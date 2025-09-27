@@ -1592,8 +1592,8 @@ let baseHTML = `
       function showNotification() {
         if (!lastClickedButton) return;
         const rect = lastClickedButton.getBoundingClientRect();
-        notification.style.left = `${rect.left + window.scrollX}px`;
-        notification.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        notification.style.left = (rect.left + window.scrollX) + 'px';
+        notification.style.top = (rect.bottom + window.scrollY + 5) + 'px';
         notification.classList.remove("opacity-0");
         setTimeout(() => {
           notification.classList.add("opacity-0");
@@ -1791,8 +1791,8 @@ let baseHTML = `
             if (!lastClickedButton) return;
             const rect = lastClickedButton.getBoundingClientRect();
 
-            rootElement.style.left = `${rect.left + window.scrollX}px`;
-            rootElement.style.top = `${rect.bottom + window.scrollY + 5}px`;
+            rootElement.style.left = (rect.left + window.scrollX) + 'px';
+            rootElement.style.top = (rect.bottom + window.scrollY + 5) + 'px';
 
             rootElement.classList.remove("hidden");
             windowInfoContainer.innerText = "Select output:";
