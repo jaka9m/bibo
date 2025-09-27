@@ -1737,22 +1737,22 @@ let baseHTML = `
         const registrationPromises = domainsToRegister.map(async (rawDomain) => {
           const domain = rawDomain.toLowerCase() + "." + rootDomain;
           if (rawDomain.includes(' ') || rawDomain.endsWith(rootDomain)) {
-            return `${rawDomain}: Format tidak valid`;
+            return rawDomain + ': Format tidak valid';
           }
 
-          const url = `https://${rootDomain}/api/v1/domains/put?domain=${domain}`;
+          const url = 'https://' + rootDomain + '/api/v1/domains/put?domain=' + domain;
           try {
             const res = await fetch(url);
             if (res.status === 200) {
-              return `${rawDomain}: Berhasil`;
+              return rawDomain + ': Berhasil';
             } else if (res.status === 409) {
-              return `${rawDomain}: Domain sudah ada`;
+              return rawDomain + ': Domain sudah ada';
             } else {
               const errorText = await res.text();
-              return `${rawDomain}: Gagal (Status ${res.status}: ${errorText})`;
+              return rawDomain + ': Gagal (Status ' + res.status + ': ' + errorText + ')';
             }
           } catch (error) {
-            return `${rawDomain}: Gagal (Kesalahan Jaringan)`;
+            return rawDomain + ': Gagal (Kesalahan Jaringan)';
           }
         });
 
@@ -1760,7 +1760,7 @@ let baseHTML = `
 
         Swal.fire({
           title: 'Hasil Pendaftaran Massal',
-          html: `<div style="text-align: left; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">${results.join('<br>')}</div>`,
+          html: '<div style="text-align: left; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">' + results.join('<br>') + '</div>',
           icon: 'info',
           width: '400px',
         });
