@@ -1340,7 +1340,7 @@ let baseHTML = `
         <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-400"></div>
     </div>
 
-    <div id="notification-badge" class="absolute z-50 opacity-0 transition-opacity ease-in-out duration-300 p-4 max-w-sm rounded-xl flex items-center gap-x-4 shadow-lg glass-effect dark:glass-effect-light" style="top: -1000px; left: -1000px;">
+    <div id="notification-badge" class="fixed z-50 opacity-0 transition-opacity ease-in-out duration-300 mt-9 mr-6 right-0 p-4 max-w-sm rounded-xl flex items-center gap-x-4 shadow-lg glass-effect dark:glass-effect-light">
         <div class="shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-accent-cyan">
                 <path d="M5.85 3.5a.75.75 0 0 0-1.117-1 9.719 9.719 0 0 0-2.348 4.876.75.75 0 0 0 1.479.248A8.219 8.219 0 0 1 5.85 3.5ZM19.267 2.5a.75.75 0 1 0-1.118 1 8.22 8.22 0 0 1 1.987 4.124.75.75 0 0 0 1.48-.248A9.72 9.72 0 0 0 19.266 2.5Z" />
@@ -1430,7 +1430,7 @@ let baseHTML = `
             <p id="container-window-info" class="text-center w-full h-full top-1/4 absolute text-white animate-pulse"></p>
         </div>
 
-        <div id="output-window" class="absolute z-30 hidden" style="top: -1000px; left: -1000px;">
+        <div id="output-window" class="fixed z-30 inset-0 flex justify-center items-center p-2 hidden">
             <div class="w-full max-w-xs flex flex-col gap-2 p-4 text-center rounded-xl bg-gray-800 border border-gray-700 shadow-lg animate-zoom-in">
                 <div class="flex flex-col items-center gap-1 mb-1">
                     <h4 class="text-xl font-bold text-white mt-1">Pilih Format</h4>
@@ -1446,7 +1446,7 @@ let baseHTML = `
                         SFA
                     </button>
                     <button onclick="copyToClipboardAsTarget('bfr')" class="p-1.5 rounded-md bg-sky-500 hover:bg-sky-600 text-xs font-semibold text-white flex flex-col justify-center items-center transition-transform transform hover:scale-105 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="size-5 mb-0.5"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm288 32c0-11.5 6.1-22 16-27.6l80-45.7c10.8-6.2 24.3-3.4 31.5 6.9s3.2 23.4-7.5 29.7l-80 45.7c-2.4 1.4-5 2.2-7.8 2.2s-5.4-.8-7.8-2.2l-128-73.1c-10.8-6.2-13.6-19.7-7.5-30.5s19.7-13.6 30.5-7.5L256 226.4V64c0-17.7 14.3-32 32-32s32 14.3 32 32v240c0 17.7-14.3 32-32 32s-32-14.3-32-32v-44.5l-80 45.7c-10.8 6.2-13.6-19.7-7.5 30.5s19.7 13.6 30.5 7.5L256 280.9V448c0 17.7-14.3 32-32 32s-32-14.3-32-32V208c0-11.5-6.1-22-16-27.6L96 134.7c-10.8-6.2-24.3-3.4-31.5 6.9s-3.2 23.4 7.5 29.7l80 45.7c2.4 1.4 5 2.2 7.8 2.2s5.4-.8 7.8-2.2l128-73.1c10.8-6.2 13.6-19.7 7.5-30.5s-19.7-13.6-30.5-7.5L256 167.1V288z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="size-5 mb-0.5"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm288 32c0-11.5 6.1-22 16-27.6l80-45.7c10.8-6.2 24.3-3.4 31.5 6.9s3.2 23.4-7.5 29.7l-80 45.7c-2.4 1.4-5 2.2-7.8 2.2s-5.4-.8-7.8-2.2l-128-73.1c-10.8-6.2-13.6-19.7-7.5-30.5s19.7-13.6 30.5-7.5L256 226.4V64c0-17.7 14.3-32 32-32s32 14.3 32 32v240c0 17.7-14.3 32-32 32s-32-14.3-32-32v-44.5l-80 45.7c-10.8 6.2-13.6 19.7-7.5 30.5s19.7 13.6 30.5 7.5L256 280.9V448c0 17.7-14.3 32-32 32s-32-14.3-32-32V208c0-11.5-6.1-22-16-27.6L96 134.7c-10.8-6.2-24.3-3.4-31.5 6.9s-3.2 23.4 7.5 29.7l80 45.7c2.4 1.4 5 2.2 7.8 2.2s5.4-.8 7.8-2.2l128-73.1c10.8-6.2 13.6-19.7 7.5-30.5s-19.7-13.6-30.5-7.5L256 167.1V288z"/></svg>
                         BFR
                     </button>
                     <button onclick="copyToClipboardAsRaw()" class="p-1.5 rounded-md bg-gray-400 hover:bg-gray-500 text-xs font-semibold text-white flex flex-col justify-center items-center transition-transform transform hover:scale-105 shadow-sm">
@@ -1587,18 +1587,6 @@ let baseHTML = `
 
       // Local variable
       let rawConfig = "";
-      let lastClickedButton = null;
-
-      function showNotification() {
-        if (!lastClickedButton) return;
-        const rect = lastClickedButton.getBoundingClientRect();
-        notification.style.left = (rect.left + window.scrollX) + 'px';
-        notification.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-        notification.classList.remove("opacity-0");
-        setTimeout(() => {
-          notification.classList.add("opacity-0");
-        }, 2000);
-      }
 
       function getDomainList() {
         if (isDomainListFetched) return;
@@ -1717,15 +1705,18 @@ let baseHTML = `
         });
       }
 
-      function copyToClipboard(event, text) {
-        lastClickedButton = event.target;
+      function copyToClipboard(text) {
         toggleOutputWindow();
         rawConfig = text;
       }
 
       function copyToClipboardAsRaw() {
         navigator.clipboard.writeText(rawConfig);
-        showNotification();
+
+        notification.classList.remove("opacity-0");
+        setTimeout(() => {
+          notification.classList.add("opacity-0");
+        }, 2000);
       }
 
       async function copyToClipboardAsTarget(target) {
@@ -1743,7 +1734,11 @@ let baseHTML = `
         if (res.status == 200) {
           windowInfoContainer.innerText = "Done!";
           navigator.clipboard.writeText(await res.text());
-          showNotification();
+
+          notification.classList.remove("opacity-0");
+          setTimeout(() => {
+            notification.classList.add("opacity-0");
+          }, 2000);
         } else {
           windowInfoContainer.innerText = "Error " + res.statusText;
         }
@@ -1782,22 +1777,13 @@ let baseHTML = `
       }
 
       function toggleOutputWindow() {
-        const rootElement = document.getElementById("output-window");
-        const isHidden = rootElement.classList.contains("hidden");
-
+        windowInfoContainer.innerText = "Select output:";
         toggleWindow();
-
-        if (isHidden) {
-            if (!lastClickedButton) return;
-            const rect = lastClickedButton.getBoundingClientRect();
-
-            rootElement.style.left = (rect.left + window.scrollX) + 'px';
-            rootElement.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-
-            rootElement.classList.remove("hidden");
-            windowInfoContainer.innerText = "Select output:";
+        const rootElement = document.getElementById("output-window");
+        if (rootElement.classList.contains("hidden")) {
+          rootElement.classList.remove("hidden");
         } else {
-            rootElement.classList.add("hidden");
+          rootElement.classList.add("hidden");
         }
       }
 
@@ -2004,7 +1990,7 @@ setTitle(title) {
     <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
     <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard(event, '${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
     </td>
 </tr>
             `;
