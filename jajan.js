@@ -1376,7 +1376,9 @@ let baseHTML = `
         </div>
     </div>
 
-    <div class="flex flex-col items-center min-h-screen relative z-10 p-4">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-gray-800/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8">
+            <div class="flex flex-col items-center min-h-screen relative z-10 p-4">
   <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
     <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
 
@@ -1448,6 +1450,8 @@ let baseHTML = `
             </ul>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">PLACEHOLDER_PAGINATION_INFO</p>
         </nav>
+    </div>
+    </div>
     </div>
 
     <div id="container-window" class="hidden">
@@ -1632,7 +1636,7 @@ let baseHTML = `
             const respJson = await res.json();
             respJson.forEach((domain, index) => {
               const domainContainer = document.createElement("div");
-              domainContainer.className = "flex items-center justify-between w-full bg-amber-400 rounded-md p-2";
+              domainContainer.className = "flex items-center justify-between w-full bg-gray-800 border border-gray-700 rounded-md p-2";
 
               const domainText = document.createElement("span");
               domainText.innerText = (index + 1) + ". " + domain.hostname;
