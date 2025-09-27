@@ -1220,34 +1220,7 @@ let baseHTML = `
         border: 1px solid rgba(100, 116, 139, 0.3);
         box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
     }
-    .input-dark, .input-group textarea, .input-group select {
-        background-color: #1f2937; 
-        color: #ffffff;
-        border: 1px solid #475569; 
-        border-radius: 0.5rem;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-        border-color: var(--tw-color-accent-blue);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-    }
-
     /* 8. TABLE STYLES (Dark Theme) */
-    .table-dark th {
-        background-color: #1e293b; 
-        color: #94a3b8; 
-        font-weight: 600;
-    }
-    .table-dark td {
-        border-color: #334155; 
-    }
-    .table-dark tr:nth-child(even) {
-        background-color: #111827; 
-    }
-    .table-dark tr:hover {
-        background-color: #334155 !important; 
-    }
 
     /* 9. UTILITY CLASSES */
     .centered-heading {
@@ -2065,17 +2038,17 @@ setTitle(title) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
             tableRows += `
-                <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
-    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
+                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center text-gray-600 dark:text-gray-400">${prx.org}</td>
+    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200">Copy</button>
     </td>
 </tr>
             `;
@@ -2083,18 +2056,18 @@ setTitle(title) {
 
         const table = `
             <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
                 <thead>
-                    <tr class="text-gray-400">
-                            <th class="px-3 py-3 text-center">No.</th>
-                            <th class="px-3 py-3 text-center">IP</th>
-                            <th class="px-3 py-3 text-center">Country</th>
-                            <th class="px-3 py-3 text-center">ISP</th>
-                            <th class="px-3 py-3 text-center">Status</th>
-                            <th class="px-3 py-3 text-center">Action</th>
+                    <tr class="bg-gray-50 dark:bg-gray-700">
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">No.</th>
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">IP</th>
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Country</th>
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ISP</th>
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         ${tableRows}
                     </tbody>
                 </table>
@@ -2202,8 +2175,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
             <div class="relative max-w-xs mx-auto"> 
-                <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
-                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="protocol-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm">Protocol</label>
+                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg text-base focus:ring-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400">
                     ${protocolOptions}
                 </select>
             </div>
@@ -2217,8 +2190,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
             <div class="relative max-w-xs mx-auto">
-                <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
-                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="country-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm">Country</label>
+                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg text-base focus:ring-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400">
                     ${countryOptions}
                 </select>
             </div>
@@ -2232,8 +2205,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
             <div class="relative max-w-xs mx-auto">
-                <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
-                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="host-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm">Wildcard/Host</label>
+                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg text-base focus:ring-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400">
                     ${hostOptions}
                 </select>
             </div>
@@ -2256,8 +2229,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
             <div class="relative max-w-xs mx-auto">
-                <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
-                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="port-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm">Security/Port</label>
+                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg text-base focus:ring-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400">
                     ${portOptions}
                 </select>
             </div>
