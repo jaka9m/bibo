@@ -1818,8 +1818,8 @@ let baseHTML = `
 
       function checkProxy() {
     for (let i = 0; ; i++) {
-        const pingElementDesktop = document.getElementById(`ping-desktop-${i}`);
-        const pingElementMobile = document.getElementById(`ping-mobile-${i}`);
+        const pingElementDesktop = document.getElementById('ping-desktop-' + i);
+        const pingElementMobile = document.getElementById('ping-mobile-' + i);
 
         if (!pingElementDesktop && !pingElementMobile) return;
 
@@ -1845,7 +1845,7 @@ let baseHTML = `
                     } else if (jsonResp.status === "ACTIVE") {
                         const delay = jsonResp.delay || "N/A";
                         const colo = jsonResp.colo || "N/A";
-                        element.textContent = `Active ${delay} (${colo})`;
+                        element.textContent = 'Active ' + delay + ' (' + colo + ')';
                         element.classList.add("text-green-500");
                         element.classList.remove("text-red-500");
                     } else {
