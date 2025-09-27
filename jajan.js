@@ -1354,6 +1354,15 @@ let baseHTML = `
 <body
     class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
   >
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        // Setel ke mode gelap jika tema adalah 'gelap' atau jika tidak ada tema yang disetel (bawaan)
+        if (theme === 'dark' || !theme) {
+          document.getElementById('html').classList.add('dark');
+        }
+      })();
+    </script>
     <div
       id="loading-screen"
       class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80 transition-opacity duration-500"
@@ -1375,6 +1384,12 @@ let baseHTML = `
             <p class="text-sm text-gray-300">Akun berhasil disalin</p>
         </div>
     </div>
+
+<div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl **py-3** text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
+    <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
+        PLACEHOLDER_JUDUL
+    </h1>
+</div>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
       <div class="bg-gray-800/30 dark:bg-gray-900/40 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 p-4 sm:p-6">
@@ -1422,26 +1437,20 @@ let baseHTML = `
     </div>
     <div class="mt-4 flex gap-2">
         <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="searchProxy()" class="px-4 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+        <button onclick="searchProxy()" class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">Search</button>
     </div>
   </div>
 
-  <div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl py-6 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
-    <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
-      PLACEHOLDER_JUDUL
-    </h1>
-  </div>
-
-  <div class="w-full max-w-5xl mb-8 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
-        PLACEHOLDER_PROTOCOL_DROPDOWN
-        PLACEHOLDER_COUNTRY_DROPDOWN
-        PLACEHOLDER_HOST_DROPDOWN
-        PLACEHOLDER_PORT_DROPDOWN
-    </div>
-
-  <div class="flex flex-col md:flex-row gap-4 pt-8 w-full max-w-7xl justify-center">
-    PLACEHOLDER_PROXY_GROUP
-  </div>
+  <div class="w-full max-w-5xl **mb-6** p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+PLACEHOLDER_PROTOCOL_DROPDOWN
+PLACEHOLDER_COUNTRY_DROPDOWN
+PLACEHOLDER_HOST_DROPDOWN
+PLACEHOLDER_PORT_DROPDOWN
+</div>
+<br>
+<div class="flex flex-col md:flex-row gap-4 w-full max-w-7xl justify-center">
+PLACEHOLDER_PROXY_GROUP
+</div>
 
         <!-- Pagination -->
         <nav id="container-pagination" class="w-full max-w-7xl mt-8 sticky bottom-2 z-20 transition-transform -translate-y-6 flex flex-col items-center">
@@ -1512,7 +1521,7 @@ let baseHTML = `
         <div id="container-domains" class="w-full h-32 rounded-md flex flex-col gap-1 overflow-y-scroll scrollbar-hide p-2 bg-gray-900"></div>
 
         <div class="flex w-full h-full gap-2 justify-between">
-            <input id="delete-domain-input" type="number" placeholder="Nomor urutan untuk hapus" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"/>
+            <input id="delete-domain-input" type="number" placeholder="Input Nomor" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"/>
             <button onclick="deleteDomainByNumber()" class="p-2 rounded-full bg-red-600 hover:bg-red-700 flex justify-center items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                     <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
@@ -1821,18 +1830,33 @@ let baseHTML = `
       }
 
       function searchProxy() {
-        const searchBar = document.getElementById("search-bar");
-        const searchValue = searchBar.value;
-        const url = new URL(window.location.href);
-        if (searchValue.length === 2) {
-          url.searchParams.set("cc", searchValue);
-          url.searchParams.delete("search");
-        } else {
-          url.searchParams.set("search", searchValue);
-          url.searchParams.delete("cc");
-        }
-        window.location.href = url.toString();
-      }
+    const searchBar = document.getElementById("search-bar");
+    // Gunakan .trim() untuk memastikan input yang berisi spasi kosong juga dianggap kosong
+    const searchValue = searchBar.value.trim(); 
+    
+    // --- KONDISI BARU: Cek jika input kosong ---
+    if (searchValue === "") {
+        // Alihkan pengguna ke /sub jika input kosong
+        window.location.href = "/sub";
+        return; // Hentikan eksekusi fungsi selanjutnya
+    }
+    // --- Akhir Kondisi Baru ---
+
+    const url = new URL(window.location.href);
+
+    if (searchValue.length === 2) {
+        // Logika untuk kode negara (cc)
+        url.searchParams.set("cc", searchValue);
+        url.searchParams.delete("search");
+    } else {
+        // Logika untuk pencarian umum
+        url.searchParams.set("search", searchValue);
+        url.searchParams.delete("cc");
+    }
+    
+    // Alihkan ke URL baru dengan parameter pencarian
+    window.location.href = url.toString();
+}
 
       function toggleOutputWindow() {
         windowInfoContainer.innerText = "Select output:";
@@ -1869,12 +1893,13 @@ let baseHTML = `
         const rootElement = document.getElementById("html");
         if (rootElement.classList.contains("dark")) {
           rootElement.classList.remove("dark");
+          localStorage.setItem('theme', 'light');
         } else {
           rootElement.classList.add("dark");
+          localStorage.setItem('theme', 'dark');
         }
       }
-
- 
+  
 function checkProxy() {
     for (let i = 0; ; i++) {
         const pingElement = document.getElementById("ping-" + i);
@@ -2054,40 +2079,42 @@ setTitle(title) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
             tableRows += `
-                <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
-    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
+                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+    <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">
+    <div class="max-w-[150px] overflow-x-auto whitespace-nowrap">${prx.org}</div></td>
+    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
     </td>
 </tr>
             `;
         }
 
         const table = `
-            <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <thead>
-                    <tr class="text-gray-400">
-                            <th class="px-3 py-3 text-center">No.</th>
-                            <th class="px-3 py-3 text-center">IP</th>
-                            <th class="px-3 py-3 text-center">Country</th>
-                            <th class="px-3 py-3 text-center">ISP</th>
-                            <th class="px-3 py-3 text-center">Status</th>
-                            <th class="px-3 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-            </div>
+            <div class="overflow-x-auto w-full max-w-full" style="max-height: 500px; overflow-y: auto;">
+    <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        
+        <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
+            <tr>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 50px;">No.</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 120px;">IP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Country</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 150px;">ISP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 80px;">Status</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Action</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            ${tableRows}
+        </tbody>
+    </table>
+</div>
         `;
 
         this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
@@ -2166,90 +2193,120 @@ setTitle(title) {
     }
 
     buildDropdowns() {
-        const selectedProtocol = this.url.searchParams.get('vpn') || 'all';
-        const selectedCountry = this.url.searchParams.get('cc') || 'all';
-        const selectedHost = this.url.searchParams.get('host') || APP_DOMAIN;
-        const selectedPort = this.url.searchParams.get('port') || 'all';
+    // Membaca parameter query dari URL
+    const selectedProtocol = this.url.searchParams.get('vpn') || 'all';
+    const selectedCountry = this.url.searchParams.get('cc') || 'all';
+    const selectedHost = this.url.searchParams.get('host') || APP_DOMAIN;
+    const selectedPort = this.url.searchParams.get('port') || 'all';
 
-        // Protocol Dropdown
-        const protocols = [{
-            value: 'all',
-            label: 'All Protocols'
-        }, {
-            value: 'vless',
-            label: 'VLESS'
-        }, {
-            value: 'trojan',
-            label: 'TROJAN'
-        }, {
-            value: 'ss',
-            label: 'SHADOWSOCKS'
-        }];
-        let protocolOptions = '';
-        for (const proto of protocols) {
-            protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
-            <div class="relative max-w-xs mx-auto"> 
-                <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
-                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${protocolOptions}
-                </select>
-            </div>
-        `);
+    // Protokol Dropdown
+    const protocols = [{
+        value: 'all',
+        label: 'All Protocols'
+    }, {
+        value: 'vless',
+        label: 'VLESS'
+    }, {
+        value: 'trojan',
+        label: 'TROJAN'
+    }, {
+        value: 'ss',
+        label: 'SHADOWSOCKS'
+    }];
 
-        // Country Dropdown
-        const countries = new Set(cachedPrxList.map(p => p.country));
-        let countryOptions = '<option value="all" ' + ('all' === selectedCountry.toLowerCase() ? 'selected' : '') + '>All Countries</option>';
-        for (const country of [...countries].sort()) {
-            countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
-            <div class="relative max-w-xs mx-auto">
-                <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
-                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${countryOptions}
-                </select>
-            </div>
-        `);
-
-        // Host Dropdown
-        const hosts = [APP_DOMAIN, 'ava.game.naver.com', 'investor.fb.com'];
-        let hostOptions = '';
-        for (const host of hosts) {
-            hostOptions += `<option value="${host}" ${selectedHost === host ? 'selected' : ''}>${host}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
-            <div class="relative max-w-xs mx-auto">
-                <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
-                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${hostOptions}
-                </select>
-            </div>
-        `);
-
-        // Port Dropdown
-        const ports = [{
-            value: 'all',
-            label: 'All Ports'
-        }, {
-            value: '443',
-            label: 'TLS (443)'
-        }, {
-            value: '80',
-            label: 'NTLS (80)'
-        }];
-        let portOptions = '';
-        for (const port of ports) {
-            portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
-            <div class="relative max-w-xs mx-auto">
-                <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
-                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${portOptions}
-                </select>
-            </div>
-        `);
+    let protocolOptions = '';
+    for (const proto of protocols) {
+        protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
     }
+
+    this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Protocol</label>
+            <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${protocolOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Country Dropdown
+    // Menggunakan Set untuk mendapatkan negara unik dan mengurutkannya
+    const countries = new Set(cachedPrxList.map(p => p.country));
+
+    // Inisialisasi dengan opsi "All Countries"
+    // Perbaikan: Tidak perlu .toLowerCase() pada 'all'
+    let countryOptions = `<option value="all" ${'all' === selectedCountry ? 'selected' : ''}>All Countries</option>`;
+
+    for (const country of [...countries].sort()) {
+        countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Country</label>
+            <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${countryOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Host Dropdown
+    // Perbaikan: Menghapus baris 'label: 'Default'' yang tidak valid
+    const hosts = [{
+        value: APP_DOMAIN,
+        label: 'Default Host (' + APP_DOMAIN + ')' // Membuat label lebih jelas
+    }, {
+        value: 'ava.game.naver.com',
+        label: 'ava.game.naver.com'
+    }, {
+        value: 'investor.fb.com',
+        label: 'investor.fb.com'
+    }];
+    
+    let hostOptions = '';
+    for (const host of hosts) {
+        // Menggunakan host.value dan host.label dari objek hosts
+        hostOptions += `<option value="${host.value}" ${selectedHost === host.value ? 'selected' : ''}>${host.label}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Wildcard/Host</label>
+            <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${hostOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Port Dropdown
+    const ports = [{
+        value: 'all',
+        label: 'All Ports'
+    }, {
+        value: '443',
+        label: 'TLS (443)'
+    }, {
+        value: '80',
+        label: 'NTLS (80)'
+    }];
+
+    let portOptions = '';
+    for (const port of ports) {
+        portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Security/Port</label>
+            <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${portOptions}
+            </select>
+        </div>
+    `);
+}
 }
