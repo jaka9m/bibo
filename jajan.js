@@ -1615,14 +1615,10 @@ let baseHTML = `
     </div>
 
     <footer>
-    <div class="fixed bottom-4 right-4 flex flex-col items-end gap-3 z-50">
-        <button onclick="toggleDropdown()" class="transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-accent-blue hover:bg-opacity-80">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-white">
-                <path d="M12 2.25a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75h-6.75a.75.75 0 0 1 0-1.5h6.75V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
-            </svg>
-        </button>
-
-        <div id="dropdown-menu" class="hidden flex flex-col gap-3">
+    <div class="fixed bottom-4 right-4 z-50">
+        <div class="relative flex flex-col items-end">
+            <!-- Dropdown Menu -->
+            <div id="dropdown-menu" class="hidden absolute bottom-full mb-2 flex flex-col items-end gap-3">
             <a href="PLACEHOLDER_DONATE_LINK" target="_blank">
                 <button class="bg-accent-cyan hover:bg-teal-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
@@ -1645,6 +1641,14 @@ let baseHTML = `
             <button onclick="toggleDarkMode()" class="bg-amber-500 hover:bg-amber-600 rounded-full border-2 border-gray-900 p-2 transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+            </button>
+            </div>
+
+            <!-- Main FAB -->
+            <button onclick="toggleDropdown()" class="mt-3 transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-accent-blue hover:bg-opacity-80">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-white">
+                    <path d="M12 2.25a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75h-6.75a.75.75 0 0 1 0-1.5h6.75V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
                 </svg>
             </button>
         </div>
