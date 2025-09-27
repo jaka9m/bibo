@@ -2,7 +2,7 @@ import { connect } from "cloudflare:sockets";
 
 // Variables
 const rootDomain = "gpj2.dpdns.org"; // Ganti dengan domain utama kalian
-const serviceName = "nautica"; // Ganti dengan nama workers kalian
+const serviceName = "gamang"; // Ganti dengan nama workers kalian
 const apiKey = "673fee2d6747b90db9a90e9279195974d01f9"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
 const apiEmail = "paoandest@gmail.com"; // Ganti dengan email yang kalian gunakan
 const accountID = "c4682365bae93b9e2a94d6ba827c82a9"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
@@ -1376,7 +1376,9 @@ let baseHTML = `
         </div>
     </div>
 
-    <div class="flex flex-col items-center min-h-screen relative z-10 p-4">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div class="bg-gray-800/30 dark:bg-gray-900/40 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 p-4 sm:p-6">
+        <div class="flex flex-col items-center relative z-10">
   <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
     <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
 
@@ -1448,6 +1450,8 @@ let baseHTML = `
             </ul>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">PLACEHOLDER_PAGINATION_INFO</p>
         </nav>
+        </div>
+      </div>
     </div>
 
     <div id="container-window" class="hidden">
@@ -1506,6 +1510,15 @@ let baseHTML = `
         </div>
 
         <div id="container-domains" class="w-full h-32 rounded-md flex flex-col gap-1 overflow-y-scroll scrollbar-hide p-2 bg-gray-900"></div>
+
+        <div class="flex w-full h-full gap-2 justify-between">
+            <input id="delete-domain-input" type="number" placeholder="Nomor urutan untuk hapus" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"/>
+            <button onclick="deleteDomainByNumber()" class="p-2 rounded-full bg-red-600 hover:bg-red-700 flex justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                    <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
 
         <button onclick="toggleWildcardsWindow()" class="transform-gpu flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 p-2">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -1615,6 +1628,7 @@ let baseHTML = `
 
       // Local variable
       let rawConfig = "";
+      let wildcardDomains = [];
 
       function getDomainList() {
         if (isDomainListFetched) return;
@@ -1630,19 +1644,14 @@ let baseHTML = `
           if (res.status == 200) {
             windowInfoContainer.innerText = "Done!";
             const respJson = await res.json();
+            wildcardDomains = respJson; // Simpan daftar domain
             respJson.forEach((domain, index) => {
               const domainContainer = document.createElement("div");
-              domainContainer.className = "flex items-center justify-between w-full bg-amber-400 rounded-md p-2";
+              domainContainer.className = "flex items-center justify-between w-full rounded-md p-2 text-white";
 
               const domainText = document.createElement("span");
               domainText.innerText = (index + 1) + ". " + domain.hostname;
               domainContainer.appendChild(domainText);
-
-              const deleteButton = document.createElement("button");
-              deleteButton.innerText = "Hapus";
-              deleteButton.className = "bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded text-xs";
-              deleteButton.onclick = () => deleteDomain(domain.id, domain.hostname);
-              domainContainer.appendChild(deleteButton);
 
               domainListContainer.appendChild(domainContainer);
             });
@@ -1650,6 +1659,27 @@ let baseHTML = `
             windowInfoContainer.innerText = "Failed!";
           }
         });
+      }
+
+      function deleteDomainByNumber() {
+        const inputElement = document.getElementById("delete-domain-input");
+        const number = parseInt(inputElement.value, 10);
+
+        if (isNaN(number) || number < 1 || number > wildcardDomains.length) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Masukkan nomor urut yang valid.',
+            icon: 'error',
+            width: '300px',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          return;
+        }
+
+        const domainToDelete = wildcardDomains[number - 1];
+        deleteDomain(domainToDelete.id, domainToDelete.hostname);
+        inputElement.value = "";
       }
 
       function deleteDomain(domainId, domainName) {
