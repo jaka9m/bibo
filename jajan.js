@@ -1882,7 +1882,7 @@ let baseHTML = `
                 .then(async (res) => {
                     if (isActive) return;
                     if (res.status == 200) {
-                        pingElement.classList.remove("dark:text-white", "text-gray-500");
+                        pingElement.className = "px-6 py-4 whitespace-nowrap text-sm text-center";
                         const jsonResp = await res.json();
                         
                         // Periksa status dari JSON, bukan dari properti proxyip
@@ -1896,7 +1896,7 @@ let baseHTML = `
                             pingElement.innerHTML = `<span class="font-bold text-red-500">Inactive</span>`;
                         }
                     } else {
-                        pingElement.classList.remove("dark:text-white", "text-gray-500");
+                        pingElement.className = "px-6 py-4 whitespace-nowrap text-sm text-center";
                         pingElement.innerHTML = `<span class="font-bold text-red-500">Check Failed!</span>`;
                     }
                 })
