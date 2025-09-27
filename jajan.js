@@ -1353,7 +1353,7 @@ let baseHTML = `
         </div>
     </div>
 
-    <div class="flex flex-col items-center min-h-screen relative z-10 p-4">
+    <div class="flex flex-col items-center min-h-screen relative z-10 p-2 md:p-4">
         
         <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
             <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
@@ -1400,20 +1400,20 @@ let baseHTML = `
             </div>
         </div>
 
-        <div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl py-6 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
-            <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
+        <div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl py-4 md:py-6 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
+            <h1 id="runningTitle" class="text-2xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
                 PLACEHOLDER_JUDUL
             </h1>
         </div>
 
-        <div class="w-full max-w-5xl mb-8 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+        <div class="w-full max-w-5xl mb-8 p-4 md:p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
             PLACEHOLDER_PROTOCOL_DROPDOWN
             PLACEHOLDER_COUNTRY_DROPDOWN
             PLACEHOLDER_HOST_DROPDOWN
             PLACEHOLDER_PORT_DROPDOWN
         </div>
 
-        <div class="flex flex-col md:flex-row gap-4 pt-8 w-full max-w-7xl justify-center">
+        <div class="flex flex-col md:flex-row gap-4 pt-4 md:pt-8 w-full max-w-7xl justify-center">
             PLACEHOLDER_PROXY_GROUP
         </div>
 
@@ -1818,43 +1818,49 @@ let baseHTML = `
 
       function checkProxy() {
     for (let i = 0; ; i++) {
-        const pingElement = document.getElementById("ping-" + i);
-        if (pingElement == undefined) return;
+        const pingElementMobile = document.getElementById("ping-mobile-" + i);
+        const pingElementDesktop = document.getElementById("ping-desktop-" + i);
 
-        const target = pingElement.textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
+        if (!pingElementMobile && !pingElementDesktop) return;
+
+        const target = (pingElementMobile || pingElementDesktop).textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
         if (target) {
-            pingElement.textContent = "Checking...";
+            if (pingElementMobile) pingElementMobile.textContent = "Checking...";
+            if (pingElementDesktop) pingElementDesktop.textContent = "Checking...";
         } else {
             continue;
         }
 
         let isActive = false;
         new Promise(async (resolve) => {
-            const res = await fetch('PLACEHOLDER_CHECK_PROXY_URL' + target)
+            await fetch('PLACEHOLDER_CHECK_PROXY_URL' + target)
                 .then(async (res) => {
                     if (isActive) return;
-                    if (res.status == 200) {
-                        pingElement.classList.remove("dark:text-white");
-                        const jsonResp = await res.json();
-                        
-                        // Periksa status dari JSON, bukan dari properti proxyip
-                        if (jsonResp.status === "ACTIVE") {
-                            isActive = true;
-                            // Mengambil delay dan colo dari data JSON
+
+                    const updateElement = (el, jsonResp) => {
+                        if (!el) return;
+                        el.classList.remove("dark:text-white");
+                        if (jsonResp && jsonResp.status === "ACTIVE") {
                             const delay = jsonResp.delay || "N/A";
                             const colo = jsonResp.colo || "N/A";
-                            pingElement.textContent = "Active " + delay + " (" + colo + ")";
-                            pingElement.classList.add("text-green-600");
-                            pingElement.classList.remove("text-red-600"); // Pastikan kelas lain dihapus
+                            el.textContent = "Active " + delay + " (" + colo + ")";
+                            el.classList.add("text-green-600");
+                            el.classList.remove("text-red-600");
                         } else {
-                            pingElement.textContent = "Inactive";
-                            pingElement.classList.add("text-red-600");
-                            pingElement.classList.remove("text-green-600"); // Pastikan kelas lain dihapus
+                            el.textContent = jsonResp ? "Inactive" : "Check Failed!";
+                            el.classList.add("text-red-600");
+                            el.classList.remove("text-green-600");
                         }
+                    };
+
+                    if (res.status == 200) {
+                        const jsonResp = await res.json();
+                        if (jsonResp.status === "ACTIVE") isActive = true;
+                        updateElement(pingElementMobile, jsonResp);
+                        updateElement(pingElementDesktop, jsonResp);
                     } else {
-                        pingElement.textContent = "Check Failed!";
-                        pingElement.classList.add("text-red-600");
-                        pingElement.classList.remove("text-green-600");
+                        updateElement(pingElementMobile, null);
+                        updateElement(pingElementDesktop, null);
                     }
                 })
                 .finally(() => {
@@ -1975,32 +1981,61 @@ setTitle(title) {
     }
 
     buildProxyGroup() {
+        let cards = "";
         let tableRows = "";
+
         for (let i = 0; i < this.proxies.length; i++) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
+
+            // Card for mobile
+            cards += `
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="24" class="rounded-full"/>
+                            <span class="font-bold text-lg text-white">${prx.country}</span>
+                        </div>
+                        <span class="text-sm text-gray-400">#${i + 1}</span>
+                    </div>
+                    <div>
+                        <p class="font-mono text-center text-white">${prx.prxIP}</p>
+                        <p class="text-sm text-gray-400 text-center truncate">${prx.org}</p>
+                    </div>
+                    <div id="ping-mobile-${i}" class="text-center text-white">${prx.prxIP}:${prx.prxPort}</div>
+                    <button onclick="copyToClipboard('${proxyConfigs}')" class="w-full text-white px-4 py-2 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+                </div>
+            `;
+
+            // Row for desktop table
             tableRows += `
                 <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
-    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
-        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
-        ${prx.country}
-    </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
-    </td>
-</tr>
+                    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
+                    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+                        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
+                        ${prx.country}
+                    </td>
+                    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
+                    <td id="ping-desktop-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+                    </td>
+                </tr>
             `;
         }
 
-        const table = `
-            <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <thead>
-                    <tr class="text-gray-400">
+        const responsiveLayout = `
+            <!-- Mobile Card View -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+                ${cards}
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto w-full max-w-full">
+                <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    <thead>
+                        <tr class="text-gray-400">
                             <th class="px-3 py-3 text-center">No.</th>
                             <th class="px-3 py-3 text-center">IP</th>
                             <th class="px-3 py-3 text-center">Country</th>
@@ -2016,7 +2051,7 @@ setTitle(title) {
             </div>
         `;
 
-        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
+        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", responsiveLayout);
     }
 
     buildCountryFlag() {
