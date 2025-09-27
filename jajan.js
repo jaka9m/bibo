@@ -1149,11 +1149,9 @@ let baseHTML = `
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .glass-effect-light {
-        background-color: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 224, 183, 0.2);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb; /* gray-200 */
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
     }
     
     /* 4. FLAG SPIN ANIMATION */
@@ -1372,7 +1370,7 @@ let baseHTML = `
       ></div>
     </div>
 
-    <div id="notification-badge" class="fixed z-50 opacity-0 transition-opacity ease-in-out duration-300 mt-9 mr-6 right-0 p-4 max-w-sm rounded-xl flex items-center gap-x-4 shadow-lg glass-effect dark:glass-effect-light">
+    <div id="notification-badge" class="fixed z-50 opacity-0 transition-opacity ease-in-out duration-300 mt-9 mr-6 right-0 p-4 max-w-sm rounded-xl flex items-center gap-x-4 shadow-lg glass-effect-light dark:glass-effect">
         <div class="shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-accent-cyan">
                 <path d="M5.85 3.5a.75.75 0 0 0-1.117-1 9.719 9.719 0 0 0-2.348 4.876.75.75 0 0 0 1.479.248A8.219 8.219 0 0 1 5.85 3.5ZM19.267 2.5a.75.75 0 1 0-1.118 1 8.22 8.22 0 0 1 1.987 4.124.75.75 0 0 0 1.48-.248A9.72 9.72 0 0 0 19.266 2.5Z" />
@@ -1392,47 +1390,47 @@ let baseHTML = `
 </div>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div class="bg-gray-800/30 dark:bg-gray-900/40 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 p-4 sm:p-6">
+      <div class="bg-gray-50 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 p-4 sm:p-6">
         <div class="flex flex-col items-center relative z-10">
-  <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
+  <div class="bg-white dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
     <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
 
-      <p id="container-info-ip" class="flex items-center gap-1 text-blue-500 dark:text-blue-300">
+      <p id="container-info-ip" class="flex items-center gap-1 text-blue-600 dark:text-blue-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5.5 13a4.5 4.5 0 011.692-3.377l1.72-1.725A4.5 4.5 0 0113 5.5V6a.5.5 0 001 0V5.5A4.5 4.5 0 009.377 2.308L7.653 4.032A4.5 4.5 0 005 8.5v.5a.5.5 0 001 0V8.5A3.5 3.5 0 017.377 5.79l.995.996a.5.5 0 00.707-.707l-.996-.995A4.5 4.5 0 008.5 2.5a.5.5 0 000-1z" />
         </svg>
-        IP: <span class="font-bold text-slate-800 dark:text-white">127.0.0.1</span>
+        IP: <span class="font-bold text-gray-800 dark:text-white">127.0.0.1</span>
       </p>
-      <p id="container-info-country" class="flex items-center gap-1 text-green-500 dark:text-green-300">
+      <p id="container-info-country" class="flex items-center gap-1 text-green-600 dark:text-green-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 3.126A8.024 8.024 0 0110 3a8 8 0 01.445.126l.01.004.013.006.015.008A5.96 5.96 0 0014 9a6 6 0 01-5.995 5.986L9 15a6 6 0 01-5.986-5.995l-.004-.01-.006-.013A6.024 6.024 0 013 10a8.024 8.024 0 01.126-.445l.004-.01.006-.013.008-.015A5.96 5.96 0 009 6a6 6 0 015.995 5.986L15 12a6 6 0 01-5.986 5.995l-.01-.004-.013-.006-.015-.008A6.024 6.024 0 019 18z" clip-rule="evenodd" />
         </svg>
-        Country: <span class="font-bold text-slate-800 dark:text-white">Singapore</span>
+        Country: <span class="font-bold text-gray-800 dark:text-white">Singapore</span>
       </p>
-      <p id="container-info-isp" class="flex items-center gap-1 text-indigo-500 dark:text-indigo-300">
+      <p id="container-info-isp" class="flex items-center gap-1 text-indigo-600 dark:text-indigo-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 3a7 7 0 00-7 7h1.5a5.5 5.5 0 1111 0h1.5a7 7 0 00-7-7z" />
         </svg>
-        ISP: <span class="font-bold text-slate-800 dark:text-white">Localhost</span>
+        ISP: <span class="font-bold text-gray-800 dark:text-white">Localhost</span>
       </p>
 
-      <p class="flex items-center gap-1 text-purple-500 dark:text-purple-300">
+      <p class="flex items-center gap-1 text-purple-600 dark:text-purple-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1H3zm13 2H4v10h12V5z" />
         </svg>
-        <span class="text-gray-600 dark:text-gray-300">Total Proxy: <strong id="total-proxy-value" class="font-semibold">0</strong></span>
+        <span class="text-gray-700 dark:text-gray-300">Total Proxy: <strong id="total-proxy-value" class="font-semibold text-gray-800 dark:text-white">0</strong></span>
       </p>
-      <p class="flex items-center gap-1 text-orange-500 dark:text-orange-300">
+      <p class="flex items-center gap-1 text-orange-600 dark:text-orange-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M3 6a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6zm2 2a1 1 0 00-1 1v4a1 1 0 001 1h10a1 1 0 001-1V9a1 1 0 00-1-1H5zm1 2h2v2H6v-2zm4 0h2v2h-2v-2z" clip-rule="evenodd" />
         </svg>
-        <span class="text-gray-600 dark:text-gray-300">Page: <strong id="page-info-value" class="font-semibold">0/0</strong></span>
+        <span class="text-gray-700 dark:text-gray-300">Page: <strong id="page-info-value" class="font-semibold text-gray-800 dark:text-white">0/0</strong></span>
       </p>
-      <p class="flex items-center gap-1 text-teal-500 dark:text-teal-300">
+      <p class="flex items-center gap-1 text-teal-600 dark:text-teal-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
         </svg>
-        Time: <strong id="time-info-value" class="font-semibold text-slate-800 dark:text-white">00:00:00</strong>
+        Time: <strong id="time-info-value" class="font-semibold text-gray-800 dark:text-white">00:00:00</strong>
       </p>
     </div>
     <div class="mt-4 flex gap-2">
@@ -1441,7 +1439,7 @@ let baseHTML = `
     </div>
   </div>
 
-  <div class="w-full max-w-5xl **mb-6** p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+  <div class="w-full max-w-5xl **mb-6** p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
 PLACEHOLDER_PROTOCOL_DROPDOWN
 PLACEHOLDER_COUNTRY_DROPDOWN
 PLACEHOLDER_HOST_DROPDOWN
@@ -2080,17 +2078,17 @@ setTitle(title) {
             const proxyConfigs = prx.list.join(',');
             tableRows += `
                 <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base text-gray-600 dark:text-gray-400 text-center">${i + 1}</td>
     <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
     <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">
     <div class="max-w-[150px] overflow-x-auto whitespace-nowrap">${prx.org}</div></td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200 text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="px-3 py-1 rounded-md text-sm font-semibold transition-colors duration-200 bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600 shadow-sm">Config</button>
     </td>
 </tr>
             `;
@@ -2100,14 +2098,14 @@ setTitle(title) {
             <div class="overflow-x-auto w-full max-w-full" style="max-height: 500px; overflow-y: auto;">
     <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         
-        <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
+        <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
             <tr>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 50px;">No.</th>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 120px;">IP</th>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Country</th>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 150px;">ISP</th>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 80px;">Status</th>
-                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Action</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 50px;">No.</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 120px;">IP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Country</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 150px;">ISP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 80px;">Status</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Action</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -2221,8 +2219,8 @@ setTitle(title) {
 
     this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
         <div class="relative max-w-xs mx-auto">
-            <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Protocol</label>
-            <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+            <label for="protocol-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm text-center">Protocol</label>
+            <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600">
                 ${protocolOptions}
             </select>
         </div>
@@ -2244,8 +2242,8 @@ setTitle(title) {
 
     this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
         <div class="relative max-w-xs mx-auto">
-            <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Country</label>
-            <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+            <label for="country-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm text-center">Country</label>
+            <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600">
                 ${countryOptions}
             </select>
         </div>
@@ -2274,8 +2272,8 @@ setTitle(title) {
 
     this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
         <div class="relative max-w-xs mx-auto">
-            <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Wildcard/Host</label>
-            <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+            <label for="host-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm text-center">Wildcard/Host</label>
+            <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600">
                 ${hostOptions}
             </select>
         </div>
@@ -2302,8 +2300,8 @@ setTitle(title) {
 
     this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
         <div class="relative max-w-xs mx-auto">
-            <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Security/Port</label>
-            <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+            <label for="port-select" class="block font-medium mb-2 text-gray-700 dark:text-gray-300 text-sm text-center">Security/Port</label>
+            <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600">
                 ${portOptions}
             </select>
         </div>
