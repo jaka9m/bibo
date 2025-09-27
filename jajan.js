@@ -1483,7 +1483,7 @@ let baseHTML = `
       <div id="wildcards-window" class="fixed hidden z-30 top-0 right-0 w-full h-full flex justify-center items-center">
     <div class="w-[75%] max-w-md h-auto flex flex-col gap-2 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-sm border border-gray-300">
         <div class="flex w-full h-full gap-2 justify-between">
-            <input id="new-domain-input" type="text" placeholder="Input wildcard" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"/>
+            <textarea id="new-domain-input" placeholder="Input wildcard(s), one per line" class="w-full h-24 px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"></textarea>
             <button onclick="registerDomain()" class="p-2 rounded-full bg-blue-600 hover:bg-blue-700 flex justify-center items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                     <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
@@ -1716,33 +1716,58 @@ let baseHTML = `
         });
       }
 
-      function registerDomain() {
+      async function registerDomain() {
         const domainInputElement = document.getElementById("new-domain-input");
-        const rawDomain = domainInputElement.value.toLowerCase();
-        const domain = domainInputElement.value + "." + rootDomain;
+        const domainsToRegister = domainInputElement.value.split('\n').map(d => d.trim()).filter(d => d);
 
-        if (!rawDomain.match(/\\w+\\.\\w+$/) || rawDomain.endsWith(rootDomain)) {
-          windowInfoContainer.innerText = "Invalid URL!";
+        if (domainsToRegister.length === 0) {
+          Swal.fire({
+            title: 'Peringatan',
+            text: 'Silakan masukkan setidaknya satu nama domain.',
+            icon: 'warning',
+            width: '300px',
+            timer: 2000,
+            showConfirmButton: false
+          });
           return;
         }
 
-        windowInfoContainer.innerText = "Pushing request...";
+        windowInfoContainer.innerText = "Mendaftarkan domain...";
 
-        const url = "https://" + rootDomain + "/api/v1/domains/put?domain=" + domain;
-        const res = fetch(url).then((res) => {
-          if (res.status == 200) {
-            windowInfoContainer.innerText = "Done!";
-            domainInputElement.value = "";
-            isDomainListFetched = false;
-            getDomainList();
-          } else {
-            if (res.status == 409) {
-              windowInfoContainer.innerText = "Domain exists!";
+        const registrationPromises = domainsToRegister.map(async (rawDomain) => {
+          const domain = rawDomain.toLowerCase() + "." + rootDomain;
+          if (rawDomain.includes(' ') || rawDomain.endsWith(rootDomain)) {
+            return `${rawDomain}: Format tidak valid`;
+          }
+
+          const url = `https://${rootDomain}/api/v1/domains/put?domain=${domain}`;
+          try {
+            const res = await fetch(url);
+            if (res.status === 200) {
+              return `${rawDomain}: Berhasil`;
+            } else if (res.status === 409) {
+              return `${rawDomain}: Domain sudah ada`;
             } else {
-              windowInfoContainer.innerText = "Error " + res.status;
+              const errorText = await res.text();
+              return `${rawDomain}: Gagal (Status ${res.status}: ${errorText})`;
             }
+          } catch (error) {
+            return `${rawDomain}: Gagal (Kesalahan Jaringan)`;
           }
         });
+
+        const results = await Promise.all(registrationPromises);
+
+        Swal.fire({
+          title: 'Hasil Pendaftaran Massal',
+          html: `<div style="text-align: left; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">${results.join('<br>')}</div>`,
+          icon: 'info',
+          width: '400px',
+        });
+
+        domainInputElement.value = "";
+        isDomainListFetched = false;
+        getDomainList();
       }
 
       function copyToClipboard(text) {
