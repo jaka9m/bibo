@@ -1330,6 +1330,12 @@ let baseHTML = `
     .text-yellow-400 { color: #facc15; } /* WARNA KUNING BARU */
     .text-xs { font-size: 0.75rem; }
     .font-normal { font-weight: 400; }
+
+    /* Light mode background */
+    body:not(.dark) {
+        background: radial-gradient(circle at 10% 20%, rgb(163, 217, 255) 0%, rgb(202, 234, 255) 90.2%);
+        background-attachment: fixed;
+    }
 </style>
     <script>
         tailwind.config = {
@@ -1352,7 +1358,7 @@ let baseHTML = `
     </script>
 </head>
 <body
-    class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
+    class="text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
   >
     <script>
       (function() {
