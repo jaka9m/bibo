@@ -1148,20 +1148,25 @@ let baseHTML = `
         }
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-        /* Glassmorphism Effect */
+        /* 3D and Glassmorphism Effect */
         .glass-effect {
-            background-color: rgba(42, 42, 47, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 224, 183, 0.3);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+                        inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+            transform-style: preserve-3d;
         }
         .glass-effect-light {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 224, 183, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            transform-style: preserve-3d;
         }
         
         /* CSS untuk animasi bendera berputar */
@@ -1195,65 +1200,85 @@ let baseHTML = `
           border: 1px solid rgba(100, 116, 139, 0.4); 
           padding: 2rem;
           margin-bottom: 2rem;
-          transform: translateZ(20px); 
+          transform: perspective(1000px) rotateX(5deg) translateZ(20px);
+          transform-style: preserve-3d;
         }
         .btn-gradient {
           background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-          transition: all 0.3s ease;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5),
+                      inset 0 1px 1px rgba(255, 255, 255, 0.2),
+                      inset 0 -4px 5px rgba(0, 0, 0, 0.4);
+          transition: all 0.2s ease-in-out;
+          transform: translateY(0);
+          border: 1px solid rgba(0,0,0,0.2);
         }
         .btn-gradient:hover:not(:disabled) {
-          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-          transform: translateY(1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
+                      inset 0 1px 5px rgba(0, 0, 0, 0.5),
+                      inset 0 0 10px rgba(102, 181, 232, 0.8);
+          transform: translateY(2px);
         }
         .input-group {
           background-color: rgba(30, 41, 59, 0.6); 
           border-radius: 0.75rem; 
           padding: 1rem; 
           border: 1px solid rgba(100, 116, 139, 0.3);
-          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+          box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
         }
         .input-dark, .input-group textarea, .input-group select {
           background-color: #1f2937; 
           color: #ffffff;
           border: 1px solid #475569; 
           border-radius: 0.5rem;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+          box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7);
           transition: border-color 0.2s, box-shadow 0.2s;
+          padding-top: 0.75rem;
+          padding-bottom: 0.75rem;
         }
         .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
           border-color: var(--tw-color-accent-blue);
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+          box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 0 8px var(--tw-color-accent-blue);
         }
         .action-btn {
             background-color: #1e293b; 
             color: #94a3b8;
             border: 1px solid #475569;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease-in-out;
+            transform: translateY(0);
         }
         .action-btn:hover {
             background-color: #334155; 
             color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6), inset 0 1px 5px rgba(0, 0, 0, 0.7);
+            transform: translateY(2px);
         }
         /* END: PENINGKATAN EFEK 3D */
 
 
+        .table-dark {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
         .table-dark th {
           background-color: #1e293b; 
           color: #94a3b8; 
           font-weight: 600;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
         .table-dark td {
           border-color: #334155; 
+          transform-style: preserve-3d;
         }
         .table-dark tr:nth-child(even) {
           background-color: #111827; 
         }
         .table-dark tr:hover {
-          background-color: #334155 !important; 
+          background-color: #334155 !important;
+          transform: scale(1.02);
+          transition: transform 0.2s ease-in-out;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
         .centered-heading {
             text-align: center;
@@ -1832,8 +1857,10 @@ let baseHTML = `
         const rootElement = document.getElementById("html");
         if (rootElement.classList.contains("dark")) {
           rootElement.classList.remove("dark");
+          localStorage.setItem('theme', 'light');
         } else {
           rootElement.classList.add("dark");
+          localStorage.setItem('theme', 'dark');
         }
       }
 
@@ -1855,7 +1882,7 @@ let baseHTML = `
                 .then(async (res) => {
                     if (isActive) return;
                     if (res.status == 200) {
-                        pingElement.classList.remove("dark:text-white");
+                        pingElement.classList.remove("dark:text-white", "text-gray-500");
                         const jsonResp = await res.json();
                         
                         // Periksa status dari JSON, bukan dari properti proxyip
@@ -1864,18 +1891,13 @@ let baseHTML = `
                             // Mengambil delay dan colo dari data JSON
                             const delay = jsonResp.delay || "N/A";
                             const colo = jsonResp.colo || "N/A";
-                            pingElement.textContent = "Active " + delay + " (" + colo + ")";
-                            pingElement.classList.add("text-green-600");
-                            pingElement.classList.remove("text-red-600"); // Pastikan kelas lain dihapus
+                            pingElement.innerHTML = `<span class="font-bold text-green-500">Active</span><br><span class="text-xs text-gray-400">${delay} | ${colo}</span>`;
                         } else {
-                            pingElement.textContent = "Inactive";
-                            pingElement.classList.add("text-red-600");
-                            pingElement.classList.remove("text-green-600"); // Pastikan kelas lain dihapus
+                            pingElement.innerHTML = `<span class="font-bold text-red-500">Inactive</span>`;
                         }
                     } else {
-                        pingElement.textContent = "Check Failed!";
-                        pingElement.classList.add("text-red-600");
-                        pingElement.classList.remove("text-green-600");
+                        pingElement.classList.remove("dark:text-white", "text-gray-500");
+                        pingElement.innerHTML = `<span class="font-bold text-red-500">Check Failed!</span>`;
                     }
                 })
                 .finally(() => {
@@ -1930,6 +1952,12 @@ let baseHTML = `
 setInterval(updateTime, 1000);
 
       window.onload = () => {
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.getElementById("html").classList.add("dark");
+        } else {
+          document.getElementById("html").classList.remove("dark");
+        }
+
         checkGeoip();
         checkProxy();
         updateTime();
@@ -2008,7 +2036,7 @@ setTitle(title) {
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
+    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center" title="${prx.org}">${prx.org}</td>
     <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
         <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
