@@ -1107,7 +1107,7 @@ class CloudflareApi {
 
 let baseHTML = `
 <!DOCTYPE html>
-<html lang="en" id="html" class="scroll-auto scrollbar-hide dark">
+<html lang="en" id="html" class="scroll-auto scrollbar-hide">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -1354,6 +1354,15 @@ let baseHTML = `
 <body
     class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
   >
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        // Setel ke mode gelap jika tema adalah 'gelap' atau jika tidak ada tema yang disetel (bawaan)
+        if (theme === 'dark' || !theme) {
+          document.getElementById('html').classList.add('dark');
+        }
+      })();
+    </script>
     <div
       id="loading-screen"
       class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80 transition-opacity duration-500"
@@ -1869,8 +1878,10 @@ let baseHTML = `
         const rootElement = document.getElementById("html");
         if (rootElement.classList.contains("dark")) {
           rootElement.classList.remove("dark");
+          localStorage.setItem('theme', 'light');
         } else {
           rootElement.classList.add("dark");
+          localStorage.setItem('theme', 'dark');
         }
       }
 
