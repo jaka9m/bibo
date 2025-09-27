@@ -1190,102 +1190,164 @@ let baseHTML = `
                         'secondary-dark': '#2a2a2f',
                         'text-light': '#f0f0f5',
                         'accent-cyan': '#00e0b7',
-                        'accent-blue': '#4a90e2',
+                        'accent-blue': '#66b5e8',
+                        'accent-purple': '#a466e8',
                     },
                 },
             },
         };
     </script>
-    
-    
-    
-    
-    
-    <script>
-        tailwind.config = { darkMode: 'selector', theme: { extend: {
-            colors: {
-                'accent-blue': '#66b5e8',
-                'accent-purple': '#a466e8',
-            }
-        } } };
-      </script>
       <style>
         /* Custom Styles for Modern/Elegant Look */
         
-        /* START: PENINGKATAN EFEK 3D */
         body {
             perspective: 1000px; 
         }
-        .main-container {
-          background: rgba(30, 41, 59, 0.8); 
-          backdrop-filter: blur(8px);
-          border-radius: 1.5rem;
-          box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.7), 
-            0 0 15px rgba(102, 181, 232, 0.2) inset, 
-            0 0 5px rgba(0, 0, 0, 0.5); 
-          border: 1px solid rgba(100, 116, 139, 0.4); 
-          padding: 2rem;
-          margin-bottom: 2rem;
-          transform: translateZ(20px); 
+
+        /* --- Main Container (Filter/Dropdown section) --- */
+        .dropdown-container {
+          padding: 1.5rem;
+          border-radius: 1.25rem;
+          transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
+
+        /* Light Mode */
+        .dropdown-container {
+          background-color: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(209, 213, 219, 0.5); /* gray-300 */
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        /* Dark Mode */
+        .dark .dropdown-container {
+          background: rgba(30, 41, 59, 0.75); /* slate-800 */
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(71, 85, 105, 0.4); /* slate-600 */
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Buttons --- */
         .btn-gradient {
           background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+          color: white;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2);
           transition: all 0.3s ease;
         }
         .btn-gradient:hover:not(:disabled) {
-          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-          transform: translateY(1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 5px rgba(0, 0, 0, 0.4), 0 0 10px rgba(102, 181, 232, 0.5);
+          transform: translateY(-1px);
         }
-        .input-group {
-          background-color: rgba(30, 41, 59, 0.6); 
-          border-radius: 0.75rem; 
-          padding: 1rem; 
-          border: 1px solid rgba(100, 116, 139, 0.3);
-          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-        }
-        .input-dark, .input-group textarea, .input-group select {
-          background-color: #1f2937; 
-          color: #ffffff;
-          border: 1px solid #475569; 
-          border-radius: 0.5rem;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-          border-color: var(--tw-color-accent-blue);
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-        }
+
         .action-btn {
-            background-color: #1e293b; 
-            color: #94a3b8;
-            border: 1px solid #475569;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             transition: all 0.2s;
         }
+        /* Light Mode Action Button */
+        .action-btn {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #374151; /* gray-700 */
+            border: 1px solid #d1d5db; /* gray-300 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
         .action-btn:hover {
-            background-color: #334155; 
+            background-color: #e5e7eb; /* gray-200 */
+            border-color: #9ca3af; /* gray-400 */
+        }
+        /* Dark Mode Action Button */
+        .dark .action-btn {
+            background-color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
+            border: 1px solid #4b5563; /* gray-600 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .dark .action-btn:hover {
+            background-color: #4b5563; /* gray-600 */
             color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-            transform: translateY(1px);
+            border-color: #6b7280; /* gray-500 */
         }
-        /* END: PENINGKATAN EFEK 3D */
 
+        /* --- Inputs and Selects --- */
+        .theme-input, .dropdown-container select {
+          border-radius: 0.5rem;
+          transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
+        }
+        /* Light Mode Inputs */
+        .theme-input, .dropdown-container select {
+          background-color: #f9fafb; /* gray-50 */
+          color: #1f2937; /* gray-800 */
+          border: 1px solid #d1d5db; /* gray-300 */
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .theme-input:focus, .dropdown-container select:focus {
+          outline: none;
+          border-color: var(--tw-color-accent-blue);
+          box-shadow: 0 0 0 3px rgba(102, 181, 232, 0.3);
+        }
+        /* Dark Mode Inputs */
+        .dark .theme-input, .dark .dropdown-container select {
+          background-color: #1f2937; /* slate-800 */
+          color: #f3f4f6; /* gray-100 */
+          border: 1px solid #4b5563; /* gray-600 */
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+        }
+        .dark .theme-input:focus, .dark .dropdown-container select:focus {
+          outline: none;
+          border-color: var(--tw-color-accent-blue);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(102, 181, 232, 0.3);
+        }
 
-        .table-dark th {
-          background-color: #1e293b; 
-          color: #94a3b8; 
+        /* --- Table Styles --- */
+        .theme-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 1.25rem;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        /* Light Mode Table */
+        .theme-table {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .theme-table th {
+          background-color: #f9fafb; /* gray-50 */
+          color: #4b5563; /* gray-600 */
           font-weight: 600;
+          border-bottom: 1px solid #e5e7eb; /* gray-200 */
         }
-        .table-dark td {
-          border-color: #334155; 
+        .theme-table td {
+          border-color: #e5e7eb; /* gray-200 */
+          background-color: white;
+          color: #374151; /* gray-700 */
         }
-        .table-dark tr:nth-child(even) {
-          background-color: #111827; 
+        .dark .theme-table td {
+            color: #d1d5db; /* gray-300 */
         }
-        .table-dark tr:hover {
-          background-color: #334155 !important; 
+        .theme-table tr:nth-child(even) td {
+          background-color: #f9fafb; /* gray-50 */
+        }
+        .theme-table tr:hover td {
+          background-color: #f3f4f6 !important; /* gray-100 */
+        }
+        /* Dark Mode Table */
+        .dark .theme-table {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .dark .theme-table th {
+          background-color: #1f2937; /* gray-800 */
+          color: #9ca3af; /* gray-400 */
+          border-bottom: 1px solid #374151; /* gray-700 */
+        }
+        .dark .theme-table td {
+          border-color: #374151; /* gray-700 */
+          background-color: #262f3d;
+        }
+        .dark .theme-table tr:nth-child(even) td {
+          background-color: #1f2937; /* gray-800 */
+        }
+        .dark .theme-table tr:hover td {
+          background-color: #374151 !important; /* gray-700 */
         }
         .centered-heading {
             text-align: center;
@@ -1314,18 +1376,38 @@ let baseHTML = `
         
         /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
         .result-success {
-          background-color: #1f2937; /* Darker background */
-          border: 1px solid #66b5e8; /* Accent blue border */
-          color: #ffffff;
-          box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+          border: 1px solid;
           transition: all 0.3s ease;
         }
         .result-error {
+          border: 1px solid;
+          transition: all 0.3s ease;
+        }
+        /* Light mode */
+        .result-success {
+            background-color: #f0fdf4; /* green-50 */
+            border-color: #22c55e; /* green-500 */
+            color: #15803d; /* green-700 */
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        .result-error {
+            background-color: #fef2f2; /* red-50 */
+            border-color: #ef4444; /* red-500 */
+            color: #b91c1c; /* red-700 */
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        /* Dark mode */
+        .dark .result-success {
           background-color: #1f2937; /* Darker background */
-          border: 1px solid #a466e8; /* Accent purple border */
+          border-color: #66b5e8; /* Accent blue border */
+          color: #ffffff;
+          box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+        }
+        .dark .result-error {
+          background-color: #1f2937; /* Darker background */
+          border-color: #a466e8; /* Accent purple border */
           color: #ffffff;
           box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-          transition: all 0.3s ease;
         }
         
         /* Loading Spinner */
@@ -1353,16 +1435,22 @@ let baseHTML = `
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        
-        
       </style>
       
       
       
 </head>
-<body
-    class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
-  >
+<body class="bg-gray-100 text-gray-800 dark:bg-primary-dark dark:text-text-light bg-fixed transition-colors duration-300">
+    <script>
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      (function() {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
     <div
       id="loading-screen"
       class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80 transition-opacity duration-500"
@@ -1428,8 +1516,8 @@ let baseHTML = `
       </p>
     </div>
     <div class="mt-4 flex gap-2">
-        <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="searchProxy()" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Search</button>
+        <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 theme-input">
+        <button onclick="searchProxy()" class="px-4 py-1 rounded text-sm font-semibold action-btn">Search</button>
     </div>
   </div>
 
@@ -1439,7 +1527,7 @@ let baseHTML = `
     </h1>
   </div>
 
-  <div class="w-full max-w-5xl mb-8 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+  <div class="w-full max-w-5xl mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 dropdown-container">
         PLACEHOLDER_PROTOCOL_DROPDOWN
         PLACEHOLDER_COUNTRY_DROPDOWN
         PLACEHOLDER_HOST_DROPDOWN
@@ -1845,11 +1933,13 @@ let baseHTML = `
       }
 
       function toggleDarkMode() {
-        const rootElement = document.getElementById("html");
-        if (rootElement.classList.contains("dark")) {
-          rootElement.classList.remove("dark");
+        const rootElement = document.documentElement;
+        if (rootElement.classList.contains('dark')) {
+          rootElement.classList.remove('dark');
+          localStorage.theme = 'light';
         } else {
-          rootElement.classList.add("dark");
+          rootElement.classList.add('dark');
+          localStorage.theme = 'dark';
         }
       }
 
@@ -2017,17 +2107,17 @@ setTitle(title) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
             tableRows += `
-                <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
+                <tr class="border-t">
+    <td class="px-3 py-3 text-base text-center">${i + 1}</td>
     <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+    <td class="px-6 py-4 whitespace-nowrap text-sm flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
     <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="px-4 py-1 rounded text-sm font-semibold action-btn">Copy</button>
     </td>
 </tr>
             `;
@@ -2035,9 +2125,9 @@ setTitle(title) {
 
         const table = `
             <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <table class="min-w-full theme-table text-base">
                 <thead>
-                    <tr class="text-gray-400">
+                    <tr>
                             <th class="px-3 py-3 text-center">No.</th>
                             <th class="px-3 py-3 text-center">IP</th>
                             <th class="px-3 py-3 text-center">Country</th>
@@ -2154,8 +2244,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
             <div class="relative">
-                <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
-                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="protocol-select" class="block font-medium mb-2 text-gray-500 dark:text-gray-300 text-sm">Protocol</label>
+                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 text-base">
                     ${protocolOptions}
                 </select>
             </div>
@@ -2169,8 +2259,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
             <div class="relative">
-                <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
-                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="country-select" class="block font-medium mb-2 text-gray-500 dark:text-gray-300 text-sm">Country</label>
+                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 text-base">
                     ${countryOptions}
                 </select>
             </div>
@@ -2184,8 +2274,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
             <div class="relative">
-                <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
-                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="host-select" class="block font-medium mb-2 text-gray-500 dark:text-gray-300 text-sm">Wildcard/Host</label>
+                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 text-base">
                     ${hostOptions}
                 </select>
             </div>
@@ -2208,8 +2298,8 @@ setTitle(title) {
         }
         this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
             <div class="relative">
-                <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
-                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                <label for="port-select" class="block font-medium mb-2 text-gray-500 dark:text-gray-300 text-sm">Security/Port</label>
+                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 text-base">
                     ${portOptions}
                 </select>
             </div>
