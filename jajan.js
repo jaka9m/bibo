@@ -1442,7 +1442,7 @@ let baseHTML = `
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-primary-dark dark:text-text-light bg-fixed transition-colors duration-300">
     <script>
-      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      // On page load or when changing themes, best to add inline in \`head\` to avoid FOUC
       (function() {
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.documentElement.classList.add('dark');
