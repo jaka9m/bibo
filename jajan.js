@@ -1023,96 +1023,94 @@ function getFlagEmoji(isoCode) {
   return String.fromCodePoint(...codePoints);
 }
 
-// CloudflareApi Class
-class CloudflareApi {
-  constructor() {
-    this.bearer = `Bearer ${apiKey}`;
-    this.accountID = accountID;
-    this.zoneID = zoneID;
-    this.apiEmail = apiEmail;
-    this.apiKey = apiKey;
+// CloudflareApi Function Constructor
+function CloudflareApi() {
+  this.bearer = `Bearer ${apiKey}`;
+  this.accountID = accountID;
+  this.zoneID = zoneID;
+  this.apiEmail = apiEmail;
+  this.apiKey = apiKey;
 
-    this.headers = {
-      Authorization: this.bearer,
-      "X-Auth-Email": this.apiEmail,
-      "X-Auth-Key": this.apiKey,
-    };
-  }
-
-  async getDomainList() {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (res.status == 200) {
-      const respJson = await res.json();
-
-      return respJson.result
-        .filter((data) => data.service == serviceName)
-        .map((data) => ({ id: data.id, hostname: data.hostname }));
-    }
-
-    return [];
-  }
-
-  async registerDomain(domain) {
-    domain = domain.toLowerCase();
-    const registeredDomains = await this.getDomainList();
-
-    if (!domain.endsWith(rootDomain)) return 400;
-    if (registeredDomains.includes(domain)) return 409;
-
-    try {
-      const domainTest = await fetch(`https://${domain.replaceAll("." + APP_DOMAIN, "")}`);
-      if (domainTest.status == 530) return domainTest.status;
-
-      const badWordsListRes = await fetch(BAD_WORDS_LIST);
-      if (badWordsListRes.status == 200) {
-        const badWordsList = (await badWordsListRes.text()).split("\n");
-        for (const badWord of badWordsList) {
-          if (domain.includes(badWord.toLowerCase())) {
-            return 403;
-          }
-        }
-      } else {
-        return 403;
-      }
-    } catch (e) {
-      return 400;
-    }
-
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
-    const res = await fetch(url, {
-      method: "PUT",
-      body: JSON.stringify({
-        environment: "production",
-        hostname: domain,
-        service: serviceName,
-        zone_id: this.zoneID,
-      }),
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    return res.status;
-  }
-
-  async deleteDomain(domainId) {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains/${domainId}`;
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    return res.status;
-  }
+  this.headers = {
+    Authorization: this.bearer,
+    "X-Auth-Email": this.apiEmail,
+    "X-Auth-Key": this.apiKey,
+  };
 }
+
+CloudflareApi.prototype.getDomainList = async function() {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
+  const res = await fetch(url, {
+    headers: {
+      ...this.headers,
+    },
+  });
+
+  if (res.status == 200) {
+    const respJson = await res.json();
+
+    return respJson.result
+      .filter((data) => data.service == serviceName)
+      .map((data) => ({ id: data.id, hostname: data.hostname }));
+  }
+
+  return [];
+};
+
+CloudflareApi.prototype.registerDomain = async function(domain) {
+  domain = domain.toLowerCase();
+  const registeredDomains = await this.getDomainList();
+
+  if (!domain.endsWith(rootDomain)) return 400;
+  if (registeredDomains.some(d => d.hostname === domain)) return 409;
+
+  try {
+    const domainTest = await fetch(`https://${domain.replaceAll("." + APP_DOMAIN, "")}`);
+    if (domainTest.status == 530) return domainTest.status;
+
+    const badWordsListRes = await fetch(BAD_WORDS_LIST);
+    if (badWordsListRes.status == 200) {
+      const badWordsList = (await badWordsListRes.text()).split("\n");
+      for (const badWord of badWordsList) {
+        if (domain.includes(badWord.toLowerCase())) {
+          return 403;
+        }
+      }
+    } else {
+      return 403;
+    }
+  } catch (e) {
+    return 400;
+  }
+
+  const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
+  const res = await fetch(url, {
+    method: "PUT",
+    body: JSON.stringify({
+      environment: "production",
+      hostname: domain,
+      service: serviceName,
+      zone_id: this.zoneID,
+    }),
+    headers: {
+      ...this.headers,
+    },
+  });
+
+  return res.status;
+};
+
+CloudflareApi.prototype.deleteDomain = async function(domainId) {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains/${domainId}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      ...this.headers,
+    },
+  });
+
+  return res.status;
+};
 
 
 let baseHTML = `
