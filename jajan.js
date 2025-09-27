@@ -1356,7 +1356,7 @@ let baseHTML = `
     <div class="flex flex-col items-center min-h-screen relative z-10 p-4">
         
         <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
-            <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
+            <div class="flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-3 text-sm font-semibold">
                 <p id="container-info-ip" class="flex items-center gap-1 text-blue-500 dark:text-blue-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M5.5 13a4.5 4.5 0 011.692-3.377l1.72-1.725A4.5 4.5 0 0113 5.5V6a.5.5 0 001 0V5.5A4.5 4.5 0 009.377 2.308L7.653 4.032A4.5 4.5 0 005 8.5v.5a.5.5 0 001 0V8.5A3.5 3.5 0 017.377 5.79l.995.996a.5.5 0 00.707-.707l-.996-.995A4.5 4.5 0 008.5 2.5a.5.5 0 000-1z" />
@@ -1818,49 +1818,58 @@ let baseHTML = `
 
       function checkProxy() {
     for (let i = 0; ; i++) {
-        const pingElement = document.getElementById("ping-" + i);
-        if (pingElement == undefined) return;
+        const pingElementDesktop = document.getElementById(`ping-desktop-${i}`);
+        const pingElementMobile = document.getElementById(`ping-mobile-${i}`);
 
-        const target = pingElement.textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
+        if (!pingElementDesktop && !pingElementMobile) return;
+
+        const referenceElement = pingElementDesktop || pingElementMobile;
+        const target = referenceElement.textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
+
         if (target) {
-            pingElement.textContent = "Checking...";
+            if (pingElementDesktop) pingElementDesktop.textContent = "Checking...";
+            if (pingElementMobile) pingElementMobile.textContent = "Checking...";
         } else {
             continue;
         }
 
-        let isActive = false;
-        new Promise(async (resolve) => {
-            const res = await fetch('PLACEHOLDER_CHECK_PROXY_URL' + target)
-                .then(async (res) => {
-                    if (isActive) return;
-                    if (res.status == 200) {
-                        pingElement.classList.remove("dark:text-white");
-                        const jsonResp = await res.json();
-                        
-                        // Periksa status dari JSON, bukan dari properti proxyip
-                        if (jsonResp.status === "ACTIVE") {
-                            isActive = true;
-                            // Mengambil delay dan colo dari data JSON
-                            const delay = jsonResp.delay || "N/A";
-                            const colo = jsonResp.colo || "N/A";
-                            pingElement.textContent = "Active " + delay + " (" + colo + ")";
-                            pingElement.classList.add("text-green-600");
-                            pingElement.classList.remove("text-red-600"); // Pastikan kelas lain dihapus
-                        } else {
-                            pingElement.textContent = "Inactive";
-                            pingElement.classList.add("text-red-600");
-                            pingElement.classList.remove("text-green-600"); // Pastikan kelas lain dihapus
-                        }
+        const updateElements = (jsonResp, error = false) => {
+            const elements = [pingElementDesktop, pingElementMobile];
+            elements.forEach(element => {
+                if (element) {
+                    element.classList.remove("dark:text-white", "text-gray-500");
+                    if (error) {
+                        element.textContent = "Check Failed!";
+                        element.classList.add("text-red-500");
+                        element.classList.remove("text-green-500");
+                    } else if (jsonResp.status === "ACTIVE") {
+                        const delay = jsonResp.delay || "N/A";
+                        const colo = jsonResp.colo || "N/A";
+                        element.textContent = `Active ${delay} (${colo})`;
+                        element.classList.add("text-green-500");
+                        element.classList.remove("text-red-500");
                     } else {
-                        pingElement.textContent = "Check Failed!";
-                        pingElement.classList.add("text-red-600");
-                        pingElement.classList.remove("text-green-600");
+                        element.textContent = "Inactive";
+                        element.classList.add("text-red-500");
+                        element.classList.remove("text-green-500");
                     }
-                })
-                .finally(() => {
-                    resolve(0);
-                });
-        });
+                }
+            });
+        };
+
+        fetch('PLACEHOLDER_CHECK_PROXY_URL' + target)
+            .then(res => {
+                if (res.status === 200) {
+                    return res.json();
+                }
+                throw new Error('Check failed');
+            })
+            .then(jsonResp => {
+                updateElements(jsonResp);
+            })
+            .catch(() => {
+                updateElements(null, true);
+            });
     }
 }
 
@@ -1976,31 +1985,61 @@ setTitle(title) {
 
     buildProxyGroup() {
         let tableRows = "";
+        let cards = "";
+
         for (let i = 0; i < this.proxies.length; i++) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
+
+            // Table Row HTML
             tableRows += `
                 <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
-    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
-        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
-        ${prx.country}
-    </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
-    </td>
-</tr>
+                    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
+                    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+                        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
+                        ${prx.country}
+                    </td>
+                    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center">${prx.org}</td>
+                    <td id="ping-desktop-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+                    </td>
+                </tr>
+            `;
+
+            // Card HTML
+            cards += `
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col gap-3 shadow-lg transform hover:-translate-y-1 transition-transform duration-200">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="32" class="rounded-full border-2 border-gray-600"/>
+                            <div>
+                                <p class="font-bold text-lg text-white">${prx.prxIP}</p>
+                                <p class="text-sm text-gray-400">${prx.org}</p>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 font-mono text-sm">#${i + 1}</span>
+                    </div>
+                    <div class="text-gray-300 text-sm mt-2 border-t border-gray-700 pt-3">
+                        <p><strong>Status:</strong> <span id="ping-mobile-${i}" class="font-semibold">${prx.prxIP}:${prx.prxPort}</span></p>
+                    </div>
+                    <button onclick="copyToClipboard('${proxyConfigs}')" class="w-full mt-2 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 btn-gradient">Copy Config</button>
+                </div>
             `;
         }
 
-        const table = `
-            <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <thead>
-                    <tr class="text-gray-400">
+        const responsiveProxyGroup = `
+            <!-- Card Layout for Mobile -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+                ${cards}
+            </div>
+
+            <!-- Table Layout for Desktop -->
+            <div class="hidden md:block overflow-x-auto w-full max-w-full">
+                <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    <thead>
+                        <tr class="text-gray-400">
                             <th class="px-3 py-3 text-center">No.</th>
                             <th class="px-3 py-3 text-center">IP</th>
                             <th class="px-3 py-3 text-center">Country</th>
@@ -2016,7 +2055,7 @@ setTitle(title) {
             </div>
         `;
 
-        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
+        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", responsiveProxyGroup);
     }
 
     buildCountryFlag() {
