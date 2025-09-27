@@ -189,23 +189,13 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
         document.setPaginationInfo(`Showing ${showingFrom} to ${showingTo} of ${totalProxies} Proxies`);
 
         // Prev button
-        // Tambahkan ikon fa-chevron-left ke tombol "Prev"
-        document.addPageButton(
-            '<i class="fa fa-chevron-left"></i> Prev', 
-            `/sub/${page > 0 ? page - 1 : 0}`, 
-            page === 0
-        );
+        document.addPageButton("Prev", `/sub/${page > 0 ? page - 1 : 0}`, page === 0);
 
 
         // Numbered buttons
 
         // Next button
-        // Tambahkan ikon fa-chevron-right ke tombol "Next"
-        document.addPageButton(
-            `Next <i class="fa fa-chevron-right"></i>`, 
-            `/sub/${page < totalPages - 1 ? page + 1 : page}`, 
-            page >= totalPages - 1
-        );
+        document.addPageButton("Next", `/sub/${page < totalPages - 1 ? page + 1 : page}`, page >= totalPages - 1);
 
         return document.build();
     } catch (error) {
@@ -1130,200 +1120,217 @@ let baseHTML = `
 
     <link rel="icon" href="https://geoproject.biz.id/circle-flags/bote.png">
     <link rel="apple-touch-icon" href="https://geoproject.biz.id/circle-flags/bote.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/fontawesome.min.css" integrity="sha384-HIFqS8I5Gj7N6+N8Yt7mD+0n5Kz0Fw0C5Fp9yV9eQ5YtVvX/T8/0S9xUvKxY1r5H7x+M+" crossorigin="anonymous">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     
     <style>
-        /* For Webkit-based browsers (Chrome, Safari and Opera) */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        /* For IE, Edge and Firefox */
-        .scrollbar-hide {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    /* 1. SCROLLBAR HIDE */
+    /* For Webkit-based browsers (Chrome, Safari and Opera) */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    /* For IE, Edge and Firefox */
+    .scrollbar-hide {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
 
-        /* Glassmorphism Effect */
-        .glass-effect {
-            background-color: rgba(42, 42, 47, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 224, 183, 0.3);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .glass-effect-light {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 224, 183, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* CSS untuk animasi bendera berputar */
-.flag-spin {
-  animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
-  transform-origin: center center; /* Pastikan rotasi dari tengah */
-}
+    /* 2. FONT IMPORT */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-@keyframes spin-around {
-  0% {
-    transform: rotateY(0deg); /* Posisi awal, tidak berputar */
-  }
-  50% {
-    transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
-  }
-  100% {
-    transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
-  }
-}
-    </style>
+    /* 3. GLASSMORPHISM EFFECT */
+    .glass-effect {
+        background-color: rgba(42, 42, 47, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 224, 183, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .glass-effect-light {
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 224, 183, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 4. FLAG SPIN ANIMATION */
+    .flag-spin {
+        animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
+        transform-origin: center center; /* Pastikan rotasi dari tengah */
+    }
+    @keyframes spin-around {
+        0% {
+            transform: rotateY(0deg); /* Posisi awal, tidak berputar */
+        }
+        50% {
+            transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
+        }
+        100% {
+            transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
+        }
+    }
 
-<style>
-        .main-container {
-          background: rgba(30, 41, 59, 0.8); 
-          backdrop-filter: blur(8px);
-          border-radius: 1.5rem;
-          box-shadow: 
+    /* 5. MAIN CONTAINER & BOX STYLES */
+    .main-container {
+        background: rgba(30, 41, 59, 0.8); 
+        backdrop-filter: blur(8px);
+        border-radius: 1.5rem;
+        box-shadow: 
             0 25px 50px rgba(0, 0, 0, 0.7), 
             0 0 15px rgba(102, 181, 232, 0.2) inset, 
             0 0 5px rgba(0, 0, 0, 0.5); 
-          border: 1px solid rgba(100, 116, 139, 0.4); 
-          padding: 2rem;
-          margin-bottom: 2rem;
-          transform: translateZ(20px); 
-        }
-        .btn-gradient {
-          background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-          transition: all 0.3s ease;
-        }
-        .btn-gradient:hover:not(:disabled) {
-          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-          transform: translateY(1px);
-        }
-        .input-group {
-          background-color: rgba(30, 41, 59, 0.6); 
-          border-radius: 0.75rem; 
-          padding: 1rem; 
-          border: 1px solid rgba(100, 116, 139, 0.3);
-          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-        }
-        .input-dark, .input-group textarea, .input-group select {
-          background-color: #1f2937; 
-          color: #ffffff;
-          border: 1px solid #475569; 
-          border-radius: 0.5rem;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-          border-color: var(--tw-color-accent-blue);
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-        }
-        .action-btn {
-            background-color: #1e293b; 
-            color: #94a3b8;
-            border: 1px solid #475569;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
-        }
-        .action-btn:hover {
-            background-color: #334155; 
-            color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-            transform: translateY(1px);
-        }
-        /* END: PENINGKATAN EFEK 3D */
+        border: 1px solid rgba(100, 116, 139, 0.4); 
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transform: translateZ(20px); 
+    }
 
+    /* 6. BUTTON STYLES */
+    .btn-gradient {
+        background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
+        transform: translateY(1px);
+    }
+    .action-btn {
+        background-color: #1e293b; 
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155; 
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
 
-        .table-dark th {
-          background-color: #1e293b; 
-          color: #94a3b8; 
-          font-weight: 600;
-        }
-        .table-dark td {
-          border-color: #334155; 
-        }
-        .table-dark tr:nth-child(even) {
-          background-color: #111827; 
-        }
-        .table-dark tr:hover {
-          background-color: #334155 !important; 
-        }
-        .centered-heading {
-            text-align: center;
-            width: 100%;
-            font-size: 1.5rem; 
-            font-weight: 800; 
-            line-height: 1.2;
-            padding-bottom: 0.5rem;
-        }
-        .nav-btn-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center; 
-            min-height: 50px;
-            padding: 0.75rem 1.5rem;
-            line-height: 1.2;
-            border-radius: 0.75rem;
-        }
-        
-        /* JUDUL PUTIH SOLID */
-        .text-solid-white {
-            color: #ffffff; 
-            text-shadow: none; 
-        }
-        
-        /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
-        .result-success {
-          background-color: #1f2937; /* Darker background */
-          border: 1px solid #66b5e8; /* Accent blue border */
-          color: #ffffff;
-          box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-          transition: all 0.3s ease;
-        }
-        .result-error {
-          background-color: #1f2937; /* Darker background */
-          border: 1px solid #a466e8; /* Accent purple border */
-          color: #ffffff;
-          box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-          transition: all 0.3s ease;
-        }
-        
-        /* Loading Spinner */
-        #cover-spin {
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0,0,0,0.8);
-          z-index: 9999;
-          display: none;
-        }
-        .loader {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          border: 6px solid #f3f3f3;
-          border-top: 6px solid var(--tw-color-accent-blue);
-          border-radius: 50%;
-          width: 50px;
-          height: 50px;
-          animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        
-      </style>
+    /* 7. INPUT FIELD STYLES */
+    .input-group {
+        background-color: rgba(30, 41, 59, 0.6); 
+        border-radius: 0.75rem; 
+        padding: 1rem; 
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+    }
+    .input-dark, .input-group textarea, .input-group select {
+        background-color: #1f2937; 
+        color: #ffffff;
+        border: 1px solid #475569; 
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+        border-color: var(--tw-color-accent-blue);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+    }
+
+    /* 8. TABLE STYLES (Dark Theme) */
+    .table-dark th {
+        background-color: #1e293b; 
+        color: #94a3b8; 
+        font-weight: 600;
+    }
+    .table-dark td {
+        border-color: #334155; 
+    }
+    .table-dark tr:nth-child(even) {
+        background-color: #111827; 
+    }
+    .table-dark tr:hover {
+        background-color: #334155 !important; 
+    }
+
+    /* 9. UTILITY CLASSES */
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem; 
+        font-weight: 800; 
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center; 
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    .text-solid-white {
+        color: #ffffff; 
+        text-shadow: none; 
+    }
+
+    /* 10. RESULT BOXES */
+    .result-success {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #66b5e8; /* Accent blue border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+        transition: all 0.3s ease;
+    }
+    .result-error {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #a466e8; /* Accent purple border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+        transition: all 0.3s ease;
+    }
+    
+    /* 11. LOADING SPINNER */
+    #cover-spin {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid var(--tw-color-accent-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* CSS untuk efek berkedip (blink) */
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.2; }
+        100% { opacity: 1; }
+    }
+    .blink-text {
+        animation: blink 1s linear infinite;
+    }
+    /* Definisi warna dasar */
+    .text-green-600 { color: #16a34a; }
+    .text-red-600 { color: #dc2626; }
+    .text-yellow-400 { color: #facc15; } /* WARNA KUNING BARU */
+    .text-xs { font-size: 0.75rem; }
+    .font-normal { font-weight: 400; }
+</style>
     <script>
         tailwind.config = {
             darkMode: 'selector',
@@ -1412,10 +1419,10 @@ let baseHTML = `
       </p>
     </div>
     <div class="mt-4 flex gap-2">
-                <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button onclick="searchProxy()" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Search</button>
-            </div>
-        </div>
+        <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button onclick="searchProxy()" class="px-4 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+    </div>
+  </div>
 
   <div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl py-6 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
     <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
@@ -1837,14 +1844,16 @@ let baseHTML = `
         }
       }
 
-      function checkProxy() {
+ 
+function checkProxy() {
     for (let i = 0; ; i++) {
         const pingElement = document.getElementById("ping-" + i);
         if (pingElement == undefined) return;
 
         const target = pingElement.textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
         if (target) {
-            pingElement.textContent = "Checking...";
+            // Gunakan innerHTML untuk menampilkan multi-baris
+            pingElement.innerHTML = "Checking..."; 
         } else {
             continue;
         }
@@ -1858,25 +1867,39 @@ let baseHTML = `
                         pingElement.classList.remove("dark:text-white");
                         const jsonResp = await res.json();
                         
-                        // Periksa status dari JSON, bukan dari properti proxyip
+                        // Periksa status dari JSON
                         if (jsonResp.status === "ACTIVE") {
                             isActive = true;
                             // Mengambil delay dan colo dari data JSON
                             const delay = jsonResp.delay || "N/A";
                             const colo = jsonResp.colo || "N/A";
-                            pingElement.textContent = "Active " + delay + " (" + colo + ")";
+
+                            // MODIFIKASI: Menampilkan Active berkedip dan Delay/Colo KUNING
+                            pingElement.innerHTML = \`
+                                <span class="blink-text">Active</span><br>
+                                <span class="text-xs font-normal text-yellow-400">\${delay} (\${colo})</span>
+                            \`;
+                            
+                            // Tambahkan kelas untuk warna hijau pada elemen utama (untuk Active)
                             pingElement.classList.add("text-green-600");
-                            pingElement.classList.remove("text-red-600"); // Pastikan kelas lain dihapus
+                            pingElement.classList.remove("text-red-600"); 
+
                         } else {
                             pingElement.textContent = "Inactive";
                             pingElement.classList.add("text-red-600");
-                            pingElement.classList.remove("text-green-600"); // Pastikan kelas lain dihapus
+                            pingElement.classList.remove("text-green-600"); 
                         }
                     } else {
                         pingElement.textContent = "Check Failed!";
                         pingElement.classList.add("text-red-600");
                         pingElement.classList.remove("text-green-600");
                     }
+                })
+                .catch(() => {
+                    // Tambahkan penanganan error jika fetch gagal total (mis. masalah jaringan)
+                    pingElement.textContent = "Fetch Error!";
+                    pingElement.classList.add("text-red-600");
+                    pingElement.classList.remove("text-green-600");
                 })
                 .finally(() => {
                     resolve(0);
@@ -2137,7 +2160,7 @@ setTitle(title) {
             protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
         }
         this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
-            <div class="relative">
+            <div class="relative max-w-xs mx-auto"> 
                 <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
                 <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
                     ${protocolOptions}
@@ -2152,7 +2175,7 @@ setTitle(title) {
             countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
         }
         this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
-            <div class="relative">
+            <div class="relative max-w-xs mx-auto">
                 <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
                 <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
                     ${countryOptions}
@@ -2167,7 +2190,7 @@ setTitle(title) {
             hostOptions += `<option value="${host}" ${selectedHost === host ? 'selected' : ''}>${host}</option>`;
         }
         this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
-            <div class="relative">
+            <div class="relative max-w-xs mx-auto">
                 <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
                 <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
                     ${hostOptions}
@@ -2191,7 +2214,7 @@ setTitle(title) {
             portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
         }
         this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
-            <div class="relative">
+            <div class="relative max-w-xs mx-auto">
                 <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
                 <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
                     ${portOptions}
