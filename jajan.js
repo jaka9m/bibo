@@ -1984,247 +1984,243 @@ setInterval(updateTime, 1000);
 </html>
 `;
 
-class Document {
-    proxies = [];
+function Document(request) {
+    this.proxies = [];
+    this.html = baseHTML;
+    this.request = request;
+    this.url = new URL(this.request.url);
+}
 
-    constructor(request) {
-        this.html = baseHTML;
-        this.request = request;
-        this.url = new URL(this.request.url);
-    }
+Document.prototype.setTotalProxy = function(total) {
+    this.html = this.html.replace(
+        '<strong id="total-proxy-value" class="font-semibold">0</strong>',
+        `<strong id="total-proxy-value" class="font-semibold">${total}</strong>`
+    );
+}
 
-    setTotalProxy(total) {
-        this.html = this.html.replace(
-            '<strong id="total-proxy-value" class="font-semibold">0</strong>',
-            `<strong id="total-proxy-value" class="font-semibold">${total}</strong>`
-        );
-    }
-    
-    setPage(current, total) {
-        this.html = this.html.replace(
-            '<strong id="page-info-value" class="font-semibold">0/0</strong>',
-            `<strong id="page-info-value" class="font-semibold">${current}/${total}</strong>`
-        );
-    }
+Document.prototype.setPage = function(current, total) {
+    this.html = this.html.replace(
+        '<strong id="page-info-value" class="font-semibold">0/0</strong>',
+        `<strong id="page-info-value" class="font-semibold">${current}/${total}</strong>`
+    );
+}
 
-setTitle(title) {
+Document.prototype.setTitle = function(title) {
     this.html = this.html.replaceAll("PLACEHOLDER_JUDUL", title.replace("text-blue-500", "text-indigo-500"));
-  }
+}
 
-  addInfo(text) {
+Document.prototype.addInfo = function(text) {
     text = `<span>${text}</span>`;
     this.html = this.html.replaceAll("PLACEHOLDER_INFO", `${text}\nPLACEHOLDER_INFO`);
-  }
+}
 
-    registerProxies(data, proxies) {
-        this.proxies.push({
-            ...data,
-            list: proxies,
-        });
-    }
+Document.prototype.registerProxies = function(data, proxies) {
+    this.proxies.push({
+        ...data,
+        list: proxies,
+    });
+}
 
-    buildProxyGroup() {
-        let tableRows = "";
-        for (let i = 0; i < this.proxies.length; i++) {
-            const prx = this.proxies[i];
-            const proxyConfigs = prx.list.join(',');
-            tableRows += `
-                <tr class="border-t border-gray-700 hover:bg-gray-800">
-    <td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
-    <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
-        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
-        ${prx.country}
-    </td>
-    <td class="px-3 py-3 text-base truncate max-w-[150px] text-center" title="${prx.org}">${prx.org}</td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
-    </td>
+Document.prototype.buildProxyGroup = function() {
+    let tableRows = "";
+    for (let i = 0; i < this.proxies.length; i++) {
+        const prx = this.proxies[i];
+        const proxyConfigs = prx.list.join(',');
+        tableRows += `
+            <tr class="border-t border-gray-700 hover:bg-gray-800">
+<td class="px-3 py-3 text-base text-gray-400 text-center">${i + 1}</td>
+<td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+    <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
+    ${prx.country}
+</td>
+<td class="px-3 py-3 text-base truncate max-w-[150px] text-center" title="${prx.org}">${prx.org}</td>
+<td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-center">${prx.prxIP}:${prx.prxPort}</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+    <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Copy</button>
+</td>
 </tr>
-            `;
-        }
-
-        const table = `
-            <div class="overflow-x-auto w-full max-w-full">
-            <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <thead>
-                    <tr class="text-gray-400">
-                            <th class="px-3 py-3 text-center">No.</th>
-                            <th class="px-3 py-3 text-center">IP</th>
-                            <th class="px-3 py-3 text-center">Country</th>
-                            <th class="px-3 py-3 text-center">ISP</th>
-                            <th class="px-3 py-3 text-center">Status</th>
-                            <th class="px-3 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-            </div>
         `;
-
-        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
     }
 
-    buildCountryFlag() {
-        const prxBankUrl = this.url.searchParams.get("prx-list");
-        const selectedCC = this.url.searchParams.get("cc");
-        const flagList = [];
-        for (const proxy of cachedPrxList) {
-            flagList.push(proxy.country);
-        }
+    const table = `
+        <div class="overflow-x-auto w-full max-w-full">
+        <table class="min-w-full table-dark bg-gray-800 border border-gray-700 rounded-xl text-base overflow-hidden" style="box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <thead>
+                <tr class="text-gray-400">
+                        <th class="px-3 py-3 text-center">No.</th>
+                        <th class="px-3 py-3 text-center">IP</th>
+                        <th class="px-3 py-3 text-center">Country</th>
+                        <th class="px-3 py-3 text-center">ISP</th>
+                        <th class="px-3 py-3 text-center">Status</th>
+                        <th class="px-3 py-3 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+        </div>
+    `;
 
-        let flagElement = "";
-        for (const flag of new Set(flagList)) {
-            const isSelected = selectedCC === flag;
-            // Apply different classes based on selection state
-            const linkClasses = isSelected 
-                ? 'border-2 border-blue-400 rounded-lg p-0.5' // Classes for selected flag
-                : 'py-1';                                     // Classes for non-selected flag
+    this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
+}
 
-            flagElement += `<a href="/sub?cc=${flag}${prxBankUrl ? "&prx-list=" + prxBankUrl : ""
-                }" class="flex items-center justify-center ${linkClasses}" ><img width=30 src="https://hatscripts.github.io/circle-flags/flags/${flag.toLowerCase()}.svg" /></a>`;
-        }
-
-        this.html = this.html.replaceAll("PLACEHOLDER_BENDERA_NEGARA", flagElement);
+Document.prototype.buildCountryFlag = function() {
+    const prxBankUrl = this.url.searchParams.get("prx-list");
+    const selectedCC = this.url.searchParams.get("cc");
+    const flagList = [];
+    for (const proxy of cachedPrxList) {
+        flagList.push(proxy.country);
     }
 
-    addPageButton(text, link, isDisabled) {
-        const pageButton = `<li><button ${
-            isDisabled ? "disabled" : ""
-        } class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity" onclick=navigateTo('${link}')>${text}</button></li>`;
+    let flagElement = "";
+    for (const flag of new Set(flagList)) {
+        const isSelected = selectedCC === flag;
+        // Apply different classes based on selection state
+        const linkClasses = isSelected
+            ? 'border-2 border-blue-400 rounded-lg p-0.5' // Classes for selected flag
+            : 'py-1';                                     // Classes for non-selected flag
 
-        this.html = this.html.replaceAll("PLACEHOLDER_PAGE_BUTTON", `${pageButton}\nPLACEHOLDER_PAGE_BUTTON`);
+        flagElement += `<a href="/sub?cc=${flag}${prxBankUrl ? "&prx-list=" + prxBankUrl : ""
+            }" class="flex items-center justify-center ${linkClasses}" ><img width=30 src="https://hatscripts.github.io/circle-flags/flags/${flag.toLowerCase()}.svg" /></a>`;
     }
 
+    this.html = this.html.replaceAll("PLACEHOLDER_BENDERA_NEGARA", flagElement);
+}
 
-    setPaginationInfo(info) {
-        this.html = this.html.replace("PLACEHOLDER_PAGINATION_INFO", info);
+Document.prototype.addPageButton = function(text, link, isDisabled) {
+    const pageButton = `<li><button ${
+        isDisabled ? "disabled" : ""
+    } class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity" onclick=navigateTo('${link}')>${text}</button></li>`;
+
+    this.html = this.html.replaceAll("PLACEHOLDER_PAGE_BUTTON", `${pageButton}\nPLACEHOLDER_PAGE_BUTTON`);
+}
+
+Document.prototype.setPaginationInfo = function(info) {
+    this.html = this.html.replace("PLACEHOLDER_PAGINATION_INFO", info);
+}
+
+Document.prototype.build = function() {
+    this.buildProxyGroup();
+    this.buildCountryFlag();
+
+    this.html = this.html.replaceAll("PLACEHOLDER_API_READY", isApiReady ? "block" : "hidden");
+
+    let whatsappButton = '';
+    if (WHATSAPP_NUMBER) {
+        whatsappButton = `<a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank">
+                          <button class="bg-green-500 hover:bg-green-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
+                            <img src="https://geoproject.biz.id/circle-flags/whatsapp.png" alt="WhatsApp Icon" class="size-6">
+                          </button>
+                        </a>`;
     }
+    this.html = this.html.replace('PLACEHOLDER_WHATSAPP_BUTTON', whatsappButton);
 
-    build() {
-        this.buildProxyGroup();
-        this.buildCountryFlag();
-
-        this.html = this.html.replaceAll("PLACEHOLDER_API_READY", isApiReady ? "block" : "hidden");
-
-        let whatsappButton = '';
-        if (WHATSAPP_NUMBER) {
-            whatsappButton = `<a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank">
-                              <button class="bg-green-500 hover:bg-green-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
-                                <img src="https://geoproject.biz.id/circle-flags/whatsapp.png" alt="WhatsApp Icon" class="size-6">
-                              </button>
-                            </a>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_WHATSAPP_BUTTON', whatsappButton);
-
-        let telegramButton = '';
-        if (TELEGRAM_USERNAME) {
-            telegramButton = `<a href="https://t.me/${TELEGRAM_USERNAME}" target="_blank">
-                              <button class="bg-blue-500 hover:bg-blue-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
-                                <img src="https://geoproject.biz.id/circle-flags/telegram.png" alt="Telegram Icon" class="size-6">
-                              </button>
-                            </a>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_TELEGRAM_BUTTON', telegramButton);
-
-        this.html = this.html.replaceAll('PLACEHOLDER_CHECK_PROXY_URL', `https://${serviceName}.${rootDomain}/check?target=`);
-        this.html = this.html.replaceAll('PLACEHOLDER_ROOT_DOMAIN', `${serviceName}.${rootDomain}`);
-        this.html = this.html.replaceAll('PLACEHOLDER_CONVERTER_URL', CONVERTER_URL);
-        this.html = this.html.replaceAll('PLACEHOLDER_DONATE_LINK', DONATE_LINK);
-
-        this.buildDropdowns();
-
-        return this.html.replaceAll(/PLACEHOLDER_\w+/gim, "");
+    let telegramButton = '';
+    if (TELEGRAM_USERNAME) {
+        telegramButton = `<a href="https://t.me/${TELEGRAM_USERNAME}" target="_blank">
+                          <button class="bg-blue-500 hover:bg-blue-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
+                            <img src="https://geoproject.biz.id/circle-flags/telegram.png" alt="Telegram Icon" class="size-6">
+                          </button>
+                        </a>`;
     }
+    this.html = this.html.replace('PLACEHOLDER_TELEGRAM_BUTTON', telegramButton);
 
-    buildDropdowns() {
-        const selectedProtocol = this.url.searchParams.get('vpn') || 'all';
-        const selectedCountry = this.url.searchParams.get('cc') || 'all';
-        const selectedHost = this.url.searchParams.get('host') || APP_DOMAIN;
-        const selectedPort = this.url.searchParams.get('port') || 'all';
+    this.html = this.html.replaceAll('PLACEHOLDER_CHECK_PROXY_URL', `https://${serviceName}.${rootDomain}/check?target=`);
+    this.html = this.html.replaceAll('PLACEHOLDER_ROOT_DOMAIN', `${serviceName}.${rootDomain}`);
+    this.html = this.html.replaceAll('PLACEHOLDER_CONVERTER_URL', CONVERTER_URL);
+    this.html = this.html.replaceAll('PLACEHOLDER_DONATE_LINK', DONATE_LINK);
 
-        // Protocol Dropdown
-        const protocols = [{
-            value: 'all',
-            label: 'All Protocols'
-        }, {
-            value: 'vless',
-            label: 'VLESS'
-        }, {
-            value: 'trojan',
-            label: 'TROJAN'
-        }, {
-            value: 'ss',
-            label: 'SHADOWSOCKS'
-        }];
-        let protocolOptions = '';
-        for (const proto of protocols) {
-            protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
-            <div class="relative">
-                <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
-                <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${protocolOptions}
-                </select>
-            </div>
-        `);
+    this.buildDropdowns();
 
-        // Country Dropdown
-        const countries = new Set(cachedPrxList.map(p => p.country));
-        let countryOptions = '<option value="all" ' + ('all' === selectedCountry.toLowerCase() ? 'selected' : '') + '>All Countries</option>';
-        for (const country of [...countries].sort()) {
-            countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
-            <div class="relative">
-                <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
-                <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${countryOptions}
-                </select>
-            </div>
-        `);
+    return this.html.replaceAll(/PLACEHOLDER_\\w+/gim, "");
+}
 
-        // Host Dropdown
-        const hosts = [APP_DOMAIN, 'ava.game.naver.com', 'investor.fb.com'];
-        let hostOptions = '';
-        for (const host of hosts) {
-            hostOptions += `<option value="${host}" ${selectedHost === host ? 'selected' : ''}>${host}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
-            <div class="relative">
-                <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
-                <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${hostOptions}
-                </select>
-            </div>
-        `);
+Document.prototype.buildDropdowns = function() {
+    const selectedProtocol = this.url.searchParams.get('vpn') || 'all';
+    const selectedCountry = this.url.searchParams.get('cc') || 'all';
+    const selectedHost = this.url.searchParams.get('host') || APP_DOMAIN;
+    const selectedPort = this.url.searchParams.get('port') || 'all';
 
-        // Port Dropdown
-        const ports = [{
-            value: 'all',
-            label: 'All Ports'
-        }, {
-            value: '443',
-            label: 'TLS (443)'
-        }, {
-            value: '80',
-            label: 'NTLS (80)'
-        }];
-        let portOptions = '';
-        for (const port of ports) {
-            portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
-        }
-        this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
-            <div class="relative">
-                <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
-                <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-                    ${portOptions}
-                </select>
-            </div>
-        `);
+    // Protocol Dropdown
+    const protocols = [{
+        value: 'all',
+        label: 'All Protocols'
+    }, {
+        value: 'vless',
+        label: 'VLESS'
+    }, {
+        value: 'trojan',
+        label: 'TROJAN'
+    }, {
+        value: 'ss',
+        label: 'SHADOWSOCKS'
+    }];
+    let protocolOptions = '';
+    for (const proto of protocols) {
+        protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
     }
+    this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
+        <div class="relative">
+            <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm">Protocol</label>
+            <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${protocolOptions}
+            </select>
+        </div>
+    `);
+
+    // Country Dropdown
+    const countries = new Set(cachedPrxList.map(p => p.country));
+    let countryOptions = '<option value="all" ' + ('all' === selectedCountry.toLowerCase() ? 'selected' : '') + '>All Countries</option>';
+    for (const country of [...countries].sort()) {
+        countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
+    }
+    this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
+        <div class="relative">
+            <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm">Country</label>
+            <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${countryOptions}
+            </select>
+        </div>
+    `);
+
+    // Host Dropdown
+    const hosts = [APP_DOMAIN, 'ava.game.naver.com', 'investor.fb.com'];
+    let hostOptions = '';
+    for (const host of hosts) {
+        hostOptions += `<option value="${host}" ${selectedHost === host ? 'selected' : ''}>${host}</option>`;
+    }
+    this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
+        <div class="relative">
+            <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm">Wildcard/Host</label>
+            <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${hostOptions}
+            </select>
+        </div>
+    `);
+
+    // Port Dropdown
+    const ports = [{
+        value: 'all',
+        label: 'All Ports'
+    }, {
+        value: '443',
+        label: 'TLS (443)'
+    }, {
+        value: '80',
+        label: 'NTLS (80)'
+    }];
+    let portOptions = '';
+    for (const port of ports) {
+        portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
+    }
+    this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
+        <div class="relative">
+            <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm">Security/Port</label>
+            <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${portOptions}
+            </select>
+        </div>
+    `);
 }
