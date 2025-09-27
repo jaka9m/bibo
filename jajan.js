@@ -1126,58 +1126,6 @@ let baseHTML = `
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     
     <style>
-    /* Light Mode Enhancement */
-    html:not(.dark) body {
-        background: linear-gradient(to top, #d2e1f9 0%, #a6c1ee 100%);
-        color: black;
-    }
-    html:not(.dark) .dark\\:bg-gray-800 { /* Table background */
-        background-color: rgba(255, 255, 255, 0.4) !important;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-    html:not(.dark) .dark\\:bg-gray-700 { /* Table head and inputs */
-        background-color: rgba(255, 255, 255, 0.2) !important;
-    }
-    html:not(.dark) .dark\\:divide-gray-700 > :not([hidden]) ~ :not([hidden]) { /* Table borders */
-        border-color: rgba(0, 0, 0, 0.1) !important;
-    }
-    html:not(.dark) .dark\\:hover\\:bg-gray-700:hover { /* Table row hover */
-        background-color: rgba(255, 255, 255, 0.5) !important;
-    }
-    html:not(.dark) .dark\\:text-white,
-    html:not(.dark) .dark\\:text-gray-200,
-    html:not(.dark) .dark\\:text-gray-300,
-    html:not(.dark) .dark\\:text-gray-400,
-    html:not(.dark) .text-slate-800 {
-        color: black !important;
-    }
-    html:not(.dark) .dark\\:bg-gray-900\\/40 { /* Main container background */
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    html:not(.dark) .glass-effect {
-        background-color: rgba(255, 255, 255, 0.3) !important;
-    }
-    html:not(.dark) .input-dark { /* Inputs */
-        background-color: rgba(255, 255, 255, 0.3) !important;
-        color: black !important;
-        border-color: rgba(0, 0, 0, 0.2) !important;
-    }
-    html:not(.dark) .input-dark::placeholder {
-        color: #333 !important;
-    }
-    html:not(.dark) .text-gray-600 {
-        color: #222 !important;
-    }
-    html:not(.dark) .text-blue-300 { color: #2563eb !important; }
-    html:not(.dark) .text-green-300 { color: #16a34a !important; }
-    html:not(.dark) .text-indigo-300 { color: #4f46e5 !important; }
-    html:not(.dark) .text-purple-300 { color: #7c3aed !important; }
-    html:not(.dark) .text-orange-300 { color: #ea580c !important; }
-    html:not(.dark) .text-teal-300 { color: #0d9488 !important; }
-
     /* 1. SCROLLBAR HIDE */
     /* For Webkit-based browsers (Chrome, Safari and Opera) */
     .scrollbar-hide::-webkit-scrollbar {
@@ -1404,7 +1352,7 @@ let baseHTML = `
     </script>
 </head>
 <body
-    class="text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
+    class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
   >
     <script>
       (function() {
