@@ -460,270 +460,858 @@ export default {
         }
       } else if (url.pathname === "/kuota") {
         const html = `
-          <!DOCTYPE html>
-    <html lang="en" class="dark">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <title>Cek Kuota XL/AXIS</title>
-      <script src="https://cdn.tailwindcss.com"></script>
-      <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+// Simulasikan JQuery $('#cover-spin').show() dan $('#cover-spin').hide() dengan Vanilla JS.
+const coverSpin = document.getElementById('cover-spin');
+function showLoader() { if(coverSpin) coverSpin.style.display = 'block'; }
+function hideLoader() { if(coverSpin) coverSpin.style.display = 'none'; }
 
-      <script>
-        tailwind.config = { darkMode: 'selector', theme: { extend: {
-            colors: {
-                'accent-blue': '#66b5e8',
-                'accent-purple': '#a466e8',
-            }
-        } } };
-      </script>
-      <style>
-        /* Custom Styles for Modern/Elegant Look */
-        
-        /* START: PENINGKATAN EFEK 3D */
-        body {
-            perspective: 1000px; 
-        }
-        .main-container {
-          background: rgba(30, 41, 59, 0.8); 
-          backdrop-filter: blur(8px);
-          border-radius: 1.5rem;
-          box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.7), 
-            0 0 15px rgba(102, 181, 232, 0.2) inset, 
-            0 0 5px rgba(0, 0, 0, 0.5); 
-          border: 1px solid rgba(100, 116, 139, 0.4); 
-          padding: 2rem;
-          margin-bottom: 2rem;
-          transform: translateZ(20px); 
-        }
-        .btn-gradient {
-          background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-          transition: all 0.3s ease;
-        }
-        .btn-gradient:hover:not(:disabled) {
-          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-          transform: translateY(1px);
-        }
-        .input-group {
-          background-color: rgba(30, 41, 59, 0.6); 
-          border-radius: 0.75rem; 
-          padding: 1rem; 
-          border: 1px solid rgba(100, 116, 139, 0.3);
-          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-        }
-        .input-dark, .input-group textarea, .input-group select {
-          background-color: #1f2937; 
-          color: #ffffff;
-          border: 1px solid #475569; 
-          border-radius: 0.5rem;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-          border-color: var(--tw-color-accent-blue);
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-        }
-        .action-btn {
-            background-color: #1e293b; 
-            color: #94a3b8;
-            border: 1px solid #475569;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
-        }
-        .action-btn:hover {
-            background-color: #334155; 
-            color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-            transform: translateY(1px);
-        }
-        /* END: PENINGKATAN EFEK 3D */
-
-
-        .table-dark th {
-          background-color: #1e293b; 
-          color: #94a3b8; 
-          font-weight: 600;
-        }
-        .table-dark td {
-          border-color: #334155; 
-        }
-        .table-dark tr:nth-child(even) {
-          background-color: #111827; 
-        }
-        .table-dark tr:hover {
-          background-color: #334155 !important; 
-        }
-        .centered-heading {
-            text-align: center;
-            width: 100%;
-            font-size: 1.5rem; 
-            font-weight: 800; 
-            line-height: 1.2;
-            padding-bottom: 0.5rem;
-        }
-        .nav-btn-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center; 
-            min-height: 50px;
-            padding: 0.75rem 1.5rem;
-            line-height: 1.2;
-            border-radius: 0.75rem;
-        }
-        
-        /* JUDUL PUTIH SOLID */
-        .text-solid-white {
-            color: #ffffff; 
-            text-shadow: none; 
-        }
-        
-        /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
-        .result-success {
-          background-color: #1f2937; /* Darker background */
-          border: 1px solid #66b5e8; /* Accent blue border */
-          color: #ffffff;
-          box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-          transition: all 0.3s ease;
-        }
-        .result-error {
-          background-color: #1f2937; /* Darker background */
-          border: 1px solid #a466e8; /* Accent purple border */
-          color: #ffffff;
-          box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-          transition: all 0.3s ease;
-        }
-        
-        /* Loading Spinner */
-        #cover-spin {
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0,0,0,0.8);
-          z-index: 9999;
-          display: none;
-        }
-        .loader {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          border: 6px solid #f3f3f3;
-          border-top: 6px solid var(--tw-color-accent-blue);
-          border-radius: 50%;
-          width: 50px;
-          height: 50px;
-          animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        
-      </style>
-    </head>
-    <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
-      <div id="cover-spin"><div class="loader"></div></div>
-      <div id="custom-notification"></div> 
-      
-      <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
-      
-        <div class="w-full max-w-lg mx-auto main-container">
-            <div class="text-center mb-6">
-                <h2 class="text-solid-white centered-heading">
-                    <i class="fas fa-signal mr-2"></i>Cek Kuota XL/AXIS
-                </h2>
-            </div>
-            
-            <div class="bg-gray-800 p-4 rounded-lg mb-6 text-center text-gray-400 border border-gray-700 shadow-md" style="box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
-                <i class="fa fa-info-circle text-accent-blue mr-1"></i> Gunakan layanan ini secara bijak dan hindari spam.
-            </div>
-            
-            <form id="formnya" class="p-6 bg-gray-800 rounded-xl shadow-xl border border-gray-700" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
-                <div class="mb-6">
-                    <label for="msisdn" class="block font-medium mb-2 text-gray-300 text-sm">Nomor HP XL/AXIS:</label>
-                    <input type="number" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-accent-blue" id="msisdn" placeholder="08xxx / 628xxx" maxlength="16" required>
-                </div>
-                <button type="button" id="submitCekKuota" class="w-full py-3 rounded-lg text-white font-bold text-lg btn-gradient hover:opacity-90 transition-opacity">
-                    <i class="fa fa-search mr-2"></i>Cek Sekarang
-                </button>
-            </form>
-
-            <div id="hasilnya" class="mt-6"></div>
-        </div>
+// --- Helper Copy & Download ---
+function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Salin berhasil
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    });
     
+    if (element) {
+        element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6)';
+        element.style.transform = 'translateY(1px)';
+
+        setTimeout(() => {
+            element.style.boxShadow = ''; 
+            element.style.transform = 'translateY(0)';
+        }, 300);
+    }
+}
+
+function downloadConfig() {
+    const configData = document.getElementById('result-output').value;
+    const format = document.getElementById('format-select').value;
+    
+    if (!configData.trim() || configData.startsWith('❌ Gagal:')) {
+        console.error('Tidak ada config valid untuk diunduh.');
+        return;
+    }
+
+    let filename = 'config_mediafairy';
+    let mimeType = 'text/plain';
+
+    if (format === 'clash' || format === 'clash-provider') {
+        filename += '.yaml';
+        mimeType = 'text/yaml';
+    } else {
+        filename += '.txt';
+    }
+
+    const blob = new Blob([configData], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// --- Utility Parser ---
+const tryUrlDecode = function tryUrlDecode(s = '') {
+    try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
+    catch { return s; }
+};
+
+const mapFields = function mapFields(d) {
+    const pass = d.password;
+    
+    return {
+        protocol: d.protocol,
+        remark: d.remark,
+        server: d.server,
+        port: d.port,
+        password: pass, 
+        uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined, 
+        alterId: d.alterId, 
+        method: d.method, 
+        network: d.network,
+        security: d.security,
+        sni: d.sni,
+        host: d.host,
+        path: d.path,
+        plugin: d.plugin,
+        serviceName: d.serviceName,
+    };
+};
+
+// --- Parser Functions ---
+
+const parseVlessUri = function parseVlessUri(uri) {
+    const u = new URL(uri);
+    const network = u.searchParams.get('type') || 'tcp';
+    
+    const path = tryUrlDecode(u.searchParams.get('path') || '/'); 
+    const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+    const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+    
+    return {
+        protocol: 'vless',
+        remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
+        server: u.hostname,
+        port: parseInt(u.port, 10),
+        password: decodeURIComponent(u.username),
+        network: network,
+        security: u.searchParams.get('security') || 'none',
+        sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+        host: host,
+        path: path,
+        serviceName: serviceName || (network === 'grpc' ? path : ''),
+    };
+};
+
+const parseVmessUri = function parseVmessUri(uri){
+    const base64Part = uri.substring('vmess://'.length).trim();
+    const decodedStr = atob(base64Part);
+    const decoded = JSON.parse(decodedStr);
+    
+    const network = decoded.net || 'tcp';
+    const path = decoded.path || '/';
+
+    return {
+        protocol: 'vmess',
+        remark: decoded.ps || 'VMess',
+        server: decoded.add,
+        port: parseInt(decoded.port, 10),
+        password: decoded.id,
+        alterId: parseInt(decoded.aid, 10) || 0,
+        network: network,
+        security: decoded.tls === 'tls' ? 'tls' : 'none',
+        sni: decoded.sni || decoded.host || decoded.add,
+        host: decoded.host || decoded.sni || decoded.add,
+        path: path,
+        serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
+    };
+};
+
+const parseTrojanUri = function parseTrojanUri(uri) {
+    const u = new URL(uri);
+    const network = u.searchParams.get('type') || 'tcp';
+    
+    const path = tryUrlDecode(u.searchParams.get('path') || '/');
+    const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+    const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+    
+    return {
+        protocol: 'trojan',
+        remark: decodeURIComponent(u.hash.substring(1)) || 'Trojan',
+        server: u.hostname,
+        port: parseInt(u.port, 10),
+        password: decodeURIComponent(u.username),
+        network: network,
+        security: u.searchParams.get('security') || 'tls',
+        sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+        host: host,
+        path: path,
+        serviceName: serviceName || (network === 'grpc' ? path : ''),
+    };
+};
+
+const parseShadowsocksUri = function parseShadowsocksUri(uri) {
+    const parts = uri.substring('ss://'.length).split('#');
+    const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
+    const corePart = parts[0];
+    
+    const pluginMatch = corePart.match(/@(.+?)\/\?plugin=(.*)/);
+    let userServerPort, pluginData = {};
+    let pluginExists = false;
+
+    if (pluginMatch) {
+        const userInfoBase64 = corePart.substring(0, pluginMatch.index);
+        userServerPort = atob(userInfoBase64);
+        
+        const pluginRaw = tryUrlDecode(pluginMatch[2]);
+        
+        const params = pluginRaw.split(';');
+        params.forEach(param => {
+            if (param === 'tls') pluginData.security = 'tls';
+            else if (param.startsWith('host=')) pluginData.host = param.substring(5);
+            else if (param.startsWith('path=')) pluginData.path = param.substring(5);
+        });
+        pluginData.plugin = 'v2ray-plugin';
+        pluginExists = true;
+    } else {
+        userServerPort = atob(corePart);
+    }
+
+    const [userInfo, serverPort] = userServerPort.split('@');
+    const [method, password] = userInfo.split(':');
+    const [server, port] = serverPort.split(':');
+
+    return {
+        protocol: 'ss',
+        remark: remark,
+        server: server,
+        port: parseInt(port, 10),
+        password: password,
+        method: method,
+        network: pluginExists ? 'ws' : 'tcp', 
+        plugin: pluginData.plugin,
+        security: pluginData.security || 'none',
+        sni: pluginData.host || server,
+        host: pluginData.host || server,
+        path: pluginData.path || '/',
+        serviceName: '',
+    };
+};
+
+// --- Generator Functions ---
+
+const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
+    let proxyConfigs = [];
+    let proxyNames = []; 
+
+    for (const fields of fieldsList) {
+        let transportOpts = '';
+
+        if (fields.network === 'ws') {
+            transportOpts = \`  ws-opts:
+    path: \${fields.path}
+    headers:
+      Host: \${fields.host}\`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = \`  grpc-opts:
+    grpc-service-name: \${fields.serviceName || ''}\`;
+        }
+
+        let proxy = '';
+        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
+        
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+\`- name: \${safeRemark}
+  server: \${fields.server}
+  port: \${fields.port}
+  type: \${fields.protocol}
+  \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n  alterId: \${fields.alterId}\`}
+  cipher: auto
+  tls: \${fields.security === 'tls'}
+  udp: true
+  skip-cert-verify: true
+  network: \${fields.network}
+  servername: \${fields.sni}
+\${transportOpts}\`;
+        } else if (fields.protocol === 'trojan') {
+            proxy = 
+\`- name: \${safeRemark}
+  server: \${fields.server}
+  port: \${fields.port}
+  type: trojan
+  password: \${fields.password}
+  network: \${fields.network}
+  tls: \${fields.security === 'tls'}
+  skip-cert-verify: true
+  servername: \${fields.sni}
+\${transportOpts}\`;
+        } else if (fields.protocol === 'ss') {
+            proxy = 
+\`- name: \${safeRemark}
+  server: \${fields.server}
+  port: \${fields.port}
+  type: ss
+  cipher: \${fields.method}
+  password: \${fields.password}
+  plugin: \${fields.plugin || 'v2ray-plugin'}
+  plugin-opts:
+    mode: websocket
+    host: \${fields.host}
+    path: \${fields.path}
+    tls: \${fields.security === 'tls'}
+    skip-cert-verify: true
+    servername: \${fields.sni}\`;
+        } else {
+            proxy = \`# Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
+        }
+        
+        proxyConfigs.push(proxy);
+        proxyNames.push(\`  - \${safeRemark}\`); 
+    }
+
+    const proxyListJoined = proxyConfigs.join('\\n');
+    const proxyNamesJoined = proxyNames.join('\\n');
+    
+    // TEMPLATE clash.js
+    const template = \`port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7895
+ipv6: false
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: ""
+bind-address: "*"
+unified-delay: true
+profile:
+  store-selected: true
+  store-fake-ip: true
+dns:
+  enable: true
+  ipv6: false
+  use-host: true
+  enhanced-mode: fake-ip
+  listen: 0.0.0.0:7874
+  proxy-server-nameserver:
+    - 112.215.203.246
+    - 112.215.203.247
+    - 112.215.203.248
+    - 112.215.203.254
+    - 112.215.198.248
+    - 112.215.198.254
+  nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+    - 1.0.0.1
+  fallback:
+    - 9.9.9.9
+    - 149.112.112.112
+    - 208.67.222.222
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.localdomain"
+    - "*.example"
+    - "*.invalid"
+    - "*.localhost"
+    - "*.test"
+    - "*.local"
+    - "*.home.arpa"
+    - time.*.com
+    - time.*.gov
+    - time.*.edu.cn
+    - time.*.apple.com
+    - time1.*.com
+    - time2.*.com
+    - time3.*.com
+    - time4.*.com
+    - time5.*.com
+    - time6.*.com
+    - time7.*.com
+    - ntp.*.com
+    - ntp1.*.com
+    - ntp2.*.com
+    - ntp3.*.com
+    - ntp4.*.com
+    - ntp5.*.com
+    - ntp6.*.com
+    - ntp7.*.com
+    - "*.time.edu.cn"
+    - "*.ntp.org.cn"
+    - +.pool.ntp.org
+    - time1.cloud.tencent.com
+    - music.163.com
+    - "*.music.163.com"
+    - "*.126.net"
+    - musicapi.taihe.com
+    - music.taihe.com
+    - songsearch.kugou.com
+    - trackercdn.kugou.com
+    - "*.kuwo.cn"
+    - api-jooxtt.sanook.com
+    - api.joox.com
+    - joox.com
+    - y.qq.com
+    - "*.y.qq.com"
+    - streamoc.music.tc.qq.com
+    - mobileoc.music.tc.qq.com
+    - isure.stream.qqmusic.qq.com
+    - dl.stream.qqmusic.qq.com
+    - aqqmusic.tc.qq.com
+    - amobile.music.tc.qq.com
+    - "*.xiami.com"
+    - "*.music.migu.cn"
+    - music.migu.cn
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - msftconnecttest.com
+    - msftncsi.com
+    - localhost.ptlogin2.qq.com
+    - localhost.sec.qq.com
+    - +.srv.nintendo.net
+    - +.stun.playstation.net
+    - xbox.*.microsoft.com
+    - xnotify.xboxlive.com
+    - +.battlenet.com.cn
+    - +.wotgame.cn
+    - +.wggames.cn
+    - +.wowsgame.cn
+    - +.wargaming.net
+    - proxy.golang.org
+    - stun.*.*
+    - stun.*.*.*
+    - +.stun.*.*
+    - +.stun.*.*.*
+    - +.stun.*.*.*.*
+    - heartbeat.belkin.com
+    - "*.linksys.com"
+    - "*.linksyssmartwifi.com"
+    - "*.router.asus.com"
+    - mesu.apple.com
+    - swscan.apple.com
+    - swquery.apple.com
+    - swdownload.apple.com
+    - swcdn.apple.com
+    - swdist.apple.com
+    - lens.l.google.com
+    - stun.l.google.com
+    - +.nflxvideo.net
+    - "*.square-enix.com"
+    - "*.finalfantasyxiv.com"
+    - "*.ffxiv.com"
+    - "*.mcdn.bilivideo.cn"
+    - +.media.dssott.com
+proxies:
+\${proxyNamesJoined}
+
+proxy-groups:
+- name: INTERNET
+  type: select
+  disable-udp: false
+  proxies:
+    - DIRECT
+    - REJECT
+    - BEST-PING
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+
+- name: BEST-PING
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  proxies:
+    - DIRECT
+    - REJECT
+\${proxyNamesJoined}
+
+rule-providers:
+  rule_hijacking:
+    type: file
+    behavior: classical
+    path: ./rule_provider/rule_hijacking.yaml
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml
+  rule_privacy:
+    type: file
+    behavior: classical
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml
+    path: ./rule_provider/rule_privacy.yaml
+  rule_basicads:
+    type: file
+    behavior: domain
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml
+    path: ./rule_provider/rule_basicads.yaml
+  rule_personalads:
+    type: file
+    behavior: classical
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml
+    path: ./rule_provider/rule_personalads.yaml
+
+rules:
+- IP-CIDR,198.18.0.1/16,REJECT,no-resolve
+- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan
+- RULE-SET,rule_basicads,REJECT    # Langsung REJECT untuk memblokir iklan
+- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir
+- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir
+- MATCH,INTERNET\`;
+
+    return template;
+};
+
+const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
+    let proxyConfigs = [];
+
+    for (const fields of fieldsList) {
+        let transportOpts = '';
+
+        if (fields.network === 'ws') {
+            transportOpts = \`    ws-opts:
+      path: \${fields.path}
+      headers:
+        Host: \${fields.host}\`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = \`    grpc-opts:
+      grpc-service-name: \${fields.serviceName || ''}\`;
+        }
+
+        let proxy = '';
+        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
+        
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+\`  - name: \${safeRemark}
+    server: \${fields.server}
+    port: \${fields.port}
+    type: \${fields.protocol}
+    \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n    alterId: \${fields.alterId}\`}
+    cipher: auto
+    tls: \${fields.security === 'tls'}
+    udp: true
+    skip-cert-verify: true
+    network: \${fields.network}
+    servername: \${fields.sni}
+\${transportOpts}\`;
+        } else if (fields.protocol === 'trojan') {
+            proxy = 
+\`  - name: \${safeRemark}
+    server: \${fields.server}
+    port: \${fields.port}
+    type: trojan
+    password: \${fields.password}
+    network: \${fields.network}
+    tls: \${fields.security === 'tls'}
+    skip-cert-verify: true
+    servername: \${fields.sni}
+\${transportOpts}\`;
+        } else if (fields.protocol === 'ss') {
+            proxy = 
+\`  - name: \${safeRemark}
+    server: \${fields.server}
+    port: \${fields.port}
+    type: ss
+    cipher: \${fields.method}
+    password: \${fields.password}
+    plugin: \${fields.plugin || 'v2ray-plugin'}
+    plugin-opts:
+      mode: websocket
+      host: \${fields.host}
+      path: \${fields.path}
+      tls: \${fields.security === 'tls'}
+      skip-cert-verify: true
+      servername: \${fields.sni}\`;
+        } else {
+            proxy = \`  # Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
+        }
+        
+        proxyConfigs.push(proxy);
+    }
+    
+    const proxyListJoined = proxyConfigs.join('\\n');
+    
+    return \`proxies:\\n\${proxyListJoined}\`;
+};
+
+// Fungsi utama yang mengorkestrasi konversi
+const convertLink = function convertLink(linksInput, format) {
+    const linkArray = linksInput.split('\\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
+    
+    if (linkArray.length === 0) {
+        return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
+    }
+
+    const successfulConversions = [];
+    
+    for (const link of linkArray) {
+        try {
+            let d;
+            const decodedLink = tryUrlDecode(link);
+
+            if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
+            else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
+            else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
+            else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
+            else continue;
+            
+            successfulConversions.push(mapFields(d));
+            
+        } catch (e) {
+            console.error(\`Error parsing link: \${link}\`, e);
+        }
+    }
+    
+    if (successfulConversions.length === 0) {
+        return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
+    }
+
+    if (format === 'clash') return generateClashMetaProxies(successfulConversions);
+    if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
+    
+    return 'Format konversi tidak valid.';
+};
+
+// --- Event Listener Tombol Convert ---
+document.getElementById('convert-button').addEventListener('click', function() {
+    showLoader(); // Tampilkan loading
+    
+    const linkInput = document.getElementById('link-input').value;
+    const format = document.getElementById('format-select').value;
+    const resultOutput = document.getElementById('result-output');
+
+    if (!linkInput.trim()) {
+        console.error('Link tidak boleh kosong.');
+        resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
+        hideLoader(); // Sembunyikan loading
+        return;
+    }
+
+    // Delay kecil agar loading sempat terlihat (opsional)
+    setTimeout(() => {
+        const converted = convertLink(linkInput, format);
+        
+        if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
+            resultOutput.value = converted;
+        } else {
+            resultOutput.value = converted;
+        }
+        hideLoader(); // Sembunyikan loading
+    }, 50); 
+});
+`;
+
+// --- 4. HTML Content (Termasuk Script Logika Konversi yang di-Inject) ---
+// Perhatian: Konten HTML ini menggunakan string literal ES6 (`...`) yang memungkinkan multiple lines.
+const HTML_CONTENT_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VLESS/VMess Link Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'selector', theme: { extend: {
+        colors: {
+            'accent-blue': '#66b5e8',
+            'accent-purple': '#a466e8',
+        }
+    } } };
+  </script>
+  <style>
+    /* Custom Styles for Modern/Elegant Look */
+    
+    /* START: PENINGKATAN EFEK 3D */
+    body {
+        perspective: 1000px; 
+    }
+    .main-container {
+      background: rgba(30, 41, 59, 0.8); 
+      backdrop-filter: blur(8px);
+      border-radius: 1.5rem;
+      box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.7), 
+        0 0 15px rgba(102, 181, 232, 0.2) inset, 
+        0 0 5px rgba(0, 0, 0, 0.5); 
+      border: 1px solid rgba(100, 116, 139, 0.4); 
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transform: translateZ(20px); 
+    }
+    .btn-gradient {
+      background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-gradient:hover:not(:disabled) {
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
+      transform: translateY(1px);
+    }
+    .input-group {
+      background-color: rgba(30, 41, 59, 0.6); 
+      border-radius: 0.75rem; 
+      padding: 1rem; 
+      border: 1px solid rgba(100, 116, 139, 0.3);
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+    }
+    .input-dark, .input-group textarea, .input-group select {
+      background-color: #1f2937; 
+      color: #ffffff;
+      border: 1px solid #475569; 
+      border-radius: 0.5rem;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+      border-color: var(--tw-color-accent-blue);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+    }
+    .action-btn {
+        background-color: #1e293b; 
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155; 
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
+    /* END: PENINGKATAN EFEK 3D */
+
+
+    .table-dark th {
+      background-color: #1e293b; 
+      color: #94a3b8; 
+      font-weight: 600;
+    }
+    .table-dark td {
+      border-color: #334155; 
+    }
+    .table-dark tr:nth-child(even) {
+      background-color: #111827; 
+    }
+    .table-dark tr:hover {
+      background-color: #334155 !important; 
+    }
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem; 
+        font-weight: 800; 
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center; 
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    
+    /* JUDUL PUTIH SOLID */
+    .text-solid-white {
+        color: #ffffff; 
+        text-shadow: none; 
+    }
+    
+    /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
+    .result-success {
+      background-color: #1f2937; /* Darker background */
+      border: 1px solid #66b5e8; /* Accent blue border */
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+      transition: all 0.3s ease;
+    }
+    .result-error {
+      background-color: #1f2937; /* Darker background */
+      border: 1px solid #a466e8; /* Accent purple border */
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+      transition: all 0.3s ease;
+    }
+    
+    /* Loading Spinner */
+    #cover-spin {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 9999;
+      display: none;
+    }
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--tw-color-accent-blue);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
+  <div id="cover-spin"><div class="loader"></div></div>
+  <div id="custom-notification"></div> 
+  
+  <div id="nav-buttons-container" class="w-full max-w-5xl flex justify-center gap-4 mb-8">
+  
+    </div>
+  <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
+  
+    <div id="slide-2" class="slide w-full max-w-4xl main-container">
+        <h1 class="text-solid-white centered-heading mb-8">
+            🔗 Clash Converter
+        </h1>
+        
+        <div class="input-group mb-6">
+            <label for="link-input" class="block font-medium mb-2 text-gray-300 text-sm">Masukkan Link:</label>
+            <textarea id="link-input" rows="5" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" placeholder="vless://.... vmess://.... trojan://... "></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="md:col-span-2">
+                <label for="format-select" class="block font-medium mb-2 text-gray-300 text-sm">Pilih Format Output:</label>
+                <select id="format-select" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-[#66b5e8]">
+                    <option value="clash">Clash Meta (Full Config)</option><option value="clash-provider">Clash Provider (Proxies Only)</option>
+                </select>
+            </div>
+            <div class="md:col-span-1">
+                <button id="convert-button" class="w-full h-full py-3 rounded-lg text-white font-bold text-lg btn-gradient hover:opacity-90 transition-opacity mt-0 md:mt-[30px]">
+                    <i class="fa fa-arrow-right-arrow-left mr-2"></i> Convert
+                </button>
+            </div>
+        </div>
+        
+        <div id="converter-result" class="input-group">
+            <label class="block font-medium mb-2 text-gray-300 text-sm">Hasil Config:</label>
+            <textarea id="result-output" rows="15" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" readonly placeholder="Output konfigurasi akan muncul di sini (YAML/JSON)."></textarea>
+        </div>
+        <div class="mt-6 text-center flex justify-center gap-4">
+            <button onclick="copyToClipboard(document.getElementById('result-output').value, this)" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
+                <i class="fa fa-copy mr-1"></i> Salin Config
+            </button>
+            <button onclick="downloadConfig()" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
+                <i class="fa fa-download mr-1"></i> Download
+            </button>
+        </div>
     </div>
 
-      <footer class="w-full p-4 text-center mt-auto border-t border-gray-800">
-        <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
-          <span>Technical Support</span>
-          <a href="https://t.me/iMediafairy" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
-            <i class="fab fa-telegram-plane"></i>
-            <span>MEDIAFAIRY</span>
-          </a>
-        </div>
-      </footer>
+</div>
 
-      <script>
-        
-        function cekKuota() {
-            const msisdn = document.getElementById('msisdn').value;
-            if (!msisdn) {
-                console.error('Nomor tidak boleh kosong.');
-                return;
-            }
-            
-            $('#cover-spin').show();
-            $.ajax({
-                type: 'GET',
-                url: `https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=${msisdn}&isJSON=true`,
-                dataType: 'JSON',
-                contentType: 'application/x-www-form-urlencoded',
-                beforeSend: function (req) {
-                    req.setRequestHeader('Authorization', 'Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw');
-                    req.setRequestHeader('X-API-Key', '60ef29aa-a648-4668-90ae-20951ef90c55');
-                    req.setRequestHeader('X-App-Version', '4.0.0');
-                },
-                success: function (res) {
-                    $('#cover-spin').hide();
-                    $('#hasilnya').html('');
-                    if (res.status) {
-                        $('#hasilnya').html(`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">${res.data.hasil}</div>`);
-                    } else {
-                        console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">${res.data.keteranganError}</div>`);
-                    }
-                },
-                error: function () {
-                    $('#cover-spin').hide();
-                    console.error('Terjadi kesalahan koneksi.');
-                    $('#hasilnya').html(`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>`);
-                }
-            });
-        }
-        
-        // Pemasangan event listener setelah konten dimuat
-        // Gunakan jQuery untuk konsistensi dengan fungsi cekKuota
-        $(document).ready(function() {
-            $('#submitCekKuota').off('click').on('click', cekKuota); 
-            $('#msisdn').off('keypress').on('keypress', function (e) {
-                if (e.which === 13) cekKuota();
-            });
-        });
-        
-      </script>
-    </body>
-    </html>
-        `;
-        return new Response(html, {
-          status: 200,
-          headers: { 'Content-Type': 'text/html;charset=utf-8' },
-        });
-      }
+  <footer class="w-full p-4 text-center mt-auto border-t border-gray-800">
+    <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
+      <span>Technical Support</span>
+      <a href="https://t.me/iMediafairy" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
+        <i class="fab fa-telegram-plane"></i>
+        <span>MEDIAFAIRY</span>
+      </a>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script>
+    // Inject semua parser, generator, dan event listener di sini
+    ${html}
+  </script>
+</body>
+</html>
+`;
+
+return new Response(html, {
+        headers: { 'content-type': 'text/html;charset=UTF-8' },
+    });
+}
 
       const targetReversePrx = env.REVERSE_PRX_TARGET || "example.com";
       return await reverseWeb(request, targetReversePrx);
