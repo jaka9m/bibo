@@ -460,292 +460,579 @@ export default {
         }
       } else if (url.pathname === "/kuota") {
         const html = `
-// Simulasikan JQuery $('#cover-spin').show() dan $('#cover-spin').hide() dengan Vanilla JS.
-const coverSpin = document.getElementById('cover-spin');
-function showLoader() { if(coverSpin) coverSpin.style.display = 'block'; }
-function hideLoader() { if(coverSpin) coverSpin.style.display = 'none'; }
-
-// --- Helper Copy & Download ---
-function copyToClipboard(text, element) {
-    navigator.clipboard.writeText(text).then(() => {
-        // Salin berhasil
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-    });
-    
-    if (element) {
-        element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6)';
-        element.style.transform = 'translateY(1px)';
-
-        setTimeout(() => {
-            element.style.boxShadow = ''; 
-            element.style.transform = 'translateY(0)';
-        }, 300);
-    }
-}
-
-function downloadConfig() {
-    const configData = document.getElementById('result-output').value;
-    const format = document.getElementById('format-select').value;
-    
-    if (!configData.trim() || configData.startsWith('❌ Gagal:')) {
-        console.error('Tidak ada config valid untuk diunduh.');
-        return;
-    }
-
-    let filename = 'config_mediafairy';
-    let mimeType = 'text/plain';
-
-    if (format === 'clash' || format === 'clash-provider') {
-        filename += '.yaml';
-        mimeType = 'text/yaml';
-    } else {
-        filename += '.txt';
-    }
-
-    const blob = new Blob([configData], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// --- Utility Parser ---
-const tryUrlDecode = function tryUrlDecode(s = '') {
-    try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
-    catch { return s; }
-};
-
-const mapFields = function mapFields(d) {
-    const pass = d.password;
-    
-    return {
-        protocol: d.protocol,
-        remark: d.remark,
-        server: d.server,
-        port: d.port,
-        password: pass, 
-        uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined, 
-        alterId: d.alterId, 
-        method: d.method, 
-        network: d.network,
-        security: d.security,
-        sni: d.sni,
-        host: d.host,
-        path: d.path,
-        plugin: d.plugin,
-        serviceName: d.serviceName,
-    };
-};
-
-// --- Parser Functions ---
-
-const parseVlessUri = function parseVlessUri(uri) {
-    const u = new URL(uri);
-    const network = u.searchParams.get('type') || 'tcp';
-    
-    const path = tryUrlDecode(u.searchParams.get('path') || '/'); 
-    const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
-    const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
-    
-    return {
-        protocol: 'vless',
-        remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
-        server: u.hostname,
-        port: parseInt(u.port, 10),
-        password: decodeURIComponent(u.username),
-        network: network,
-        security: u.searchParams.get('security') || 'none',
-        sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
-        host: host,
-        path: path,
-        serviceName: serviceName || (network === 'grpc' ? path : ''),
-    };
-};
-
-const parseVmessUri = function parseVmessUri(uri){
-    const base64Part = uri.substring('vmess://'.length).trim();
-    const decodedStr = atob(base64Part);
-    const decoded = JSON.parse(decodedStr);
-    
-    const network = decoded.net || 'tcp';
-    const path = decoded.path || '/';
-
-    return {
-        protocol: 'vmess',
-        remark: decoded.ps || 'VMess',
-        server: decoded.add,
-        port: parseInt(decoded.port, 10),
-        password: decoded.id,
-        alterId: parseInt(decoded.aid, 10) || 0,
-        network: network,
-        security: decoded.tls === 'tls' ? 'tls' : 'none',
-        sni: decoded.sni || decoded.host || decoded.add,
-        host: decoded.host || decoded.sni || decoded.add,
-        path: path,
-        serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
-    };
-};
-
-const parseTrojanUri = function parseTrojanUri(uri) {
-    const u = new URL(uri);
-    const network = u.searchParams.get('type') || 'tcp';
-    
-    const path = tryUrlDecode(u.searchParams.get('path') || '/');
-    const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
-    const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
-    
-    return {
-        protocol: 'trojan',
-        remark: decodeURIComponent(u.hash.substring(1)) || 'Trojan',
-        server: u.hostname,
-        port: parseInt(u.port, 10),
-        password: decodeURIComponent(u.username),
-        network: network,
-        security: u.searchParams.get('security') || 'tls',
-        sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
-        host: host,
-        path: path,
-        serviceName: serviceName || (network === 'grpc' ? path : ''),
-    };
-};
-
-const parseShadowsocksUri = function parseShadowsocksUri(uri) {
-    const parts = uri.substring('ss://'.length).split('#');
-    const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
-    const corePart = parts[0];
-    
-    const pluginMatch = corePart.match(/@(.+?)\/\?plugin=(.*)/);
-    let userServerPort, pluginData = {};
-    let pluginExists = false;
-
-    if (pluginMatch) {
-        const userInfoBase64 = corePart.substring(0, pluginMatch.index);
-        userServerPort = atob(userInfoBase64);
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VLESS/VMess Link Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'selector', theme: { extend: {
+            colors: {
+                'accent-blue': '#66b5e8',
+                'accent-purple': '#a466e8',
+            }
+        } } };
+    </script>
+    <style>
+        /* Custom Styles for Modern/Elegant Look */
         
-        const pluginRaw = tryUrlDecode(pluginMatch[2]);
-        
-        const params = pluginRaw.split(';');
-        params.forEach(param => {
-            if (param === 'tls') pluginData.security = 'tls';
-            else if (param.startsWith('host=')) pluginData.host = param.substring(5);
-            else if (param.startsWith('path=')) pluginData.path = param.substring(5);
-        });
-        pluginData.plugin = 'v2ray-plugin';
-        pluginExists = true;
-    } else {
-        userServerPort = atob(corePart);
-    }
-
-    const [userInfo, serverPort] = userServerPort.split('@');
-    const [method, password] = userInfo.split(':');
-    const [server, port] = serverPort.split(':');
-
-    return {
-        protocol: 'ss',
-        remark: remark,
-        server: server,
-        port: parseInt(port, 10),
-        password: password,
-        method: method,
-        network: pluginExists ? 'ws' : 'tcp', 
-        plugin: pluginData.plugin,
-        security: pluginData.security || 'none',
-        sni: pluginData.host || server,
-        host: pluginData.host || server,
-        path: pluginData.path || '/',
-        serviceName: '',
-    };
-};
-
-// --- Generator Functions ---
-
-const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
-    let proxyConfigs = [];
-    let proxyNames = []; 
-
-    for (const fields of fieldsList) {
-        let transportOpts = '';
-
-        if (fields.network === 'ws') {
-            transportOpts = \`  ws-opts:
-    path: \${fields.path}
-    headers:
-      Host: \${fields.host}\`;
-        } else if (fields.network === 'grpc') {
-            transportOpts = \`  grpc-opts:
-    grpc-service-name: \${fields.serviceName || ''}\`;
+        /* START: PENINGKATAN EFEK 3D */
+        body {
+            perspective: 1000px; 
         }
+        .main-container {
+            background: rgba(30, 41, 59, 0.8); 
+            backdrop-filter: blur(8px);
+            border-radius: 1.5rem;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.7), 
+                0 0 15px rgba(102, 181, 232, 0.2) inset, 
+                0 0 5px rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(100, 116, 139, 0.4); 
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transform: translateZ(20px); 
+        }
+        .btn-gradient {
+            background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover:not(:disabled) {
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
+            transform: translateY(1px);
+        }
+        .input-group {
+            background-color: rgba(30, 41, 59, 0.6); 
+            border-radius: 0.75rem; 
+            padding: 1rem; 
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+        }
+        .input-dark, .input-group textarea, .input-group select {
+            background-color: #1f2937; 
+            color: #ffffff;
+            border: 1px solid #475569; 
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+            border-color: var(--tw-color-accent-blue);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+        }
+        .action-btn {
+            background-color: #1e293b; 
+            color: #94a3b8;
+            border: 1px solid #475569;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #334155; 
+            color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+            transform: translateY(1px);
+        }
+        /* END: PENINGKATAN EFEK 3D */
 
-        let proxy = '';
-        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
+
+        .table-dark th {
+            background-color: #1e293b; 
+            color: #94a3b8; 
+            font-weight: 600;
+        }
+        .table-dark td {
+            border-color: #334155; 
+        }
+        .table-dark tr:nth-child(even) {
+            background-color: #111827; 
+        }
+        .table-dark tr:hover {
+            background-color: #334155 !important; 
+        }
+        .centered-heading {
+            text-align: center;
+            width: 100%;
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            line-height: 1.2;
+            padding-bottom: 0.5rem;
+        }
+        .nav-btn-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center; 
+            min-height: 50px;
+            padding: 0.75rem 1.5rem;
+            line-height: 1.2;
+            border-radius: 0.75rem;
+        }
         
-        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
-            proxy =
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
-  type: \${fields.protocol}
-  \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n  alterId: \${fields.alterId}\`}
+        /* JUDUL PUTIH SOLID */
+        .text-solid-white {
+            color: #ffffff; 
+            text-shadow: none; 
+        }
+        
+        /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
+        .result-success {
+            background-color: #1f2937; /* Darker background */
+            border: 1px solid #66b5e8; /* Accent blue border */
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+            transition: all 0.3s ease;
+        }
+        .result-error {
+            background-color: #1f2937; /* Darker background */
+            border: 1px solid #a466e8; /* Accent purple border */
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Spinner */
+        #cover-spin {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 9999;
+            display: none;
+        }
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--tw-color-accent-blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
+    <div id="cover-spin"><div class="loader"></div></div>
+    <div id="custom-notification"></div> 
+    
+    <div id="nav-buttons-container" class="w-full max-w-5xl flex justify-center gap-4 mb-8">
+    
+    </div>
+    <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
+    
+        <div id="slide-2" class="slide w-full max-w-4xl main-container">
+            <h1 class="text-solid-white centered-heading mb-8">
+                🔗 Clash Converter
+            </h1>
+            
+            <div class="input-group mb-6">
+                <label for="link-input" class="block font-medium mb-2 text-gray-300 text-sm">Masukkan Link:</label>
+                <textarea id="link-input" rows="5" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" placeholder="vless://.... vmess://.... trojan://... "></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="md:col-span-2">
+                    <label for="format-select" class="block font-medium mb-2 text-gray-300 text-sm">Pilih Format Output:</label>
+                    <select id="format-select" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-[#66b5e8]">
+                        <option value="clash">Clash Meta (Full Config)</option><option value="clash-provider">Clash Provider (Proxies Only)</option>
+                    </select>
+                </div>
+                <div class="md:col-span-1">
+                    <button id="convert-button" class="w-full h-full py-3 rounded-lg text-white font-bold text-lg btn-gradient hover:opacity-90 transition-opacity mt-0 md:mt-[30px]">
+                        <i class="fa fa-arrow-right-arrow-left mr-2"></i> Convert
+                    </button>
+                </div>
+            </div>
+            
+            <div id="converter-result" class="input-group">
+                <label class="block font-medium mb-2 text-gray-300 text-sm">Hasil Config:</label>
+                <textarea id="result-output" rows="15" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" readonly placeholder="Output konfigurasi akan muncul di sini (YAML/JSON)."></textarea>
+            </div>
+            <div class="mt-6 text-center flex justify-center gap-4">
+                <button onclick="copyToClipboard(document.getElementById('result-output').value, this)" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
+                    <i class="fa fa-copy mr-1"></i> Salin Config
+                </button>
+                <button onclick="downloadConfig()" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
+                    <i class="fa fa-download mr-1"></i> Download
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="w-full p-4 text-center mt-auto border-t border-gray-800">
+        <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
+            <span>Technical Support</span>
+            <a href="https://t.me/iMediafairy" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
+                <i class="fab fa-telegram-plane"></i>
+                <span>MEDIAFAIRY</span>
+            </a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        // --- Loader Function (Vanilla JS) ---
+        const coverSpin = document.getElementById('cover-spin');
+        function showLoader() { if(coverSpin) coverSpin.style.display = 'block'; }
+        function hideLoader() { if(coverSpin) coverSpin.style.display = 'none'; }
+        
+        // --- Helper Copy & Download ---
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Salin berhasil
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+            
+            if (element) {
+                element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6)';
+                element.style.transform = 'translateY(1px)';
+
+                setTimeout(() => {
+                    element.style.boxShadow = ''; 
+                    element.style.transform = 'translateY(0)';
+                }, 300);
+            }
+        }
+        
+        function downloadConfig() {
+            const configData = document.getElementById('result-output').value;
+            const format = document.getElementById('format-select').value;
+            
+            if (!configData.trim() || configData.startsWith('❌ Gagal:')) {
+                console.error('Tidak ada config valid untuk diunduh.');
+                return;
+            }
+
+            let filename = 'config_mediafairy';
+            let mimeType = 'text/plain';
+
+            if (format === 'clash' || format === 'clash-provider') {
+                filename += '.yaml';
+                mimeType = 'text/yaml';
+            } else {
+                filename += '.txt';
+            }
+
+            const blob = new Blob([configData], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // --- Core Functions: Parser & Generator ---
+
+        const tryUrlDecode = function tryUrlDecode(s = '') {
+            try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
+            catch { return s; }
+        };
+        
+        const mapFields = function mapFields(d) {
+            const pass = d.password;
+            
+            return {
+                protocol: d.protocol,
+                remark: d.remark,
+                server: d.server,
+                port: d.port,
+                password: pass, 
+                uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined, 
+                alterId: d.alterId, 
+                method: d.method, 
+                network: d.network,
+                security: d.security,
+                sni: d.sni,
+                host: d.host,
+                path: d.path,
+                plugin: d.plugin,
+                serviceName: d.serviceName,
+            };
+        };
+
+        const parseVlessUri = function parseVlessUri(uri) {
+            const u = new URL(uri);
+            const network = u.searchParams.get('type') || 'tcp';
+            
+            const path = tryUrlDecode(u.searchParams.get('path') || '/'); 
+            const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+            const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+            
+            return {
+                protocol: 'vless',
+                remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
+                server: u.hostname,
+                port: parseInt(u.port, 10),
+                password: decodeURIComponent(u.username),
+                network: network,
+                security: u.searchParams.get('security') || 'none',
+                sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+                host: host,
+                path: path,
+                serviceName: serviceName || (network === 'grpc' ? path : ''),
+            };
+        };
+
+        const parseVmessUri = function parseVmessUri(uri){
+            // Mengganti atob() agar lebih aman dari karakter non-ASCII (meskipun atob di browser sudah cukup)
+            const base64Part = uri.substring('vmess://'.length).trim();
+            // Fallback untuk Base64 yang tidak valid/tidak standar URL
+            let decodedStr;
+            try {
+                decodedStr = atob(base64Part);
+            } catch (e) {
+                // Mencoba Base64 URL Safe jika ada padding yang hilang
+                const urlSafeBase64 = base64Part.replace(/-/g, '+').replace(/_/g, '/');
+                decodedStr = atob(urlSafeBase64);
+            }
+
+            const decoded = JSON.parse(decodedStr);
+            
+            const network = decoded.net || 'tcp';
+            const path = decoded.path || '/';
+
+            return {
+                protocol: 'vmess',
+                remark: decoded.ps || 'VMess',
+                server: decoded.add,
+                port: parseInt(decoded.port, 10),
+                password: decoded.id,
+                alterId: parseInt(decoded.aid, 10) || 0,
+                network: network,
+                security: decoded.tls === 'tls' ? 'tls' : 'none',
+                sni: decoded.sni || decoded.host || decoded.add,
+                host: decoded.host || decoded.sni || decoded.add,
+                path: path,
+                serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
+            };
+        };
+
+        const parseTrojanUri = function parseTrojanUri(uri) {
+            const u = new URL(uri.replace(/#.*$/, '')); // Hapus hash sebelum parsing URL
+            
+            // Trojan password berada di u.username, bagian setelah @ adalah server:port
+            const password = u.username; 
+            
+            // Ambil parameter dari query
+            const network = u.searchParams.get('type') || 'tcp';
+            const path = tryUrlDecode(u.searchParams.get('path') || '/');
+            const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+            const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+
+            // Dapatkan remark (nama) dari fragment identifier (setelah #)
+            const hashMatch = uri.match(/#(.+)$/);
+            const remark = hashMatch ? decodeURIComponent(hashMatch[1]) : 'Trojan';
+
+            return {
+                protocol: 'trojan',
+                remark: remark,
+                server: u.hostname,
+                port: parseInt(u.port, 10),
+                password: password,
+                network: network,
+                security: u.searchParams.get('security') || 'tls',
+                sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+                host: host,
+                path: path,
+                serviceName: serviceName || (network === 'grpc' ? path : ''),
+            };
+        };
+
+        const parseShadowsocksUri = function parseShadowsocksUri(uri) {
+            const parts = uri.substring('ss://'.length).split('#');
+            const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
+            const corePart = parts[0];
+            
+            // Pola untuk SS dengan plugin seperti v2ray-plugin
+            const pluginMatch = corePart.match(/@(.+?)\/\?plugin=(.*)/);
+            let userServerPort, pluginData = {};
+            let pluginExists = false;
+
+            if (pluginMatch) {
+                const userInfoBase64 = corePart.substring(0, pluginMatch.index);
+                userServerPort = atob(userInfoBase64);
+                
+                const pluginRaw = tryUrlDecode(pluginMatch[2]);
+                
+                // Asumsikan plugin adalah v2ray-plugin atau simple-obfs
+                pluginData.plugin = 'v2ray-plugin'; // Default ke v2ray-plugin
+                
+                const params = pluginRaw.split(';').filter(p => p.trim() !== '');
+                params.forEach(param => {
+                    const [key, value] = param.split('=');
+                    if (key === 'tls') pluginData.security = 'tls';
+                    else if (key === 'host') pluginData.host = value;
+                    else if (key === 'path') pluginData.path = value;
+                    else if (key === 'obfs') {
+                        // Jika menggunakan simple-obfs
+                        pluginData.plugin = 'simple-obfs';
+                        pluginData.obfs = value; // http atau tls
+                    }
+                });
+
+                pluginExists = true;
+                pluginData.network = 'ws'; // Default network untuk plugin mode ws
+                if (pluginData.obfs) pluginData.network = 'tcp'; // Jika simple-obfs
+            } else {
+                userServerPort = atob(corePart);
+            }
+
+            const [userInfo, serverPort] = userServerPort.split('@');
+            const [method, password] = userInfo.split(':');
+            const [server, port] = serverPort.split(':');
+
+            return {
+                protocol: 'ss',
+                remark: remark,
+                server: server,
+                port: parseInt(port, 10),
+                password: password,
+                method: method,
+                network: pluginData.network || 'tcp', 
+                plugin: pluginData.plugin,
+                security: pluginData.security || 'none',
+                sni: pluginData.host || server,
+                host: pluginData.host || server,
+                path: pluginData.path || '/',
+                serviceName: '',
+                obfs: pluginData.obfs,
+            };
+        };
+
+        const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
+            let proxyConfigs = [];
+            let proxyNames = []; 
+            const existingNames = new Set();
+
+            for (const fields of fieldsList) {
+                let transportOpts = '';
+                let safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim(); 
+                
+                // Tambahkan penomoran jika nama duplikat
+                let count = 1;
+                let originalRemark = safeRemark;
+                while(existingNames.has(safeRemark)) {
+                    safeRemark = `${originalRemark}_${count++}`;
+                }
+                existingNames.add(safeRemark);
+                
+                // Opsi Transportasi
+                if (fields.network === 'ws') {
+                    transportOpts = `  ws-opts:
+    path: ${fields.path}
+    headers:
+      Host: ${fields.host}`;
+                } else if (fields.network === 'grpc') {
+                    transportOpts = `  grpc-opts:
+    grpc-service-name: ${fields.serviceName || ''}`;
+                }
+                
+                let proxy = '';
+
+                // Generate Proxy Config
+                if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+                    proxy =
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
+  type: ${fields.protocol}
+  ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n  alterId: ${fields.alterId}`}
   cipher: auto
-  tls: \${fields.security === 'tls'}
+  tls: ${fields.security === 'tls'}
   udp: true
   skip-cert-verify: true
-  network: \${fields.network}
-  servername: \${fields.sni}
-\${transportOpts}\`;
-        } else if (fields.protocol === 'trojan') {
-            proxy = 
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
+  network: ${fields.network}
+  servername: ${fields.sni}
+${transportOpts}`;
+                } else if (fields.protocol === 'trojan') {
+                    proxy = 
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
   type: trojan
-  password: \${fields.password}
-  network: \${fields.network}
-  tls: \${fields.security === 'tls'}
+  password: ${fields.password}
+  network: ${fields.network}
+  tls: ${fields.security === 'tls'}
   skip-cert-verify: true
-  servername: \${fields.sni}
-\${transportOpts}\`;
-        } else if (fields.protocol === 'ss') {
-            proxy = 
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
-  type: ss
-  cipher: \${fields.method}
-  password: \${fields.password}
-  plugin: \${fields.plugin || 'v2ray-plugin'}
+  servername: ${fields.sni}
+${transportOpts}`;
+                } else if (fields.protocol === 'ss') {
+                    // Penanganan SS dengan atau tanpa plugin
+                    let ssPluginOpts = '';
+                    if (fields.plugin === 'v2ray-plugin') {
+                        ssPluginOpts = `
+  plugin: v2ray-plugin
   plugin-opts:
     mode: websocket
-    host: \${fields.host}
-    path: \${fields.path}
-    tls: \${fields.security === 'tls'}
+    host: ${fields.host}
+    path: ${fields.path}
+    tls: ${fields.security === 'tls'}
     skip-cert-verify: true
-    servername: \${fields.sni}\`;
-        } else {
-            proxy = \`# Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
-        }
-        
-        proxyConfigs.push(proxy);
-        proxyNames.push(\`  - \${safeRemark}\`); 
-    }
+    servername: ${fields.sni}`;
+                    } else if (fields.plugin === 'simple-obfs') {
+                         ssPluginOpts = `
+  plugin: simple-obfs
+  plugin-opts:
+    obfs: ${fields.obfs}
+    obfs-host: ${fields.host}`;
+                    } else if (fields.network === 'ws' && !fields.plugin) {
+                        // SS murni WS (tidak umum)
+                         ssPluginOpts = `
+  plugin: v2ray-plugin
+  plugin-opts:
+    mode: websocket
+    tls: ${fields.security === 'tls'}
+    skip-cert-verify: true
+    servername: ${fields.sni}
+    host: ${fields.host}
+    path: ${fields.path}`;
+                    }
+                    
+                    proxy = 
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
+  type: ss
+  cipher: ${fields.method}
+  password: ${fields.password}
+  udp: true
+${ssPluginOpts}`;
+                } else {
+                    proxy = `# Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
+                }
+                
+                proxyConfigs.push(proxy);
+                proxyNames.push(`  - ${safeRemark}`); 
+            }
 
-    const proxyListJoined = proxyConfigs.join('\\n');
-    const proxyNamesJoined = proxyNames.join('\\n');
-    
-    // TEMPLATE clash.js
-    const template = \`port: 7890
+            const proxyNamesJoined = proxyNames.join('\n');
+            
+            // TEMPLATE clash.js
+            const template = `port: 7890
 socks-port: 7891
 redir-port: 7892
 mixed-port: 7893
@@ -877,7 +1164,7 @@ dns:
     - "*.mcdn.bilivideo.cn"
     - +.media.dssott.com
 proxies:
-\${proxyNamesJoined}
+${proxyConfigs.join('\n')}
 
 proxy-groups:
 - name: INTERNET
@@ -897,7 +1184,7 @@ proxy-groups:
   proxies:
     - DIRECT
     - REJECT
-\${proxyNamesJoined}
+${proxyNamesJoined}
 
 rule-providers:
   rule_hijacking:
@@ -924,391 +1211,225 @@ rule-providers:
 rules:
 - IP-CIDR,198.18.0.1/16,REJECT,no-resolve
 - RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_basicads,REJECT    # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir
-- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir
-- MATCH,INTERNET\`;
+- RULE-SET,rule_basicads,REJECT      # Langsung REJECT untuk memblokir iklan
+- RULE-SET,rule_hijacking,REJECT     # Langsung REJECT untuk memblokir
+- RULE-SET,rule_privacy,REJECT       # Langsung REJECT untuk memblokir
+- MATCH,INTERNET`;
 
-    return template;
-};
+            return template;
+        };
 
-const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
-    let proxyConfigs = [];
+        const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
+            let proxyConfigs = [];
+            const existingNames = new Set();
+            
+            for (const fields of fieldsList) {
+                let transportOpts = '';
+                let safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim(); 
+                
+                // Tambahkan penomoran jika nama duplikat
+                let count = 1;
+                let originalRemark = safeRemark;
+                while(existingNames.has(safeRemark)) {
+                    safeRemark = `${originalRemark}_${count++}`;
+                }
+                existingNames.add(safeRemark);
 
-    for (const fields of fieldsList) {
-        let transportOpts = '';
-
-        if (fields.network === 'ws') {
-            transportOpts = \`    ws-opts:
-      path: \${fields.path}
+                // Opsi Transportasi
+                if (fields.network === 'ws') {
+                    transportOpts = `    ws-opts:
+      path: ${fields.path}
       headers:
-        Host: \${fields.host}\`;
-        } else if (fields.network === 'grpc') {
-            transportOpts = \`    grpc-opts:
-      grpc-service-name: \${fields.serviceName || ''}\`;
-        }
+        Host: ${fields.host}`;
+                } else if (fields.network === 'grpc') {
+                    transportOpts = `    grpc-opts:
+      grpc-service-name: ${fields.serviceName || ''}`;
+                }
 
-        let proxy = '';
-        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
-        
-        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
-            proxy =
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
-    type: \${fields.protocol}
-    \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n    alterId: \${fields.alterId}\`}
+                let proxy = '';
+                
+                // Generate Proxy Config
+                if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+                    proxy =
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
+    type: ${fields.protocol}
+    ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n    alterId: ${fields.alterId}`}
     cipher: auto
-    tls: \${fields.security === 'tls'}
+    tls: ${fields.security === 'tls'}
     udp: true
     skip-cert-verify: true
-    network: \${fields.network}
-    servername: \${fields.sni}
-\${transportOpts}\`;
-        } else if (fields.protocol === 'trojan') {
-            proxy = 
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
+    network: ${fields.network}
+    servername: ${fields.sni}
+${transportOpts}`;
+                } else if (fields.protocol === 'trojan') {
+                    proxy = 
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
     type: trojan
-    password: \${fields.password}
-    network: \${fields.network}
-    tls: \${fields.security === 'tls'}
+    password: ${fields.password}
+    network: ${fields.network}
+    tls: ${fields.security === 'tls'}
     skip-cert-verify: true
-    servername: \${fields.sni}
-\${transportOpts}\`;
-        } else if (fields.protocol === 'ss') {
-            proxy = 
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
-    type: ss
-    cipher: \${fields.method}
-    password: \${fields.password}
-    plugin: \${fields.plugin || 'v2ray-plugin'}
+    servername: ${fields.sni}
+${transportOpts}`;
+                } else if (fields.protocol === 'ss') {
+                    // Penanganan SS dengan atau tanpa plugin
+                    let ssPluginOpts = '';
+                    if (fields.plugin === 'v2ray-plugin') {
+                        ssPluginOpts = `
+    plugin: v2ray-plugin
     plugin-opts:
       mode: websocket
-      host: \${fields.host}
-      path: \${fields.path}
-      tls: \${fields.security === 'tls'}
+      host: ${fields.host}
+      path: ${fields.path}
+      tls: ${fields.security === 'tls'}
       skip-cert-verify: true
-      servername: \${fields.sni}\`;
-        } else {
-            proxy = \`  # Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
-        }
-        
-        proxyConfigs.push(proxy);
-    }
-    
-    const proxyListJoined = proxyConfigs.join('\\n');
-    
-    return \`proxies:\\n\${proxyListJoined}\`;
-};
-
-// Fungsi utama yang mengorkestrasi konversi
-const convertLink = function convertLink(linksInput, format) {
-    const linkArray = linksInput.split('\\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
-    
-    if (linkArray.length === 0) {
-        return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
-    }
-
-    const successfulConversions = [];
-    
-    for (const link of linkArray) {
-        try {
-            let d;
-            const decodedLink = tryUrlDecode(link);
-
-            if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
-            else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
-            else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
-            else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
-            else continue;
+      servername: ${fields.sni}`;
+                    } else if (fields.plugin === 'simple-obfs') {
+                         ssPluginOpts = `
+    plugin: simple-obfs
+    plugin-opts:
+      obfs: ${fields.obfs}
+      obfs-host: ${fields.host}`;
+                    } else if (fields.network === 'ws' && !fields.plugin) {
+                        // SS murni WS (tidak umum)
+                         ssPluginOpts = `
+    plugin: v2ray-plugin
+    plugin-opts:
+      mode: websocket
+      tls: ${fields.security === 'tls'}
+      skip-cert-verify: true
+      servername: ${fields.sni}
+      host: ${fields.host}
+      path: ${fields.path}`;
+                    }
+                    
+                    proxy = 
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
+    type: ss
+    cipher: ${fields.method}
+    password: ${fields.password}
+    udp: true
+${ssPluginOpts}`;
+                } else {
+                    proxy = `  # Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
+                }
+                
+                proxyConfigs.push(proxy);
+            }
             
-            successfulConversions.push(mapFields(d));
+            const proxyListJoined = proxyConfigs.join('\n');
             
-        } catch (e) {
-            console.error(\`Error parsing link: \${link}\`, e);
-        }
-    }
+            return `proxies:\n${proxyListJoined}`;
+        };
+
+        const convertLink = function convertLink(linksInput, format) {
+            const linkArray = linksInput.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
+            
+            if (linkArray.length === 0) {
+                return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
+            }
+
+            const successfulConversions = [];
+            
+            for (const link of linkArray) {
+                try {
+                    let d;
+                    const decodedLink = tryUrlDecode(link);
+
+                    if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
+                    else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
+                    else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
+                    else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
+                    else continue;
+                    
+                    successfulConversions.push(mapFields(d));
+                    
+                } catch (e) {
+                    console.error(`Error parsing link: ${link}`, e);
+                }
+            }
+            
+            if (successfulConversions.length === 0) {
+                return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
+            }
+
+            if (format === 'clash') return generateClashMetaProxies(successfulConversions);
+            if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
+            
+            return 'Format konversi tidak valid.';
+        };
+
+
+        // --- Event Listener Utama ---
+        document.getElementById('convert-button').addEventListener('click', function() {
+            showLoader(); // Tampilkan loading
+            
+            const linkInput = document.getElementById('link-input').value;
+            const format = document.getElementById('format-select').value;
+            const resultOutput = document.getElementById('result-output');
+
+            if (!linkInput.trim()) {
+                console.error('Link tidak boleh kosong.');
+                resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
+                hideLoader(); // Sembunyikan loading
+                return;
+            }
+
+            // Delay kecil agar loading sempat terlihat (opsional)
+            setTimeout(() => {
+                const converted = convertLink(linkInput, format);
+                
+                if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
+                    resultOutput.value = converted;
+                    // Ubah warna hasil ke error jika gagal (opsional)
+                    // resultOutput.closest('.input-group').classList.remove('result-success');
+                    // resultOutput.closest('.input-group').classList.add('result-error');
+                } else {
+                    resultOutput.value = converted;
+                    // Ubah warna hasil ke success (opsional)
+                    // resultOutput.closest('.input-group').classList.remove('result-error');
+                    // resultOutput.closest('.input-group').classList.add('result-success');
+                }
+                hideLoader(); // Sembunyikan loading
+            }, 50); 
+        });
     
-    if (successfulConversions.length === 0) {
-        return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
-    }
-
-    if (format === 'clash') return generateClashMetaProxies(successfulConversions);
-    if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
-    
-    return 'Format konversi tidak valid.';
-};
-
-// --- Event Listener Tombol Convert ---
-document.getElementById('convert-button').addEventListener('click', function() {
-    showLoader(); // Tampilkan loading
-    
-    const linkInput = document.getElementById('link-input').value;
-    const format = document.getElementById('format-select').value;
-    const resultOutput = document.getElementById('result-output');
-
-    if (!linkInput.trim()) {
-        console.error('Link tidak boleh kosong.');
-        resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
-        hideLoader(); // Sembunyikan loading
-        return;
-    }
-
-    // Delay kecil agar loading sempat terlihat (opsional)
-    setTimeout(() => {
-        const converted = convertLink(linkInput, format);
-        
-        if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
-            resultOutput.value = converted;
-        } else {
-            resultOutput.value = converted;
-        }
-        hideLoader(); // Sembunyikan loading
-    }, 50); 
-});
-`;
-
-// --- 4. HTML Content (Termasuk Script Logika Konversi yang di-Inject) ---
-// Perhatian: Konten HTML ini menggunakan string literal ES6 (`...`) yang memungkinkan multiple lines.
-const HTML_CONTENT_TEMPLATE = `
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VLESS/VMess Link Converter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'selector', theme: { extend: {
-        colors: {
-            'accent-blue': '#66b5e8',
-            'accent-purple': '#a466e8',
-        }
-    } } };
-  </script>
-  <style>
-    /* Custom Styles for Modern/Elegant Look */
-    
-    /* START: PENINGKATAN EFEK 3D */
-    body {
-        perspective: 1000px; 
-    }
-    .main-container {
-      background: rgba(30, 41, 59, 0.8); 
-      backdrop-filter: blur(8px);
-      border-radius: 1.5rem;
-      box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.7), 
-        0 0 15px rgba(102, 181, 232, 0.2) inset, 
-        0 0 5px rgba(0, 0, 0, 0.5); 
-      border: 1px solid rgba(100, 116, 139, 0.4); 
-      padding: 2rem;
-      margin-bottom: 2rem;
-      transform: translateZ(20px); 
-    }
-    .btn-gradient {
-      background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-    }
-    .btn-gradient:hover:not(:disabled) {
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-      transform: translateY(1px);
-    }
-    .input-group {
-      background-color: rgba(30, 41, 59, 0.6); 
-      border-radius: 0.75rem; 
-      padding: 1rem; 
-      border: 1px solid rgba(100, 116, 139, 0.3);
-      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-    }
-    .input-dark, .input-group textarea, .input-group select {
-      background-color: #1f2937; 
-      color: #ffffff;
-      border: 1px solid #475569; 
-      border-radius: 0.5rem;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-      border-color: var(--tw-color-accent-blue);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-    }
-    .action-btn {
-        background-color: #1e293b; 
-        color: #94a3b8;
-        border: 1px solid #475569;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #334155; 
-        color: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-        transform: translateY(1px);
-    }
-    /* END: PENINGKATAN EFEK 3D */
-
-
-    .table-dark th {
-      background-color: #1e293b; 
-      color: #94a3b8; 
-      font-weight: 600;
-    }
-    .table-dark td {
-      border-color: #334155; 
-    }
-    .table-dark tr:nth-child(even) {
-      background-color: #111827; 
-    }
-    .table-dark tr:hover {
-      background-color: #334155 !important; 
-    }
-    .centered-heading {
-        text-align: center;
-        width: 100%;
-        font-size: 1.5rem; 
-        font-weight: 800; 
-        line-height: 1.2;
-        padding-bottom: 0.5rem;
-    }
-    .nav-btn-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center; 
-        min-height: 50px;
-        padding: 0.75rem 1.5rem;
-        line-height: 1.2;
-        border-radius: 0.75rem;
-    }
-    
-    /* JUDUL PUTIH SOLID */
-    .text-solid-white {
-        color: #ffffff; 
-        text-shadow: none; 
-    }
-    
-    /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
-    .result-success {
-      background-color: #1f2937; /* Darker background */
-      border: 1px solid #66b5e8; /* Accent blue border */
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-      transition: all 0.3s ease;
-    }
-    .result-error {
-      background-color: #1f2937; /* Darker background */
-      border: 1px solid #a466e8; /* Accent purple border */
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-      transition: all 0.3s ease;
-    }
-    
-    /* Loading Spinner */
-    #cover-spin {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      z-index: 9999;
-      display: none;
-    }
-    .loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--tw-color-accent-blue);
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    
-  </style>
-</head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
-  <div id="cover-spin"><div class="loader"></div></div>
-  <div id="custom-notification"></div> 
-  
-  <div id="nav-buttons-container" class="w-full max-w-5xl flex justify-center gap-4 mb-8">
-  
-    </div>
-  <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
-  
-    <div id="slide-2" class="slide w-full max-w-4xl main-container">
-        <h1 class="text-solid-white centered-heading mb-8">
-            🔗 Clash Converter
-        </h1>
-        
-        <div class="input-group mb-6">
-            <label for="link-input" class="block font-medium mb-2 text-gray-300 text-sm">Masukkan Link:</label>
-            <textarea id="link-input" rows="5" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" placeholder="vless://.... vmess://.... trojan://... "></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="md:col-span-2">
-                <label for="format-select" class="block font-medium mb-2 text-gray-300 text-sm">Pilih Format Output:</label>
-                <select id="format-select" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-[#66b5e8]">
-                    <option value="clash">Clash Meta (Full Config)</option><option value="clash-provider">Clash Provider (Proxies Only)</option>
-                </select>
-            </div>
-            <div class="md:col-span-1">
-                <button id="convert-button" class="w-full h-full py-3 rounded-lg text-white font-bold text-lg btn-gradient hover:opacity-90 transition-opacity mt-0 md:mt-[30px]">
-                    <i class="fa fa-arrow-right-arrow-left mr-2"></i> Convert
-                </button>
-            </div>
-        </div>
-        
-        <div id="converter-result" class="input-group">
-            <label class="block font-medium mb-2 text-gray-300 text-sm">Hasil Config:</label>
-            <textarea id="result-output" rows="15" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" readonly placeholder="Output konfigurasi akan muncul di sini (YAML/JSON)."></textarea>
-        </div>
-        <div class="mt-6 text-center flex justify-center gap-4">
-            <button onclick="copyToClipboard(document.getElementById('result-output').value, this)" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
-                <i class="fa fa-copy mr-1"></i> Salin Config
-            </button>
-            <button onclick="downloadConfig()" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
-                <i class="fa fa-download mr-1"></i> Download
-            </button>
-        </div>
-    </div>
-
-</div>
-
-  <footer class="w-full p-4 text-center mt-auto border-t border-gray-800">
-    <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
-      <span>Technical Support</span>
-      <a href="https://t.me/iMediafairy" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
-        <i class="fab fa-telegram-plane"></i>
-        <span>MEDIAFAIRY</span>
-      </a>
-    </div>
-  </footer>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <script>
-    // Inject semua parser, generator, dan event listener di sini
-    ${html}
-  </script>
+    </script>
 </body>
 </html>
 `;
 
-return new Response(html, {
+/**
+ * Fungsi untuk mengompres string HTML (menghapus spasi dan newline berlebihan)
+ * agar file Worker lebih kecil. Ini opsional, tapi disarankan jika Worker terlalu besar.
+ */
+function minifyString(str) {
+    return str
+        .replace(/\/\*[\s\S]*?\*\/|(?<=\s)\/\/.*/g, '') // Hapus komentar JS/CSS
+        .replace(/\s+/g, ' ') // Ganti multiple whitespace (spasi, newline, tab) dengan satu spasi
+        .replace(/>\s*</g, '><') // Hapus spasi antara tag HTML
+        .trim();
+}
+
+/**
+ * Handler utama untuk permintaan fetch
+ */
+async function handleRequest(request) {
+    // Pilihan 1: Menggunakan html (lebih mudah dibaca)
+    // const responseHtml = html;
+
+    // Pilihan 2: Menggunakan html yang sudah di-minify (lebih kecil)
+    const responseHtml = minifyString(html); 
+
+    return new Response(responseHtml, {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
     });
 }
