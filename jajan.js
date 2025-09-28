@@ -2275,7 +2275,8 @@ setTitle(title) {
     // Add wildcard domains to the list
     if (this.wildcardDomains.length > 0) {
         this.wildcardDomains.forEach(domain => {
-            const subDomain = domain.hostname.replace(`.${this.rootDomain}`, '');
+            // Chained replace to handle both formats: (`wildcard.service.root` and `wildcard.root`)
+            const subDomain = domain.hostname.replace(`.${APP_DOMAIN}`, '').replace(`.${this.rootDomain}`, '');
             hosts.push({
                 value: subDomain,
                 label: subDomain,
