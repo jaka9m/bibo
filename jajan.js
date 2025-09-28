@@ -1262,6 +1262,7 @@ let baseHTML = `
     <div class="mt-4 flex gap-2">
         <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         <button onclick="searchProxy()" class="px-4 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+        <button onclick="clearSearch()" class="px-4 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">Clear</button>
     </div>
   </div>
 
@@ -1677,6 +1678,11 @@ let baseHTML = `
     window.location.href = url.toString();
 }
 
+function clearSearch() {
+    document.getElementById('search-bar').value = '';
+    window.location.href = "/sub";
+}
+
       function toggleOutputWindow() {
         windowInfoContainer.innerText = "Select output:";
         toggleWindow();
@@ -1830,6 +1836,14 @@ setInterval(updateTime, 1000);
         checkGeoip();
         checkProxy();
         updateTime();
+
+        // Restore search value from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        if (searchQuery) {
+            document.getElementById('search-bar').value = decodeURIComponent(searchQuery);
+        }
+
         // checkRegion();
         const observer = lozad(".lozad", {
           load: function (el) {
