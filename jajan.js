@@ -692,10 +692,10 @@ export default {
                     $('#cover-spin').hide();
                     $('#hasilnya').html('');
                     if (res.status) {
-                        $('#hasilnya').html(`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">${res.data.hasil}</div>`);
+                        $('#hasilnya').html('<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.hasil + '</div>');
                     } else {
                         console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">${res.data.keteranganError}</div>`);
+                        $('#hasilnya').html('<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.keteranganError + '</div>');
                     }
                 },
                 error: function () {
