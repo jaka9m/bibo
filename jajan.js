@@ -383,7 +383,7 @@ export default {
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
-                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${
+                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
                       prx.prxPort
                     };host=${effectiveHost}`
                   );
@@ -393,7 +393,7 @@ export default {
 
                 uri.searchParams.set("security", port == 443 ? "tls" : "none");
                 uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
-                uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prxIP}-${prx.prxPort}`);
+                uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
 
                 uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
                   port == 443 ? "TLS" : "NTLS"
