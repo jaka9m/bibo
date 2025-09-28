@@ -460,6 +460,13 @@ export default {
         }
       }
 
+      } else if (url.pathname === "/kuota") {
+        return new Response("welcome to our service", {
+          status: 200,
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+        });
+      }
+
       const targetReversePrx = env.REVERSE_PRX_TARGET || "example.com";
       return await reverseWeb(request, targetReversePrx);
     } catch (err) {
