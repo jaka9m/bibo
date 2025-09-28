@@ -460,14 +460,21 @@ export default {
         }
       } else if (url.pathname === "/kuota") {
         const html = `
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>VLESS/VMess Link Converter</title>
+    <title>Cek Kuota XL/AXIS</title>
+
+    <link rel="icon" href="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" type="image/jpeg">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
     <script>
+        // Konfigurasi Tailwind CSS untuk warna kustom
         tailwind.config = { darkMode: 'selector', theme: { extend: {
             colors: {
                 'accent-blue': '#66b5e8',
@@ -476,125 +483,160 @@ export default {
         } } };
     </script>
     <style>
-        /* Custom Styles for Modern/Elegant Look */
-        
-        /* START: PENINGKATAN EFEK 3D */
+        /* BASE & CONTAINER GLASSMORPHISM (BLUR 3D) */
         body {
-            perspective: 1000px; 
+            background-image: url('https://picsum.photos/1920/1080?random=1');
+            background-size: cover;
+            background-attachment: fixed;
+            perspective: 1500px;
         }
+
         .main-container {
-            background: rgba(30, 41, 59, 0.8); 
-            backdrop-filter: blur(8px);
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(18px);
             border-radius: 1.5rem;
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.7), 
-                0 0 15px rgba(102, 181, 232, 0.2) inset, 
-                0 0 5px rgba(0, 0, 0, 0.5); 
-            border: 1px solid rgba(100, 116, 139, 0.4); 
+            border: 1px solid rgba(102, 181, 232, 0.4);
+            box-shadow:
+                0 40px 80px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(102, 181, 232, 0.4) inset;
             padding: 2rem;
             margin-bottom: 2rem;
-            transform: translateZ(20px); 
+            transform: translateZ(50px) rotateX(0deg) rotateY(0deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-gradient {
-            background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+
+        .main-container:hover {
+            transform: translateZ(80px) rotateX(1deg) rotateY(-1deg);
+            box-shadow:
+                0 60px 100px rgba(0, 0, 0, 0.9),
+                0 0 40px rgba(102, 181, 232, 0.6) inset;
+        }
+
+        /* FORM CONTAINER */
+        #formnya {
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.3);
+            transform: translateZ(10px);
             transition: all 0.3s ease;
         }
-        .btn-gradient:hover:not(:disabled) {
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-            transform: translateY(1px);
+        #formnya:hover {
+            transform: translateZ(15px);
         }
-        .input-group {
-            background-color: rgba(30, 41, 59, 0.6); 
-            border-radius: 0.75rem; 
-            padding: 1rem; 
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-        }
+
+        /* INPUT FIELD STYLES */
         .input-dark, .input-group textarea, .input-group select {
-            background-color: #1f2937; 
+            background-color: rgba(17, 24, 39, 0.7);
             color: #ffffff;
-            border: 1px solid #475569; 
+            border: 1px solid rgba(102, 181, 232, 0.5);
             border-radius: 0.5rem;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5);
+            transform: translateZ(2px);
+            transition: all 0.2s;
         }
         .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
             border-color: var(--tw-color-accent-blue);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px var(--tw-color-accent-blue);
+            transform: translateZ(5px);
         }
-        .action-btn {
-            background-color: #1e293b; 
-            color: #94a3b8;
-            border: 1px solid #475569;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
+        
+        /* BUTTON STYLES (3D) - UKURAN LEBIH KECIL */
+        .btn-gradient {
+            background: linear-gradient(45deg, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3); /* Shadow dikurangi */
+            transform: translateZ(10px); /* Kedalaman dikurangi */
+            transition: all 0.3s ease;
+            border: none;
         }
-        .action-btn:hover {
-            background-color: #334155; 
+        .btn-gradient:hover:not(:disabled) {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px var(--tw-color-accent-blue); /* Shadow dikurangi */
+            transform: translateZ(15px) translateY(-1px); /* Kedalaman dan translasi dikurangi */
+        }
+        
+        /* Style untuk tombol Home (UKURAN LEBIH KECIL) */
+        .btn-home {
+            background: linear-gradient(45deg, #4c566a, #2e3440); /* Warna gradient lebih netral */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3); /* Shadow dikurangi */
+            transform: translateZ(10px); /* Kedalaman dikurangi */
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .btn-home:hover:not(:disabled) {
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px #88c0d0; /* Warna biru es */
+             transform: translateZ(15px) translateY(-1px); /* Kedalaman dan translasi dikurangi */
+        }
+
+        /* CARD HASIL BARU (GLASSMORPHISM & RATA KIRI) */
+        .result-card {
+            background: rgba(45, 62, 80, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 181, 232, 0.5);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(102, 181, 232, 0.2);
+            transform: translateZ(10px);
+            text-align: left; /* RATA KIRI */
+            margin-top: 1.5rem;
             color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-            transform: translateY(1px);
         }
-        /* END: PENINGKATAN EFEK 3D */
+        .result-card h4 {
+            color: var(--tw-color-accent-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.5);
+            padding-bottom: 0.5rem;
+        }
+        .result-item {
+            padding: 0.4rem 0;
+            border-bottom: 1px dashed rgba(100, 116, 139, 0.3);
+            overflow: hidden; /* Clear float */
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
 
 
-        .table-dark th {
-            background-color: #1e293b; 
-            color: #94a3b8; 
-            font-weight: 600;
+        /* UTILITY & LAYOUT STYLES */
+        .info-box {
+            background-color: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
         }
-        .table-dark td {
-            border-color: #334155; 
+        
+        footer {
+            background-color: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(3px);
+            border-top: 1px solid rgba(100, 116, 139, 0.3);
+            transform: translateZ(0);
         }
-        .table-dark tr:nth-child(even) {
-            background-color: #111827; 
-        }
-        .table-dark tr:hover {
-            background-color: #334155 !important; 
-        }
+        
         .centered-heading {
             text-align: center;
             width: 100%;
-            font-size: 1.5rem; 
-            font-weight: 800; 
+            font-size: 1.5rem;
+            font-weight: 800;
             line-height: 1.2;
             padding-bottom: 0.5rem;
-        }
-        .nav-btn-center {
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center; 
-            min-height: 50px;
-            padding: 0.75rem 1.5rem;
-            line-height: 1.2;
-            border-radius: 0.75rem;
         }
-        
-        /* JUDUL PUTIH SOLID */
+        /* LOGO BULAT DAN BESAR */
+        .heading-icon {
+            width: 50px; /* Ukuran gambar diperbesar */
+            height: 50px; /* Ukuran gambar diperbesar */
+            margin-right: 15px;
+            border-radius: 50%; /* Bulat sempurna */
+            object-fit: cover;
+        }
+
         .text-solid-white {
-            color: #ffffff; 
-            text-shadow: none; 
-        }
-        
-        /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
-        .result-success {
-            background-color: #1f2937; /* Darker background */
-            border: 1px solid #66b5e8; /* Accent blue border */
             color: #ffffff;
-            box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-            transition: all 0.3s ease;
+            text-shadow: none;
         }
-        .result-error {
-            background-color: #1f2937; /* Darker background */
-            border: 1px solid #a466e8; /* Accent purple border */
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-            transition: all 0.3s ease;
-        }
-        
-        /* Loading Spinner */
+        /* SPINNER */
         #cover-spin {
             position: fixed;
             width: 100%;
@@ -619,820 +661,141 @@ export default {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
+<br>
+<br>
+<body class="text-white min-h-screen flex flex-col items-center">
     <div id="cover-spin"><div class="loader"></div></div>
     <div id="custom-notification"></div> 
     
-    <div id="nav-buttons-container" class="w-full max-w-5xl flex justify-center gap-4 mb-8">
-    
-    </div>
     <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
     
-        <div id="slide-2" class="slide w-full max-w-4xl main-container">
-            <h1 class="text-solid-white centered-heading mb-8">
-                🔗 Clash Converter
-            </h1>
-            
-            <div class="input-group mb-6">
-                <label for="link-input" class="block font-medium mb-2 text-gray-300 text-sm">Masukkan Link:</label>
-                <textarea id="link-input" rows="5" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" placeholder="vless://.... vmess://.... trojan://... "></textarea>
+        <div class="w-full max-w-lg mx-auto main-container">
+            <div class="text-center mb-6">
+                <h2 class="text-solid-white centered-heading">
+                    <img src="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" alt="Logo Sidompul" class="heading-icon">
+                    Sidompul Cek Kuota XL/AXIS
+                </h2>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="md:col-span-2">
-                    <label for="format-select" class="block font-medium mb-2 text-gray-300 text-sm">Pilih Format Output:</label>
-                    <select id="format-select" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-[#66b5e8]">
-                        <option value="clash">Clash Meta (Full Config)</option><option value="clash-provider">Clash Provider (Proxies Only)</option>
-                    </select>
+            
+            <div class="p-4 rounded-lg mb-6 text-center text-gray-400 border info-box" style="box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+                <i class="fa fa-info-circle text-accent-blue mr-1"></i> Gunakan layanan ini secara bijak dan hindari spam.
+            </div>
+            
+            <form id="formnya" class="p-6 rounded-xl shadow-xl border">
+                <div class="mb-6">
+                    <label for="msisdn" class="block font-medium mb-2 text-gray-300 text-sm">Nomor HP XL/AXIS:</label>
+                    <input type="number" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-accent-blue" id="msisdn" placeholder="08xxx / 628xxx" maxlength="16" required>
                 </div>
-                <div class="md:col-span-1">
-                    <button id="convert-button" class="w-full h-full py-3 rounded-lg text-white font-bold text-lg btn-gradient hover:opacity-90 transition-opacity mt-0 md:mt-[30px]">
-                        <i class="fa fa-arrow-right-arrow-left mr-2"></i> Convert
+                
+                <div class="flex gap-4">
+                    
+                    <a href="/sub" class="flex-1 text-center py-2 rounded-lg text-white font-bold text-base btn-home hover:opacity-90 transition-opacity">
+                        <i class="fa fa-home mr-2"></i>Home
+                    </a>
+
+                    <button type="button" id="submitCekKuota" class="flex-1 py-2 rounded-lg text-white font-bold text-base btn-gradient hover:opacity-90 transition-opacity">
+                        <i class="fa fa-search mr-2"></i>Cek
                     </button>
                 </div>
-            </div>
-            
-            <div id="converter-result" class="input-group">
-                <label class="block font-medium mb-2 text-gray-300 text-sm">Hasil Config:</label>
-                <textarea id="result-output" rows="15" class="w-full px-4 py-3 rounded-lg input-dark border-transparent focus:ring-2 focus:ring-[#66b5e8] resize-none font-mono text-sm" readonly placeholder="Output konfigurasi akan muncul di sini (YAML/JSON)."></textarea>
-            </div>
-            <div class="mt-6 text-center flex justify-center gap-4">
-                <button onclick="copyToClipboard(document.getElementById('result-output').value, this)" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
-                    <i class="fa fa-copy mr-1"></i> Salin Config
-                </button>
-                <button onclick="downloadConfig()" class="px-6 py-2 text-white rounded-lg text-base font-semibold action-btn">
-                    <i class="fa fa-download mr-1"></i> Download
-                </button>
+            </form>
+
+            <div id="hasilnya" class="mt-6">
+                <div class="result-card hidden">
+                    <h4><i class="fas fa-check-circle mr-2"></i> Detail Kuota</h4>
+                    
+                    <div class="result-item">
+                        <span class="font-medium text-gray-300">Nomor:</span> 
+                        <span class="float-right font-bold text-accent-blue">62878xxxxxxx</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="font-medium text-gray-300">Jenis Paket:</span> 
+                        <span class="float-right font-bold text-white">Xtra Combo VIP 50GB</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="font-medium text-gray-300">Sisa Kuota Utama:</span> 
+                        <span class="float-right font-bold text-white">12.5 GB</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="font-medium text-gray-300">Masa Aktif Kuota:</span> 
+                        <span class="float-right font-bold text-white">2025-12-31</span>
+                    </div>
+                </div>
             </div>
         </div>
-
+    
     </div>
 
-    <footer class="w-full p-4 text-center mt-auto border-t border-gray-800">
+    <footer class="w-full p-4 text-center mt-auto border-t">
         <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
-            <span>Technical Support</span>
-            <a href="https://t.me/iMediafairy" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
-                <i class="fab fa-telegram-plane"></i>
-                <span>MEDIAFAIRY</span>
+            <span>Sumbawa Support</span>
+            <a href="https://t.me/sampiiiiu" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
+                <i class="fab fa-telegram"></i>
+                <span>GEO PROJECT</span>
             </a>
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script>
-        // --- Loader Function (Vanilla JS) ---
-        const coverSpin = document.getElementById('cover-spin');
-        function showLoader() { if(coverSpin) coverSpin.style.display = 'block'; }
-        function hideLoader() { if(coverSpin) coverSpin.style.display = 'none'; }
+      <script>
         
-        // --- Helper Copy & Download ---
-        function copyToClipboard(text, element) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Salin berhasil
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
+        function cekKuota() {
+            const msisdn = document.getElementById('msisdn').value;
+            if (!msisdn) {
+                console.error('Nomor tidak boleh kosong.');
+                return;
+            }
+            
+            $('#cover-spin').show();
+            $.ajax({
+                type: 'GET',
+                url: \`https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=\${msisdn}&isJSON=true\`,
+                dataType: 'JSON',
+                contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function (req) {
+                    req.setRequestHeader('Authorization', 'Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw');
+                    req.setRequestHeader('X-API-Key', '60ef29aa-a648-4668-90ae-20951ef90c55');
+                    req.setRequestHeader('X-App-Version', '4.0.0');
+                },
+                success: function (res) {
+                    $('#cover-spin').hide();
+                    $('#hasilnya').html('');
+                    if (res.status) {
+                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
+                    } else {
+                        console.error('Gagal Cek Kuota: ' + res.message);
+                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
+                    }
+                },
+                error: function () {
+                    $('#cover-spin').hide();
+                    console.error('Terjadi kesalahan koneksi.');
+                    $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>\`);
+                }
             });
-            
-            if (element) {
-                element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6)';
-                element.style.transform = 'translateY(1px)';
-
-                setTimeout(() => {
-                    element.style.boxShadow = ''; 
-                    element.style.transform = 'translateY(0)';
-                }, 300);
-            }
         }
         
-        function downloadConfig() {
-            const configData = document.getElementById('result-output').value;
-            const format = document.getElementById('format-select').value;
-            
-            if (!configData.trim() || configData.startsWith('❌ Gagal:')) {
-                console.error('Tidak ada config valid untuk diunduh.');
-                return;
-            }
-
-            let filename = 'config_mediafairy';
-            let mimeType = 'text/plain';
-
-            if (format === 'clash' || format === 'clash-provider') {
-                filename += '.yaml';
-                mimeType = 'text/yaml';
-            } else {
-                filename += '.txt';
-            }
-
-            const blob = new Blob([configData], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        
-        // --- Core Functions: Parser & Generator ---
-
-        const tryUrlDecode = function tryUrlDecode(s = '') {
-            try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
-            catch { return s; }
-        };
-        
-        const mapFields = function mapFields(d) {
-            const pass = d.password;
-            
-            return {
-                protocol: d.protocol,
-                remark: d.remark,
-                server: d.server,
-                port: d.port,
-                password: pass, 
-                uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined, 
-                alterId: d.alterId, 
-                method: d.method, 
-                network: d.network,
-                security: d.security,
-                sni: d.sni,
-                host: d.host,
-                path: d.path,
-                plugin: d.plugin,
-                serviceName: d.serviceName,
-            };
-        };
-
-        const parseVlessUri = function parseVlessUri(uri) {
-            const u = new URL(uri);
-            const network = u.searchParams.get('type') || 'tcp';
-            
-            const path = tryUrlDecode(u.searchParams.get('path') || '/'); 
-            const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
-            const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
-            
-            return {
-                protocol: 'vless',
-                remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
-                server: u.hostname,
-                port: parseInt(u.port, 10),
-                password: decodeURIComponent(u.username),
-                network: network,
-                security: u.searchParams.get('security') || 'none',
-                sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
-                host: host,
-                path: path,
-                serviceName: serviceName || (network === 'grpc' ? path : ''),
-            };
-        };
-
-        const parseVmessUri = function parseVmessUri(uri){
-            // Mengganti atob() agar lebih aman dari karakter non-ASCII (meskipun atob di browser sudah cukup)
-            const base64Part = uri.substring('vmess://'.length).trim();
-            // Fallback untuk Base64 yang tidak valid/tidak standar URL
-            let decodedStr;
-            try {
-                decodedStr = atob(base64Part);
-            } catch (e) {
-                // Mencoba Base64 URL Safe jika ada padding yang hilang
-                const urlSafeBase64 = base64Part.replace(/-/g, '+').replace(/_/g, '/');
-                decodedStr = atob(urlSafeBase64);
-            }
-
-            const decoded = JSON.parse(decodedStr);
-            
-            const network = decoded.net || 'tcp';
-            const path = decoded.path || '/';
-
-            return {
-                protocol: 'vmess',
-                remark: decoded.ps || 'VMess',
-                server: decoded.add,
-                port: parseInt(decoded.port, 10),
-                password: decoded.id,
-                alterId: parseInt(decoded.aid, 10) || 0,
-                network: network,
-                security: decoded.tls === 'tls' ? 'tls' : 'none',
-                sni: decoded.sni || decoded.host || decoded.add,
-                host: decoded.host || decoded.sni || decoded.add,
-                path: path,
-                serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
-            };
-        };
-
-        const parseTrojanUri = function parseTrojanUri(uri) {
-            const u = new URL(uri.replace(/#.*$/, '')); // Hapus hash sebelum parsing URL
-            
-            // Trojan password berada di u.username, bagian setelah @ adalah server:port
-            const password = u.username; 
-            
-            // Ambil parameter dari query
-            const network = u.searchParams.get('type') || 'tcp';
-            const path = tryUrlDecode(u.searchParams.get('path') || '/');
-            const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
-            const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
-
-            // Dapatkan remark (nama) dari fragment identifier (setelah #)
-            const hashMatch = uri.match(/#(.+)$/);
-            const remark = hashMatch ? decodeURIComponent(hashMatch[1]) : 'Trojan';
-
-            return {
-                protocol: 'trojan',
-                remark: remark,
-                server: u.hostname,
-                port: parseInt(u.port, 10),
-                password: password,
-                network: network,
-                security: u.searchParams.get('security') || 'tls',
-                sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
-                host: host,
-                path: path,
-                serviceName: serviceName || (network === 'grpc' ? path : ''),
-            };
-        };
-
-        const parseShadowsocksUri = function parseShadowsocksUri(uri) {
-            const parts = uri.substring('ss://'.length).split('#');
-            const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
-            const corePart = parts[0];
-            
-            // Pola untuk SS dengan plugin seperti v2ray-plugin
-            const pluginMatch = corePart.match(/@(.+?)\/\?plugin=(.*)/);
-            let userServerPort, pluginData = {};
-            let pluginExists = false;
-
-            if (pluginMatch) {
-                const userInfoBase64 = corePart.substring(0, pluginMatch.index);
-                userServerPort = atob(userInfoBase64);
-                
-                const pluginRaw = tryUrlDecode(pluginMatch[2]);
-                
-                // Asumsikan plugin adalah v2ray-plugin atau simple-obfs
-                pluginData.plugin = 'v2ray-plugin'; // Default ke v2ray-plugin
-                
-                const params = pluginRaw.split(';').filter(p => p.trim() !== '');
-                params.forEach(param => {
-                    const [key, value] = param.split('=');
-                    if (key === 'tls') pluginData.security = 'tls';
-                    else if (key === 'host') pluginData.host = value;
-                    else if (key === 'path') pluginData.path = value;
-                    else if (key === 'obfs') {
-                        // Jika menggunakan simple-obfs
-                        pluginData.plugin = 'simple-obfs';
-                        pluginData.obfs = value; // http atau tls
-                    }
-                });
-
-                pluginExists = true;
-                pluginData.network = 'ws'; // Default network untuk plugin mode ws
-                if (pluginData.obfs) pluginData.network = 'tcp'; // Jika simple-obfs
-            } else {
-                userServerPort = atob(corePart);
-            }
-
-            const [userInfo, serverPort] = userServerPort.split('@');
-            const [method, password] = userInfo.split(':');
-            const [server, port] = serverPort.split(':');
-
-            return {
-                protocol: 'ss',
-                remark: remark,
-                server: server,
-                port: parseInt(port, 10),
-                password: password,
-                method: method,
-                network: pluginData.network || 'tcp', 
-                plugin: pluginData.plugin,
-                security: pluginData.security || 'none',
-                sni: pluginData.host || server,
-                host: pluginData.host || server,
-                path: pluginData.path || '/',
-                serviceName: '',
-                obfs: pluginData.obfs,
-            };
-        };
-
-        const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
-            let proxyConfigs = [];
-            let proxyNames = []; 
-            const existingNames = new Set();
-
-            for (const fields of fieldsList) {
-                let transportOpts = '';
-                let safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim(); 
-                
-                // Tambahkan penomoran jika nama duplikat
-                let count = 1;
-                let originalRemark = safeRemark;
-                while(existingNames.has(safeRemark)) {
-                    safeRemark = `${originalRemark}_${count++}`;
-                }
-                existingNames.add(safeRemark);
-                
-                // Opsi Transportasi
-                if (fields.network === 'ws') {
-                    transportOpts = `  ws-opts:
-    path: ${fields.path}
-    headers:
-      Host: ${fields.host}`;
-                } else if (fields.network === 'grpc') {
-                    transportOpts = `  grpc-opts:
-    grpc-service-name: ${fields.serviceName || ''}`;
-                }
-                
-                let proxy = '';
-
-                // Generate Proxy Config
-                if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
-                    proxy =
-`- name: ${safeRemark}
-  server: ${fields.server}
-  port: ${fields.port}
-  type: ${fields.protocol}
-  ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n  alterId: ${fields.alterId}`}
-  cipher: auto
-  tls: ${fields.security === 'tls'}
-  udp: true
-  skip-cert-verify: true
-  network: ${fields.network}
-  servername: ${fields.sni}
-${transportOpts}`;
-                } else if (fields.protocol === 'trojan') {
-                    proxy = 
-`- name: ${safeRemark}
-  server: ${fields.server}
-  port: ${fields.port}
-  type: trojan
-  password: ${fields.password}
-  network: ${fields.network}
-  tls: ${fields.security === 'tls'}
-  skip-cert-verify: true
-  servername: ${fields.sni}
-${transportOpts}`;
-                } else if (fields.protocol === 'ss') {
-                    // Penanganan SS dengan atau tanpa plugin
-                    let ssPluginOpts = '';
-                    if (fields.plugin === 'v2ray-plugin') {
-                        ssPluginOpts = `
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    host: ${fields.host}
-    path: ${fields.path}
-    tls: ${fields.security === 'tls'}
-    skip-cert-verify: true
-    servername: ${fields.sni}`;
-                    } else if (fields.plugin === 'simple-obfs') {
-                         ssPluginOpts = `
-  plugin: simple-obfs
-  plugin-opts:
-    obfs: ${fields.obfs}
-    obfs-host: ${fields.host}`;
-                    } else if (fields.network === 'ws' && !fields.plugin) {
-                        // SS murni WS (tidak umum)
-                         ssPluginOpts = `
-  plugin: v2ray-plugin
-  plugin-opts:
-    mode: websocket
-    tls: ${fields.security === 'tls'}
-    skip-cert-verify: true
-    servername: ${fields.sni}
-    host: ${fields.host}
-    path: ${fields.path}`;
-                    }
-                    
-                    proxy = 
-`- name: ${safeRemark}
-  server: ${fields.server}
-  port: ${fields.port}
-  type: ss
-  cipher: ${fields.method}
-  password: ${fields.password}
-  udp: true
-${ssPluginOpts}`;
-                } else {
-                    proxy = `# Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
-                }
-                
-                proxyConfigs.push(proxy);
-                proxyNames.push(`  - ${safeRemark}`); 
-            }
-
-            const proxyNamesJoined = proxyNames.join('\n');
-            
-            // TEMPLATE clash.js
-            const template = `port: 7890
-socks-port: 7891
-redir-port: 7892
-mixed-port: 7893
-tproxy-port: 7895
-ipv6: false
-mode: rule
-log-level: silent
-allow-lan: true
-external-controller: 0.0.0.0:9090
-secret: ""
-bind-address: "*"
-unified-delay: true
-profile:
-  store-selected: true
-  store-fake-ip: true
-dns:
-  enable: true
-  ipv6: false
-  use-host: true
-  enhanced-mode: fake-ip
-  listen: 0.0.0.0:7874
-  proxy-server-nameserver:
-    - 112.215.203.246
-    - 112.215.203.247
-    - 112.215.203.248
-    - 112.215.203.254
-    - 112.215.198.248
-    - 112.215.198.254
-  nameserver:
-    - 1.1.1.1
-    - 8.8.8.8
-    - 1.0.0.1
-  fallback:
-    - 9.9.9.9
-    - 149.112.112.112
-    - 208.67.222.222
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter:
-    - "*.lan"
-    - "*.localdomain"
-    - "*.example"
-    - "*.invalid"
-    - "*.localhost"
-    - "*.test"
-    - "*.local"
-    - "*.home.arpa"
-    - time.*.com
-    - time.*.gov
-    - time.*.edu.cn
-    - time.*.apple.com
-    - time1.*.com
-    - time2.*.com
-    - time3.*.com
-    - time4.*.com
-    - time5.*.com
-    - time6.*.com
-    - time7.*.com
-    - ntp.*.com
-    - ntp1.*.com
-    - ntp2.*.com
-    - ntp3.*.com
-    - ntp4.*.com
-    - ntp5.*.com
-    - ntp6.*.com
-    - ntp7.*.com
-    - "*.time.edu.cn"
-    - "*.ntp.org.cn"
-    - +.pool.ntp.org
-    - time1.cloud.tencent.com
-    - music.163.com
-    - "*.music.163.com"
-    - "*.126.net"
-    - musicapi.taihe.com
-    - music.taihe.com
-    - songsearch.kugou.com
-    - trackercdn.kugou.com
-    - "*.kuwo.cn"
-    - api-jooxtt.sanook.com
-    - api.joox.com
-    - joox.com
-    - y.qq.com
-    - "*.y.qq.com"
-    - streamoc.music.tc.qq.com
-    - mobileoc.music.tc.qq.com
-    - isure.stream.qqmusic.qq.com
-    - dl.stream.qqmusic.qq.com
-    - aqqmusic.tc.qq.com
-    - amobile.music.tc.qq.com
-    - "*.xiami.com"
-    - "*.music.migu.cn"
-    - music.migu.cn
-    - "*.msftconnecttest.com"
-    - "*.msftncsi.com"
-    - msftconnecttest.com
-    - msftncsi.com
-    - localhost.ptlogin2.qq.com
-    - localhost.sec.qq.com
-    - +.srv.nintendo.net
-    - +.stun.playstation.net
-    - xbox.*.microsoft.com
-    - xnotify.xboxlive.com
-    - +.battlenet.com.cn
-    - +.wotgame.cn
-    - +.wggames.cn
-    - +.wowsgame.cn
-    - +.wargaming.net
-    - proxy.golang.org
-    - stun.*.*
-    - stun.*.*.*
-    - +.stun.*.*
-    - +.stun.*.*.*
-    - +.stun.*.*.*.*
-    - heartbeat.belkin.com
-    - "*.linksys.com"
-    - "*.linksyssmartwifi.com"
-    - "*.router.asus.com"
-    - mesu.apple.com
-    - swscan.apple.com
-    - swquery.apple.com
-    - swdownload.apple.com
-    - swcdn.apple.com
-    - swdist.apple.com
-    - lens.l.google.com
-    - stun.l.google.com
-    - +.nflxvideo.net
-    - "*.square-enix.com"
-    - "*.finalfantasyxiv.com"
-    - "*.ffxiv.com"
-    - "*.mcdn.bilivideo.cn"
-    - +.media.dssott.com
-proxies:
-${proxyConfigs.join('\n')}
-
-proxy-groups:
-- name: INTERNET
-  type: select
-  disable-udp: false
-  proxies:
-    - DIRECT
-    - REJECT
-    - BEST-PING
-  url: http://www.gstatic.com/generate_204
-  interval: 120
-
-- name: BEST-PING
-  type: url-test
-  url: http://www.gstatic.com/generate_204
-  interval: 120
-  proxies:
-    - DIRECT
-    - REJECT
-${proxyNamesJoined}
-
-rule-providers:
-  rule_hijacking:
-    type: file
-    behavior: classical
-    path: ./rule_provider/rule_hijacking.yaml
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml
-  rule_privacy:
-    type: file
-    behavior: classical
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml
-    path: ./rule_provider/rule_privacy.yaml
-  rule_basicads:
-    type: file
-    behavior: domain
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml
-    path: ./rule_provider/rule_basicads.yaml
-  rule_personalads:
-    type: file
-    behavior: classical
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml
-    path: ./rule_provider/rule_personalads.yaml
-
-rules:
-- IP-CIDR,198.18.0.1/16,REJECT,no-resolve
-- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_basicads,REJECT      # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_hijacking,REJECT     # Langsung REJECT untuk memblokir
-- RULE-SET,rule_privacy,REJECT       # Langsung REJECT untuk memblokir
-- MATCH,INTERNET`;
-
-            return template;
-        };
-
-        const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
-            let proxyConfigs = [];
-            const existingNames = new Set();
-            
-            for (const fields of fieldsList) {
-                let transportOpts = '';
-                let safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim(); 
-                
-                // Tambahkan penomoran jika nama duplikat
-                let count = 1;
-                let originalRemark = safeRemark;
-                while(existingNames.has(safeRemark)) {
-                    safeRemark = `${originalRemark}_${count++}`;
-                }
-                existingNames.add(safeRemark);
-
-                // Opsi Transportasi
-                if (fields.network === 'ws') {
-                    transportOpts = `    ws-opts:
-      path: ${fields.path}
-      headers:
-        Host: ${fields.host}`;
-                } else if (fields.network === 'grpc') {
-                    transportOpts = `    grpc-opts:
-      grpc-service-name: ${fields.serviceName || ''}`;
-                }
-
-                let proxy = '';
-                
-                // Generate Proxy Config
-                if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
-                    proxy =
-`  - name: ${safeRemark}
-    server: ${fields.server}
-    port: ${fields.port}
-    type: ${fields.protocol}
-    ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n    alterId: ${fields.alterId}`}
-    cipher: auto
-    tls: ${fields.security === 'tls'}
-    udp: true
-    skip-cert-verify: true
-    network: ${fields.network}
-    servername: ${fields.sni}
-${transportOpts}`;
-                } else if (fields.protocol === 'trojan') {
-                    proxy = 
-`  - name: ${safeRemark}
-    server: ${fields.server}
-    port: ${fields.port}
-    type: trojan
-    password: ${fields.password}
-    network: ${fields.network}
-    tls: ${fields.security === 'tls'}
-    skip-cert-verify: true
-    servername: ${fields.sni}
-${transportOpts}`;
-                } else if (fields.protocol === 'ss') {
-                    // Penanganan SS dengan atau tanpa plugin
-                    let ssPluginOpts = '';
-                    if (fields.plugin === 'v2ray-plugin') {
-                        ssPluginOpts = `
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: ${fields.host}
-      path: ${fields.path}
-      tls: ${fields.security === 'tls'}
-      skip-cert-verify: true
-      servername: ${fields.sni}`;
-                    } else if (fields.plugin === 'simple-obfs') {
-                         ssPluginOpts = `
-    plugin: simple-obfs
-    plugin-opts:
-      obfs: ${fields.obfs}
-      obfs-host: ${fields.host}`;
-                    } else if (fields.network === 'ws' && !fields.plugin) {
-                        // SS murni WS (tidak umum)
-                         ssPluginOpts = `
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      tls: ${fields.security === 'tls'}
-      skip-cert-verify: true
-      servername: ${fields.sni}
-      host: ${fields.host}
-      path: ${fields.path}`;
-                    }
-                    
-                    proxy = 
-`  - name: ${safeRemark}
-    server: ${fields.server}
-    port: ${fields.port}
-    type: ss
-    cipher: ${fields.method}
-    password: ${fields.password}
-    udp: true
-${ssPluginOpts}`;
-                } else {
-                    proxy = `  # Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
-                }
-                
-                proxyConfigs.push(proxy);
-            }
-            
-            const proxyListJoined = proxyConfigs.join('\n');
-            
-            return `proxies:\n${proxyListJoined}`;
-        };
-
-        const convertLink = function convertLink(linksInput, format) {
-            const linkArray = linksInput.split('\n')
-                .map(line => line.trim())
-                .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
-            
-            if (linkArray.length === 0) {
-                return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
-            }
-
-            const successfulConversions = [];
-            
-            for (const link of linkArray) {
-                try {
-                    let d;
-                    const decodedLink = tryUrlDecode(link);
-
-                    if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
-                    else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
-                    else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
-                    else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
-                    else continue;
-                    
-                    successfulConversions.push(mapFields(d));
-                    
-                } catch (e) {
-                    console.error(`Error parsing link: ${link}`, e);
-                }
-            }
-            
-            if (successfulConversions.length === 0) {
-                return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
-            }
-
-            if (format === 'clash') return generateClashMetaProxies(successfulConversions);
-            if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
-            
-            return 'Format konversi tidak valid.';
-        };
-
-
-        // --- Event Listener Utama ---
-        document.getElementById('convert-button').addEventListener('click', function() {
-            showLoader(); // Tampilkan loading
-            
-            const linkInput = document.getElementById('link-input').value;
-            const format = document.getElementById('format-select').value;
-            const resultOutput = document.getElementById('result-output');
-
-            if (!linkInput.trim()) {
-                console.error('Link tidak boleh kosong.');
-                resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
-                hideLoader(); // Sembunyikan loading
-                return;
-            }
-
-            // Delay kecil agar loading sempat terlihat (opsional)
-            setTimeout(() => {
-                const converted = convertLink(linkInput, format);
-                
-                if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
-                    resultOutput.value = converted;
-                    // Ubah warna hasil ke error jika gagal (opsional)
-                    // resultOutput.closest('.input-group').classList.remove('result-success');
-                    // resultOutput.closest('.input-group').classList.add('result-error');
-                } else {
-                    resultOutput.value = converted;
-                    // Ubah warna hasil ke success (opsional)
-                    // resultOutput.closest('.input-group').classList.remove('result-error');
-                    // resultOutput.closest('.input-group').classList.add('result-success');
-                }
-                hideLoader(); // Sembunyikan loading
-            }, 50); 
+        // Pemasangan event listener setelah konten dimuat
+        $(document).ready(function() {
+            $('#submitCekKuota').off('click').on('click', cekKuota); 
+            $('#msisdn').off('keypress').on('keypress', function (e) {
+                if (e.which === 13) cekKuota();
+            });
         });
-    
-    </script>
-</body>
-</html>
-`;
+        
+      </script>
+    </body>
+    </html>
 
-/**
- * Fungsi untuk mengompres string HTML (menghapus spasi dan newline berlebihan)
- * agar file Worker lebih kecil. Ini opsional, tapi disarankan jika Worker terlalu besar.
- */
-function minifyString(str) {
-    return str
-        .replace(/\/\*[\s\S]*?\*\/|(?<=\s)\/\/.*/g, '') // Hapus komentar JS/CSS
-        .replace(/\s+/g, ' ') // Ganti multiple whitespace (spasi, newline, tab) dengan satu spasi
-        .replace(/>\s*</g, '><') // Hapus spasi antara tag HTML
-        .trim();
-}
-
-/**
- * Handler utama untuk permintaan fetch
- */
-async function handleRequest(request) {
-    // Pilihan 1: Menggunakan html (lebih mudah dibaca)
-    // const responseHtml = html;
-
-    // Pilihan 2: Menggunakan html yang sudah di-minify (lebih kecil)
-    const responseHtml = minifyString(html); 
-
-    return new Response(responseHtml, {
-        headers: { 'content-type': 'text/html;charset=UTF-8' },
-    });
-}
+        `;
+        return new Response(html, {
+          status: 200,
+          headers: { 'Content-Type': 'text/html;charset=utf-8' },
+        });
+      }
 
       const targetReversePrx = env.REVERSE_PRX_TARGET || "example.com";
       return await reverseWeb(request, targetReversePrx);
@@ -2102,6 +1465,8 @@ let baseHTML = `
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
     /* 1. SCROLLBAR HIDE */
     /* For Webkit-based browsers (Chrome, Safari and Opera) */
@@ -2133,38 +1498,50 @@ let baseHTML = `
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
+    /* MODIFIKASI: GLASSMORPHISM 3D BLUR BARU */
+    .glass-3d-blur {
+        /* Latar Belakang Lebih Transparan (Glassmorphism) */
+        background: rgba(30, 41, 59, 0.4); /* Lebih transparan */
+        backdrop-filter: blur(15px);       /* Blur lebih kuat */
+        -webkit-backdrop-filter: blur(15px);
+
+        /* Efek 3D */
+        border-radius: 1.5rem;
+        box-shadow: 
+            0 15px 30px rgba(0, 0, 0, 0.6),    /* Bayangan kuat di luar */
+            0 0 20px rgba(102, 181, 232, 0.4) inset, /* Glow biru di dalam */
+            0 0 5px rgba(255, 255, 255, 0.2);       /* Kilauan di tepi */
+        border: 1px solid rgba(100, 116, 139, 0.6); /* Border lebih tegas */
+        padding: 2rem;
+        margin-bottom: 2rem;
+        
+        /* Transform 3D */
+        transform: perspective(1000px) translateZ(30px); /* Meningkatkan kedalaman */
+        transition: all 0.3s ease-out;
+    }
+
+    .glass-3d-blur:hover {
+        transform: perspective(1000px) translateZ(40px); /* Efek 'angkat' saat hover */
+    }
+    
     /* 4. FLAG SPIN ANIMATION */
     .flag-spin {
-        animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
-        transform-origin: center center; /* Pastikan rotasi dari tengah */
+        animation: spin-around 4s linear infinite alternate;
+        transform-origin: center center;
     }
     @keyframes spin-around {
         0% {
-            transform: rotateY(0deg); /* Posisi awal, tidak berputar */
+            transform: rotateY(0deg);
         }
         50% {
-            transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
+            transform: rotateY(180deg);
         }
         100% {
-            transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
+            transform: rotateY(0deg);
         }
     }
 
-    /* 5. MAIN CONTAINER & BOX STYLES */
-    .main-container {
-        background: rgba(30, 41, 59, 0.8); 
-        backdrop-filter: blur(8px);
-        border-radius: 1.5rem;
-        box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.7), 
-            0 0 15px rgba(102, 181, 232, 0.2) inset, 
-            0 0 5px rgba(0, 0, 0, 0.5); 
-        border: 1px solid rgba(100, 116, 139, 0.4); 
-        padding: 2rem;
-        margin-bottom: 2rem;
-        transform: translateZ(20px); 
-    }
-
+    /* 5. MAIN CONTAINER & BOX STYLES (Dihapus karena diganti .glass-3d-blur) */
     /* 6. BUTTON STYLES */
     .btn-gradient {
         background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
@@ -2176,62 +1553,62 @@ let baseHTML = `
         transform: translateY(1px);
     }
     .action-btn {
-        background-color: #1e293b; 
+        background-color: #1e293b;
         color: #94a3b8;
         border: 1px solid #475569;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         transition: all 0.2s;
     }
     .action-btn:hover {
-        background-color: #334155; 
+        background-color: #334155;
         color: white;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
         transform: translateY(1px);
     }
-
+    
     /* 7. INPUT FIELD STYLES */
     .input-group {
-        background-color: rgba(30, 41, 59, 0.6); 
-        border-radius: 0.75rem; 
-        padding: 1rem; 
+        background-color: rgba(30, 41, 59, 0.6);
+        border-radius: 0.75rem;
+        padding: 1rem;
         border: 1px solid rgba(100, 116, 139, 0.3);
-        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
     }
     .input-dark, .input-group textarea, .input-group select {
-        background-color: #1f2937; 
+        background-color: #1f2937;
         color: #ffffff;
-        border: 1px solid #475569; 
+        border: 1px solid #475569;
         border-radius: 0.5rem;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
         transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
         border-color: var(--tw-color-accent-blue);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue);
     }
 
     /* 8. TABLE STYLES (Dark Theme) */
     .table-dark th {
-        background-color: #1e293b; 
-        color: #94a3b8; 
+        background-color: #1e293b;
+        color: #94a3b8;
         font-weight: 600;
     }
     .table-dark td {
-        border-color: #334155; 
+        border-color: #334155;
     }
     .table-dark tr:nth-child(even) {
-        background-color: #111827; 
+        background-color: #111827;
     }
     .table-dark tr:hover {
-        background-color: #334155 !important; 
+        background-color: #334155 !important;
     }
 
     /* 9. UTILITY CLASSES */
     .centered-heading {
         text-align: center;
         width: 100%;
-        font-size: 1.5rem; 
-        font-weight: 800; 
+        font-size: 1.5rem;
+        font-weight: 800;
         line-height: 1.2;
         padding-bottom: 0.5rem;
     }
@@ -2239,30 +1616,30 @@ let baseHTML = `
         display: flex;
         align-items: center;
         justify-content: center;
-        text-align: center; 
+        text-align: center;
         min-height: 50px;
         padding: 0.75rem 1.5rem;
         line-height: 1.2;
         border-radius: 0.75rem;
     }
     .text-solid-white {
-        color: #ffffff; 
-        text-shadow: none; 
+        color: #ffffff;
+        text-shadow: none;
     }
 
     /* 10. RESULT BOXES */
     .result-success {
-        background-color: #1f2937; /* Darker background */
-        border: 1px solid #66b5e8; /* Accent blue border */
+        background-color: #1f2937;
+        border: 1px solid #66b5e8;
         color: #ffffff;
-        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4);
         transition: all 0.3s ease;
     }
     .result-error {
-        background-color: #1f2937; /* Darker background */
-        border: 1px solid #a466e8; /* Accent purple border */
+        background-color: #1f2937;
+        border: 1px solid #a466e8;
         color: #ffffff;
-        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4);
         transition: all 0.3s ease;
     }
     
@@ -2307,7 +1684,29 @@ let baseHTML = `
     .text-yellow-400 { color: #facc15; } /* WARNA KUNING BARU */
     .text-xs { font-size: 0.75rem; }
     .font-normal { font-weight: 400; }
-</style>
+    
+    /* Gaya Teks Judul 3D Terang */
+    #runningTitle {
+        /* Gaya Teks Gradien dan Animasi sudah ada (JANGAN DIUBAH): */
+        /* text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse */
+        
+        /* === EFEK TEKS 3D LEBIH TERANG === */
+        text-shadow: 
+            1px 1px 1px rgba(255, 255, 255, 0.5), /* Lapisan paling atas, memberi kilau */
+            2px 2px 2px rgba(255, 255, 255, 0.3), /* Lapisan tengah, meningkatkan 'lift' */
+            4px 4px 6px rgba(0, 0, 0, 0.9),       /* Bayangan gelap untuk kedalaman */
+            0 0 15px #ffffff,                     /* Glow putih lembut */
+            0 0 25px #a466e8;                     /* Glow ungu/biru */
+    }
+    
+    /* Custom style untuk gambar ikon di footer */
+    .footer-icon-img {
+        width: 1.5rem; /* size-6 equivalent (24px) */
+        height: 1.5rem; /* size-6 equivalent (24px) */
+        border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
+        object-fit: cover;
+    }
+    </style>
     <script>
         tailwind.config = {
             darkMode: 'selector',
@@ -2322,6 +1721,7 @@ let baseHTML = `
                         'text-light': '#f0f0f5',
                         'accent-cyan': '#00e0b7',
                         'accent-blue': '#4a90e2',
+                        'accent-purple': '#a466e8', // Tambahkan jika belum ada
                     },
                 },
             },
@@ -2330,7 +1730,7 @@ let baseHTML = `
 </head>
 <body
     class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
-  >
+>
     <script>
       (function() {
         const theme = localStorage.getItem('theme');
@@ -2362,97 +1762,97 @@ let baseHTML = `
         </div>
     </div>
 
-<div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl **py-3** text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
+<div id="container-title" class="title-3d-glass sticky top-0 z-10 w-full max-w-7xl rounded-xl py-3 text-center transition-all duration-300 ease-in-out">
     <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
-        PLACEHOLDER_JUDUL
+        FRE VPN CLOUDFLARE
     </h1>
 </div>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div class="bg-gray-800/30 dark:bg-gray-900/40 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 p-4 sm:p-6">
-        <div class="flex flex-col items-center relative z-10">
-  <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
-    <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
+        <div class="glass-3d-blur p-4 sm:p-6">
+            <div class="flex flex-col items-center relative z-10">
+                <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
+                    <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
+                        <p id="container-info-ip" class="flex items-center gap-1 text-blue-500 dark:text-blue-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M5.5 13a4.5 4.5 0 011.692-3.377l1.72-1.725A4.5 4.5 0 0113 5.5V6a.5.5 0 001 0V5.5A4.5 4.5 0 009.377 2.308L7.653 4.032A4.5 4.5 0 005 8.5v.5a.5.5 0 001 0V8.5A3.5 3.5 0 017.377 5.79l.995.996a.5.5 0 00.707-.707l-.996-.995A4.5 4.5 0 008.5 2.5a.5.5 0 000-1z" />
+                            </svg>
+                            IP: <span class="font-bold text-slate-800 dark:text-white">127.0.0.1</span>
+                        </p>
+                        <p id="container-info-country" class="flex items-center gap-1 text-green-500 dark:text-green-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 3.126A8.024 8.024 0 0110 3a8 8 0 01.445.126l.01.004.013.006.015.008A5.96 5.96 0 0014 9a6 6 0 01-5.995 5.986L9 15a6 6 0 01-5.986-5.995l-.004-.01-.006-.013A6.024 6.024 0 013 10a8.024 8.024 0 01.126-.445l.004-.01.006-.013.008-.015A5.96 5.96 0 009 6a6 6 0 015.995 5.986L15 12a6 6 0 01-5.986 5.995l-.01-.004-.013-.006-.015-.008A6.024 6.024 0 019 18z" clip-rule="evenodd" />
+                            </svg>
+                            Country: <span class="font-bold text-slate-800 dark:text-white">Singapore</span>
+                        </p>
+                        <p id="container-info-isp" class="flex items-center gap-1 text-indigo-500 dark:text-indigo-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 3a7 7 0 00-7 7h1.5a5.5 5.5 0 1111 0h1.5a7 7 0 00-7-7z" />
+                            </svg>
+                            ISP: <span class="font-bold text-slate-800 dark:text-white">Localhost</span>
+                        </p>
 
-      <p id="container-info-ip" class="flex items-center gap-1 text-blue-500 dark:text-blue-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M5.5 13a4.5 4.5 0 011.692-3.377l1.72-1.725A4.5 4.5 0 0113 5.5V6a.5.5 0 001 0V5.5A4.5 4.5 0 009.377 2.308L7.653 4.032A4.5 4.5 0 005 8.5v.5a.5.5 0 001 0V8.5A3.5 3.5 0 017.377 5.79l.995.996a.5.5 0 00.707-.707l-.996-.995A4.5 4.5 0 008.5 2.5a.5.5 0 000-1z" />
-        </svg>
-        IP: <span class="font-bold text-slate-800 dark:text-white">127.0.0.1</span>
-      </p>
-      <p id="container-info-country" class="flex items-center gap-1 text-green-500 dark:text-green-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 3.126A8.024 8.024 0 0110 3a8 8 0 01.445.126l.01.004.013.006.015.008A5.96 5.96 0 0014 9a6 6 0 01-5.995 5.986L9 15a6 6 0 01-5.986-5.995l-.004-.01-.006-.013A6.024 6.024 0 013 10a8.024 8.024 0 01.126-.445l.004-.01.006-.013.008-.015A5.96 5.96 0 009 6a6 6 0 015.995 5.986L15 12a6 6 0 01-5.986 5.995l-.01-.004-.013-.006-.015-.008A6.024 6.024 0 019 18z" clip-rule="evenodd" />
-        </svg>
-        Country: <span class="font-bold text-slate-800 dark:text-white">Singapore</span>
-      </p>
-      <p id="container-info-isp" class="flex items-center gap-1 text-indigo-500 dark:text-indigo-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 3a7 7 0 00-7 7h1.5a5.5 5.5 0 1111 0h1.5a7 7 0 00-7-7z" />
-        </svg>
-        ISP: <span class="font-bold text-slate-800 dark:text-white">Localhost</span>
-      </p>
+                        <p class="flex items-center gap-1 text-purple-500 dark:text-purple-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1H3zm13 2H4v10h12V5z" />
+                            </svg>
+                            <span class="text-gray-600 dark:text-gray-300">Total Proxy: <strong id="total-proxy-value" class="font-semibold">0</strong></span>
+                        </p>
+                        <p class="flex items-center gap-1 text-orange-500 dark:text-orange-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 6a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6zm2 2a1 1 0 00-1 1v4a1 1 0 001 1h10a1 1 0 001-1V9a1 1 0 00-1-1H5zm1 2h2v2H6v-2zm4 0h2v2h-2v-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-600 dark:text-gray-300">Page: <strong id="page-info-value" class="font-semibold">0/0</strong></span>
+                        </p>
+                        <p class="flex items-center gap-1 text-teal-500 dark:text-teal-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            </svg>
+                            Time: <strong id="time-info-value" class="font-semibold text-slate-800 dark:text-white">00:00:00</strong>
+                        </p>
+                    </div>
+                    <div class="mt-4 flex flex-col gap-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                            <button onclick="searchProxy()" class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">Search</button>
+                        </div>
+                    </div>
+                </div>
 
-      <p class="flex items-center gap-1 text-purple-500 dark:text-purple-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1H3zm13 2H4v10h12V5z" />
-        </svg>
-        <span class="text-gray-600 dark:text-gray-300">Total Proxy: <strong id="total-proxy-value" class="font-semibold">0</strong></span>
-      </p>
-      <p class="flex items-center gap-1 text-orange-500 dark:text-orange-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M3 6a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6zm2 2a1 1 0 00-1 1v4a1 1 0 001 1h10a1 1 0 001-1V9a1 1 0 00-1-1H5zm1 2h2v2H6v-2zm4 0h2v2h-2v-2z" clip-rule="evenodd" />
-        </svg>
-        <span class="text-gray-600 dark:text-gray-300">Page: <strong id="page-info-value" class="font-semibold">0/0</strong></span>
-      </p>
-      <p class="flex items-center gap-1 text-teal-500 dark:text-teal-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-        </svg>
-        Time: <strong id="time-info-value" class="font-semibold text-slate-800 dark:text-white">00:00:00</strong>
-      </p>
-    </div>
-    <div class="mt-4 flex gap-2">
-        <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
-        <button onclick="searchProxy()" class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">Search</button>
-    </div>
-  </div>
+                <div class="w-full max-w-5xl mb-6 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+                    PLACEHOLDER_PROTOCOL_DROPDOWN
+                    PLACEHOLDER_COUNTRY_DROPDOWN
+                    PLACEHOLDER_HOST_DROPDOWN
+                    PLACEHOLDER_PORT_DROPDOWN
+                </div>
+                <br>
+                <div class="flex flex-col md:flex-row gap-4 w-full max-w-7xl justify-center">
+                    PLACEHOLDER_PROXY_GROUP
+                </div>
 
-  <div class="w-full max-w-5xl **mb-6** p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
-PLACEHOLDER_PROTOCOL_DROPDOWN
-PLACEHOLDER_COUNTRY_DROPDOWN
-PLACEHOLDER_HOST_DROPDOWN
-PLACEHOLDER_PORT_DROPDOWN
-</div>
-<br>
-<div class="flex flex-col md:flex-row gap-4 w-full max-w-7xl justify-center">
-PLACEHOLDER_PROXY_GROUP
-</div>
-
-        <!-- Pagination -->
-        <nav id="container-pagination" class="w-full max-w-7xl mt-8 sticky bottom-2 z-20 transition-transform -translate-y-6 flex flex-col items-center">
-            <ul class="flex justify-center space-x-2">
-                PLACEHOLDER_PAGE_BUTTON
-            </ul>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">PLACEHOLDER_PAGINATION_INFO</p>
-        </nav>
+                <nav id="container-pagination" class="w-full max-w-7xl mt-8 sticky bottom-2 z-20 transition-transform -translate-y-6 flex flex-col items-center">
+                    <ul class="flex justify-center space-x-2">
+                        PLACEHOLDER_PAGE_BUTTON
+                    </ul>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">PLACEHOLDER_PAGINATION_INFO</p>
+                </nav>
+            </div>
         </div>
-      </div>
     </div>
 
     <div id="container-window" class="hidden">
-  <div class="fixed z-20 top-0 inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm flex justify-center items-center animate-fade-in">
-    <p id="container-window-info" class="text-center w-full h-full top-1/4 absolute text-white animate-pulse"></p>
-  </div>
-
-  <div id="output-window" class="fixed z-30 inset-0 flex justify-center items-center p-2 hidden">
-    <div class="w-full max-w-xs flex flex-col gap-2 p-4 text-center rounded-xl bg-gray-800 border border-gray-700 shadow-lg animate-zoom-in">
-
-      <div class="flex flex-col items-center gap-1 mb-1">
-        <h4 class="text-xl font-bold text-white mt-1">Pilih Format</h4>
+        <div class="fixed z-20 top-0 inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm flex justify-center items-center animate-fade-in">
+            <p id="container-window-info" class="text-center w-full h-full top-1/4 absolute text-white animate-pulse"></p>
         </div>
 
-      <div class="grid grid-cols-2 gap-1">
+        <div id="output-window" class="fixed z-30 inset-0 flex justify-center items-center p-2 hidden">
+            <div class="w-full max-w-xs flex flex-col gap-2 p-4 text-center rounded-xl bg-gray-800 border border-gray-700 shadow-lg animate-zoom-in">
+
+                <div class="flex flex-col items-center gap-1 mb-1">
+                    <h4 class="text-xl font-bold text-white mt-1">Pilih Format</h4>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1">
                     <button onclick="copyToClipboardAsTarget('clash')" class="p-1.5 rounded-md bg-sky-500 hover:bg-sky-600 text-xs font-semibold text-white flex flex-row justify-center items-center transition-transform transform hover:scale-105 shadow-sm px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" class="size-5 mr-1"><path d="M479.9 32.1C479.9 14.46 465.4 0 448 0H192c-17.47 0-32.22 14.46-31.99 31.99L160 384c0 17.46 14.46 32 32 32h128l-32.99 95.82c-4.141 12.19 2.594 25.75 14.78 29.89C304.8 512.9 308.8 512 312.4 512c8.203 0 16.28-4.484 20.78-12.14l128-224C474.7 269.8 480 263.2 480 256v-224C480 29.8 479.9 32.1 479.9 32.1zM384 256L272 448l64.01-192.1c.1406-.4375 .2812-.875 .4375-1.312L384 256z"/></svg>
                         Clash
@@ -2482,39 +1882,36 @@ PLACEHOLDER_PROXY_GROUP
             </div>
         </div>
     </div>
-      <!-- Wildcards -->
-      <div id="wildcards-window" class="fixed hidden z-30 top-0 right-0 w-full h-full flex justify-center items-center">
-    <div class="w-[75%] max-w-md h-auto flex flex-col gap-2 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-sm border border-gray-300">
-        <div class="flex w-full h-full gap-2 justify-between">
-            <input id="new-domain-input" type="text" placeholder="Input wildcard" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"/>
-            <button onclick="registerDomain()" class="p-2 rounded-full bg-blue-600 hover:bg-blue-700 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                    <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+    <div id="wildcards-window" class="fixed hidden z-30 top-0 right-0 w-full h-full flex justify-center items-center">
+        <div class="w-[75%] max-w-md h-auto flex flex-col gap-2 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-sm border border-gray-300">
+            <div class="flex w-full h-full gap-2 justify-between">
+                <input id="new-domain-input" type="text" placeholder="Input wildcard" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"/>
+                <button onclick="registerDomain()" class="p-2 rounded-full bg-blue-600 hover:bg-blue-700 flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                        <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="container-domains" class="w-full h-32 rounded-md flex flex-col gap-1 overflow-y-scroll scrollbar-hide p-2 bg-gray-900 w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"></div>
+
+            <div class="flex w-full h-full gap-2 justify-between">
+                <input id="delete-domain-input" type="number" placeholder="Input Nomor" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"/>
+                <button onclick="deleteDomainByNumber()" class="p-2 rounded-full bg-red-600 hover:bg-red-700 flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                        <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <button onclick="toggleWildcardsWindow()" class="transform-gpu flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd"/>
                 </svg>
+                Close
             </button>
         </div>
-
-        <div id="container-domains" class="w-full h-32 rounded-md flex flex-col gap-1 overflow-y-scroll scrollbar-hide p-2 bg-gray-900 w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"></div>
-
-        <div class="flex w-full h-full gap-2 justify-between">
-            <input id="delete-domain-input" type="number" placeholder="Input Nomor" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2"/>
-            <button onclick="deleteDomainByNumber()" class="p-2 rounded-full bg-red-600 hover:bg-red-700 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                    <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
-                </svg>
-            </button>
-        </div>
-
-        <button onclick="toggleWildcardsWindow()" class="transform-gpu flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 p-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd"/>
-    </svg>
-    Close
-</button>
     </div>
-</div>
-    </div>
-
     <footer>
     <div class="fixed bottom-4 right-4 flex flex-col items-end gap-3 z-50">
         <button onclick="toggleDropdown()" class="transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-accent-blue hover:bg-opacity-80">
@@ -2524,6 +1921,12 @@ PLACEHOLDER_PROXY_GROUP
         </button>
 
         <div id="dropdown-menu" class="hidden flex flex-col gap-3">
+            
+            <a href="/kuota">
+                <button class="bg-teal-500 hover:bg-teal-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200" title="Cek Kuota">
+                    <img src="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" alt="Cek Kuota Icon" class="footer-icon-img">
+                </button>
+            </a>
             <a href="PLACEHOLDER_DONATE_LINK" target="_blank">
                 <button class="bg-accent-cyan hover:bg-teal-600 rounded-full border-2 border-gray-900 p-2 block transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
@@ -2551,6 +1954,7 @@ PLACEHOLDER_PROXY_GROUP
         </div>
     </div>
 </footer>
+
 <script>
     function toggleDropdown() {
         const dropdownMenu = document.getElementById('dropdown-menu');
