@@ -674,6 +674,646 @@ export default {
 
       <script>
         // Memuat semua fungsi dasar
+
+    // Fungsi SPA Navigasi Client-Side
+    const mainContentContainer = document.getElementById('main-content-container');
+    const navButtonsContainer = document.getElementById('nav-buttons-container');
+
+    async function renderContentFromPath(path, pushState = true) {
+        // Tampilkan loading spinner
+        $('#cover-spin').show();
+
+        if (pushState) {
+            history.pushState(null, '', path);
+        }
+
+        try {
+            const url = new URL(path, window.location.origin);
+            const response = await fetch(url.toString(), {
+                headers: {
+                    // Tanda ke Worker bahwa ini adalah permintaan SPA (JSON)
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Hapus script lama
+                const oldScript = document.getElementById('slide-script');
+                if (oldScript) oldScript.remove();
+
+                // Suntikkan konten baru dan tombol navigasi
+                mainContentContainer.innerHTML = data.content;
+                navButtonsContainer.innerHTML = data.navButtons;
+                document.title = data.title;
+
+                // Jalankan script yang terkait
+                if (data.extraScript) {
+                    const newScript = document.createElement('script');
+                    newScript.id = 'slide-script';
+                    newScript.textContent = data.extraScript;
+                    document.body.appendChild(newScript);
+                }
+            } else {
+                console.error('Failed to fetch content for SPA. Status:', response.status);
+                // Fallback: full refresh jika gagal (opsional)
+                // window.location.href = path;
+            }
+        } catch (e) {
+            console.error('Error during SPA fetch/render:', e);
+        } finally {
+            // Sembunyikan loading spinner
+            $('#cover-spin').hide();
+        }
+    }
+
+    function navigateTo(path, pushState = true) {
+      renderContentFromPath(path, pushState);
+    }
+
+    // Tangani tombol back/forward browser
+    window.addEventListener('popstate', (event) => {
+        // Saat popstate terjadi, render konten untuk path saat ini tanpa pushState
+        navigateTo(window.location.pathname + window.location.search, false);
+    });
+
+    // --- Helper Copy & Download (Sama seperti sebelumnya) ---
+    function copyToClipboard(text, element) {
+      navigator.clipboard.writeText(text).then(() => {
+          // Salin berhasil
+      }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+      });
+
+      if (element) {
+        element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6)';
+        element.style.transform = 'translateY(1px)';
+
+        setTimeout(() => {
+          element.style.boxShadow = '';
+          element.style.transform = 'translateY(0)';
+        }, 300);
+      }
+    }
+
+    function downloadConfig() {
+        const configData = document.getElementById('result-output').value;
+        const format = document.getElementById('format-select').value;
+
+        if (!configData.trim() || configData.startsWith('❌ Gagal:')) {
+            console.error('Tidak ada config valid untuk diunduh.');
+            return;
+        }
+
+        let filename = 'config_mediafairy';
+        let mimeType = 'text/plain';
+
+        if (format === 'clash' || format === 'clash-provider') {
+            filename += '.yaml';
+            mimeType = 'text/yaml';
+        } else {
+            filename += '.txt';
+        }
+
+        const blob = new Blob([configData], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Inject semua parser dan generator yang terpakai
+    const convertLink = function convertLink(linksInput, format) {
+    const linkArray = linksInput.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
+
+    if (linkArray.length === 0) {
+        return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
+    }
+
+    const successfulConversions = [];
+
+    for (const link of linkArray) {
+        try {
+            let d;
+            const decodedLink = tryUrlDecode(link);
+
+            if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
+            else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
+            else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
+            else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
+            else continue;
+
+            successfulConversions.push(mapFields(d));
+
+        } catch (e) {
+            console.error(`Error parsing link: ${link}`, e);
+        }
+    }
+
+    if (successfulConversions.length === 0) {
+        return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
+    }
+
+    if (format === 'clash') return generateClashMetaProxies(successfulConversions);
+    if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
+
+    return 'Format konversi tidak valid.';
+};
+    const parseVlessUri = function parseVlessUri(uri) {
+  const u = new URL(uri);
+  const network = u.searchParams.get('type') || 'tcp';
+
+  const path = tryUrlDecode(u.searchParams.get('path') || '/');
+  const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+  const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+
+  return {
+    protocol: 'vless',
+    remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
+    server: u.hostname,
+    port: parseInt(u.port, 10),
+    password: decodeURIComponent(u.username),
+    network: network,
+    security: u.searchParams.get('security') || 'none',
+    sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+    host: host,
+    path: path,
+    serviceName: serviceName || (network === 'grpc' ? path : ''),
+  };
+};
+    const parseVmessUri = function parseVmessUri(uri){
+  const base64Part = uri.substring('vmess://'.length).trim();
+  const decodedStr = atob(base64Part);
+  const decoded = JSON.parse(decodedStr);
+
+  const network = decoded.net || 'tcp';
+  const path = decoded.path || '/';
+
+  return {
+      protocol: 'vmess',
+      remark: decoded.ps || 'VMess',
+      server: decoded.add,
+      port: parseInt(decoded.port, 10),
+      password: decoded.id,
+      alterId: parseInt(decoded.aid, 10) || 0,
+      network: network,
+      security: decoded.tls === 'tls' ? 'tls' : 'none',
+      sni: decoded.sni || decoded.host || decoded.add,
+      host: decoded.host || decoded.sni || decoded.add,
+      path: path,
+      serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
+  };
+};
+    const parseTrojanUri = function parseTrojanUri(uri) {
+  const u = new URL(uri);
+  const network = u.searchParams.get('type') || 'tcp';
+
+  const path = tryUrlDecode(u.searchParams.get('path') || '/');
+  const serviceName = tryUrlDecode(u.searchParams.get('serviceName') || '');
+  const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
+
+  return {
+    protocol: 'trojan',
+    remark: decodeURIComponent(u.hash.substring(1)) || 'Trojan',
+    server: u.hostname,
+    port: parseInt(u.port, 10),
+    password: decodeURIComponent(u.username),
+    network: network,
+    security: u.searchParams.get('security') || 'tls',
+    sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
+    host: host,
+    path: path,
+    serviceName: serviceName || (network === 'grpc' ? path : ''),
+  };
+};
+    const parseShadowsocksUri = function parseShadowsocksUri(uri) {
+  const parts = uri.substring('ss://'.length).split('#');
+  const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
+  const corePart = parts[0];
+
+  const pluginMatch = corePart.match(/@(.+?)\/\?plugin=(.*)/);
+  let userServerPort, pluginData = {};
+  let pluginExists = false;
+
+  if (pluginMatch) {
+      const userInfoBase64 = corePart.substring(0, pluginMatch.index);
+      userServerPort = atob(userInfoBase64);
+
+      const pluginRaw = tryUrlDecode(pluginMatch[2]);
+
+      const params = pluginRaw.split(';');
+      params.forEach(param => {
+          if (param === 'tls') pluginData.security = 'tls';
+          else if (param.startsWith('host=')) pluginData.host = param.substring(5);
+          else if (param.startsWith('path=')) pluginData.path = param.substring(5);
+      });
+      pluginData.plugin = 'v2ray-plugin';
+      pluginExists = true;
+  } else {
+      userServerPort = atob(corePart);
+  }
+
+  const [userInfo, serverPort] = userServerPort.split('@');
+  const [method, password] = userInfo.split(':');
+  const [server, port] = serverPort.split(':');
+
+  return {
+    protocol: 'ss',
+    remark: remark,
+    server: server,
+    port: parseInt(port, 10),
+    password: password,
+    method: method,
+    network: pluginExists ? 'ws' : 'tcp',
+    plugin: pluginData.plugin,
+    security: pluginData.security || 'none',
+    sni: pluginData.host || server,
+    host: pluginData.host || server,
+    path: pluginData.path || '/',
+    serviceName: '',
+  };
+};
+    const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
+    let proxyConfigs = [];
+    let proxyNames = []; // Digunakan untuk mengisi grup BEST-PING
+
+    for (const fields of fieldsList) {
+        let transportOpts = '';
+
+        if (fields.network === 'ws') {
+            transportOpts = `  ws-opts:
+    path: ${fields.path}
+    headers:
+      Host: ${fields.host}`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = `  grpc-opts:
+    grpc-service-name: ${fields.serviceName || ''}`;
+        }
+
+        let proxy = '';
+        // Ubah format penamaan untuk keamanan dan konsistensi di YAML
+        const safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim();
+
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
+  type: ${fields.protocol}
+  ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n  alterId: ${fields.alterId}`}
+  cipher: auto
+  tls: ${fields.security === 'tls'}
+  udp: true
+  skip-cert-verify: true
+  network: ${fields.network}
+  servername: ${fields.sni}
+${transportOpts}`;
+        } else if (fields.protocol === 'trojan') {
+            proxy =
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
+  type: trojan
+  password: ${fields.password}
+  network: ${fields.network}
+  tls: ${fields.security === 'tls'}
+  skip-cert-verify: true
+  servername: ${fields.sni}
+${transportOpts}`;
+        } else if (fields.protocol === 'ss') {
+            proxy =
+`- name: ${safeRemark}
+  server: ${fields.server}
+  port: ${fields.port}
+  type: ss
+  cipher: ${fields.method}
+  password: ${fields.password}
+  plugin: ${fields.plugin || 'v2ray-plugin'}
+  plugin-opts:
+    mode: websocket
+    host: ${fields.host}
+    path: ${fields.path}
+    tls: ${fields.security === 'tls'}
+    skip-cert-verify: true
+    servername: ${fields.sni}`;
+        } else {
+            proxy = `# Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
+        }
+
+        proxyConfigs.push(proxy);
+        proxyNames.push(`  - ${safeRemark}`); // Tambahkan nama proxy ke daftar untuk BEST-PING
+    }
+
+    const proxyListJoined = proxyConfigs.join('\n');
+    const proxyNamesJoined = proxyNames.join('\n');
+
+    // TEMPLATE clash.js
+    const template = `port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7895
+ipv6: false
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: ""
+bind-address: "*"
+unified-delay: true
+profile:
+  store-selected: true
+  store-fake-ip: true
+dns:
+  enable: true
+  ipv6: false
+  use-host: true
+  enhanced-mode: fake-ip
+  listen: 0.0.0.0:7874
+  proxy-server-nameserver:
+    - 112.215.203.246
+    - 112.215.203.247
+    - 112.215.203.248
+    - 112.215.203.254
+    - 112.215.198.248
+    - 112.215.198.254
+  nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+    - 1.0.0.1
+  fallback:
+    - 9.9.9.9
+    - 149.112.112.112
+    - 208.67.222.222
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.localdomain"
+    - "*.example"
+    - "*.invalid"
+    - "*.localhost"
+    - "*.test"
+    - "*.local"
+    - "*.home.arpa"
+    - time.*.com
+    - time.*.gov
+    - time.*.edu.cn
+    - time.*.apple.com
+    - time1.*.com
+    - time2.*.com
+    - time3.*.com
+    - time4.*.com
+    - time5.*.com
+    - time6.*.com
+    - time7.*.com
+    - ntp.*.com
+    - ntp1.*.com
+    - ntp2.*.com
+    - ntp3.*.com
+    - ntp4.*.com
+    - ntp5.*.com
+    - ntp6.*.com
+    - ntp7.*.com
+    - "*.time.edu.cn"
+    - "*.ntp.org.cn"
+    - +.pool.ntp.org
+    - time1.cloud.tencent.com
+    - music.163.com
+    - "*.music.163.com"
+    - "*.126.net"
+    - musicapi.taihe.com
+    - music.taihe.com
+    - songsearch.kugou.com
+    - trackercdn.kugou.com
+    - "*.kuwo.cn"
+    - api-jooxtt.sanook.com
+    - api.joox.com
+    - joox.com
+    - y.qq.com
+    - "*.y.qq.com"
+    - streamoc.music.tc.qq.com
+    - mobileoc.music.tc.qq.com
+    - isure.stream.qqmusic.qq.com
+    - dl.stream.qqmusic.qq.com
+    - aqqmusic.tc.qq.com
+    - amobile.music.tc.qq.com
+    - "*.xiami.com"
+    - "*.music.migu.cn"
+    - music.migu.cn
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - msftconnecttest.com
+    - msftncsi.com
+    - localhost.ptlogin2.qq.com
+    - localhost.sec.qq.com
+    - +.srv.nintendo.net
+    - +.stun.playstation.net
+    - xbox.*.microsoft.com
+    - xnotify.xboxlive.com
+    - +.battlenet.com.cn
+    - +.wotgame.cn
+    - +.wggames.cn
+    - +.wowsgame.cn
+    - +.wargaming.net
+    - proxy.golang.org
+    - stun.*.*
+    - stun.*.*.*
+    - +.stun.*.*
+    - +.stun.*.*.*
+    - +.stun.*.*.*.*
+    - heartbeat.belkin.com
+    - "*.linksys.com"
+    - "*.linksyssmartwifi.com"
+    - "*.router.asus.com"
+    - mesu.apple.com
+    - swscan.apple.com
+    - swquery.apple.com
+    - swdownload.apple.com
+    - swcdn.apple.com
+    - swdist.apple.com
+    - lens.l.google.com
+    - stun.l.google.com
+    - +.nflxvideo.net
+    - "*.square-enix.com"
+    - "*.finalfantasyxiv.com"
+    - "*.ffxiv.com"
+    - "*.mcdn.bilivideo.cn"
+    - +.media.dssott.com
+proxies:
+${proxyNamesJoined}
+
+proxy-groups:
+- name: INTERNET
+  type: select
+  disable-udp: false
+  proxies:
+    - DIRECT
+    - REJECT
+    - BEST-PING
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+
+- name: BEST-PING
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  proxies:
+    - DIRECT
+    - REJECT
+${proxyNamesJoined}
+
+rule-providers:
+  rule_hijacking:
+    type: file
+    behavior: classical
+    path: ./rule_provider/rule_hijacking.yaml
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml
+  rule_privacy:
+    type: file
+    behavior: classical
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml
+    path: ./rule_provider/rule_privacy.yaml
+  rule_basicads:
+    type: file
+    behavior: domain
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml
+    path: ./rule_provider/rule_basicads.yaml
+  rule_personalads:
+    type: file
+    behavior: classical
+    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml
+    path: ./rule_provider/rule_personalads.yaml
+
+rules:
+- IP-CIDR,198.18.0.1/16,REJECT,no-resolve
+- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan
+- RULE-SET,rule_basicads,REJECT     # Langsung REJECT untuk memblokir iklan
+- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir
+- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir
+- MATCH,INTERNET`;
+
+    return template;
+};
+    const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
+    let proxyConfigs = [];
+
+    for (const fields of fieldsList) {
+        let transportOpts = '';
+
+        // Indentasi untuk ws-opts/grpc-opts harus ditambah 2 spasi dari indentasi proxy utamanya.
+        if (fields.network === 'ws') {
+            transportOpts = `    ws-opts:
+      path: ${fields.path}
+      headers:
+        Host: ${fields.host}`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = `    grpc-opts:
+      grpc-service-name: ${fields.serviceName || ''}`;
+        }
+
+        let proxy = '';
+        // Ubah format penamaan untuk keamanan dan konsistensi di YAML
+        const safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim();
+
+        // Setiap proxy dimulai dengan dua spasi
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
+    type: ${fields.protocol}
+    ${fields.protocol === 'vless' ? `uuid: ${fields.uuid}` : `uuid: ${fields.uuid}\n    alterId: ${fields.alterId}`}
+    cipher: auto
+    tls: ${fields.security === 'tls'}
+    udp: true
+    skip-cert-verify: true
+    network: ${fields.network}
+    servername: ${fields.sni}
+${transportOpts}`;
+        } else if (fields.protocol === 'trojan') {
+            proxy =
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
+    type: trojan
+    password: ${fields.password}
+    network: ${fields.network}
+    tls: ${fields.security === 'tls'}
+    skip-cert-verify: true
+    servername: ${fields.sni}
+${transportOpts}`;
+        } else if (fields.protocol === 'ss') {
+            // Indentasi plugin-opts juga harus disesuaikan
+            proxy =
+`  - name: ${safeRemark}
+    server: ${fields.server}
+    port: ${fields.port}
+    type: ss
+    cipher: ${fields.method}
+    password: ${fields.password}
+    plugin: ${fields.plugin || 'v2ray-plugin'}
+    plugin-opts:
+      mode: websocket
+      host: ${fields.host}
+      path: ${fields.path}
+      tls: ${fields.security === 'tls'}
+      skip-cert-verify: true
+      servername: ${fields.sni}`;
+        } else {
+            proxy = `  # Error: Protokol ${fields.protocol} tidak didukung oleh Clash Meta.`;
+        }
+
+        proxyConfigs.push(proxy);
+    }
+
+    const proxyListJoined = proxyConfigs.join('\n');
+
+    // Prefix 'proxies:' tanpa indentasi
+    return `proxies:\n${proxyListJoined}`;
+};
+    const mapFields = function mapFields(d) {
+  const pass = d.password;
+
+  return {
+    protocol: d.protocol,
+    remark: d.remark,
+    server: d.server,
+    port: d.port,
+    password: pass,
+    uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined,
+    alterId: d.alterId,
+    method: d.method,
+    network: d.network,
+    security: d.security,
+    sni: d.sni,
+    host: d.host,
+    path: d.path,
+    plugin: d.plugin,
+    serviceName: d.serviceName,
+  };
+};
+    const tryUrlDecode = function tryUrlDecode(s = '') {
+  try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
+  catch { return s; }
+};
+
+
+
+
         function cekKuota() {
             const msisdn = document.getElementById('msisdn').value;
             if (!msisdn) {
@@ -684,7 +1324,7 @@ export default {
             $('#cover-spin').show();
             $.ajax({
                 type: 'GET',
-                url: `https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=${msisdn}&isJSON=true`,
+                url: 'https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=' + msisdn + '&isJSON=true',
                 dataType: 'JSON',
                 contentType: 'application/x-www-form-urlencoded',
                 beforeSend: function (req) {
@@ -696,16 +1336,16 @@ export default {
                     $('#cover-spin').hide();
                     $('#hasilnya').html('');
                     if (res.status) {
-                        $('#hasilnya').html(`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">${res.data.hasil}</div>`);
+                        $('#hasilnya').html('<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.hasil + '</div>');
                     } else {
                         console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">${res.data.keteranganError}</div>`);
+                        $('#hasilnya').html('<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.keteranganError + '</div>');
                     }
                 },
                 error: function () {
                     $('#cover-spin').hide();
                     console.error('Terjadi kesalahan koneksi.');
-                    $('#hasilnya').html(`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>`);
+                    $('#hasilnya').html('<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>');
                 }
             });
         }
@@ -715,7 +1355,9 @@ export default {
         $('#msisdn').off('keypress').on('keypress', function (e) {
             if (e.which === 13) cekKuota();
         });
-      </script>
+
+
+        </script>
     </body>
     </html>
   
