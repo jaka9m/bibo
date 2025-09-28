@@ -15,14 +15,10 @@ let cachedPrxList = [];
 // Constant
 const WHATSAPP_NUMBER = "082339191527";
 const TELEGRAM_USERNAME = "sampiiii";
-const horse = "dHJvamFu";
-const flash = "dmxlc3M=";
-const v2 = "djJyYXk=";
-const neko = "Y2xhc2g=";
 
 const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
-const PROTOCOLS = [atob(horse), atob(flash), "ss"];
+const PROTOCOLS = ["trojan", "vless", "ss"];
 const PRX_BANK_URL = "https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt";
 const DNS_SERVER_ADDRESS = "8.8.8.8";
 const DNS_SERVER_PORT = 53;
@@ -39,6 +35,202 @@ const CORS_HEADER_OPTIONS = {
   "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
   "Access-Control-Max-Age": "86400",
 };
+
+const sharedCSS = `
+    /* 1. SCROLLBAR HIDE */
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 2. FONT IMPORT */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    /* 3. 3D & GLASSMORPHISM EFFECT */
+    body {
+        perspective: 1000px;
+    }
+    .glass-effect {
+        background-color: rgba(42, 42, 47, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 224, 183, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .glass-effect-light {
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 224, 183, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 4. ANIMATIONS */
+    .flag-spin {
+        animation: spin-around 4s linear infinite alternate;
+        transform-origin: center center;
+    }
+    @keyframes spin-around {
+        0% { transform: rotateY(0deg); }
+        50% { transform: rotateY(180deg); }
+        100% { transform: rotateY(0deg); }
+    }
+    .blink-text {
+        animation: blink 1s linear infinite;
+    }
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.2; }
+        100% { opacity: 1; }
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* 5. MAIN CONTAINER & BOX STYLES */
+    .main-container {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(8px);
+        border-radius: 1.5rem;
+        box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.7),
+            0 0 15px rgba(102, 181, 232, 0.2) inset,
+            0 0 5px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(100, 116, 139, 0.4);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transform: translateZ(20px);
+    }
+
+    /* 6. BUTTON STYLES */
+    .btn-gradient {
+        background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
+        transform: translateY(1px);
+    }
+    .action-btn {
+        background-color: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155;
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
+
+    /* 7. INPUT FIELD STYLES */
+    .input-group {
+        background-color: rgba(30, 41, 59, 0.6);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+    .input-dark, .input-group textarea, .input-group select {
+        background-color: #1f2937;
+        color: #ffffff;
+        border: 1px solid #475569;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+        border-color: var(--tw-color-accent-blue);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue);
+    }
+
+    /* 8. TABLE STYLES (Dark Theme) */
+    .table-dark th {
+        background-color: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .table-dark td {
+        border-color: #334155;
+    }
+    .table-dark tr:nth-child(even) {
+        background-color: #111827;
+    }
+    .table-dark tr:hover {
+        background-color: #334155 !important;
+    }
+
+    /* 9. UTILITY CLASSES */
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    .text-solid-white {
+        color: #ffffff;
+        text-shadow: none;
+    }
+
+    /* 10. RESULT BOXES */
+    .result-success {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #66b5e8; /* Accent blue border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+        transition: all 0.3s ease;
+    }
+    .result-error {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #a466e8; /* Accent purple border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+        transition: all 0.3s ease;
+    }
+
+    /* 11. LOADING SPINNER */
+    #cover-spin {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid var(--tw-color-accent-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+
+    /* 12. COLOR UTILITIES */
+    .text-green-600 { color: #16a34a; }
+    .text-red-600 { color: #dc2626; }
+    .text-yellow-400 { color: #facc15; }
+    .text-xs { font-size: 0.75rem; }
+    .font-normal { font-weight: 400; }
+`;
 
 async function getKVPrxList(kvPrxUrl) {
   if (!kvPrxUrl) {
@@ -123,7 +315,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
 
         // Build URI
         // The address is the selected host (e.g., ava.game.naver.com or the app domain)
-        const uri = new URL(`${atob(horse)}://${hostName}`);
+        const uri = new URL(`trojan://${hostName}`);
         uri.searchParams.set("encryption", "none");
         uri.searchParams.set("type", "ws");
         uri.searchParams.set("host", effectiveHost);
@@ -155,7 +347,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
                         uri.username = btoa(`none:${uuid}`);
                         uri.searchParams.set(
                             "plugin",
-                            `${atob(v2)}-plugin${
+                            `v2ray-plugin${
                                 port == 80 ? "" : ";tls"
                             };mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${prxPort};host=${effectiveHost}`
                         );
@@ -166,7 +358,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
 
                     uri.protocol = protocol;
                     uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                    uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
+                    uri.searchParams.set("sni", port == 80 && protocol == 'vless' ? "" : effectiveHost);
 
                     // Build VPN URI
                     prxs.push(uri.toString());
@@ -199,7 +391,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
 
         return document.build();
     } catch (error) {
-        return `An error occurred while generating the ${atob(flash).toUpperCase()} configurations. ${error}`;
+        return `An error occurred while generating the VLESS configurations. ${error}`;
     }
 }
 
@@ -368,7 +560,7 @@ export default {
           const uuid = crypto.randomUUID();
           const result = [];
           for (const prx of prxList) {
-            const uri = new URL(`${atob(horse)}://${fillerDomain}`);
+            const uri = new URL(`trojan://${fillerDomain}`);
             uri.searchParams.set("encryption", "none");
             uri.searchParams.set("type", "ws");
             uri.searchParams.set("host", effectiveHost);
@@ -383,7 +575,7 @@ export default {
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
-                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
+                    `v2ray-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
                       prx.prxPort
                     };host=${effectiveHost}`
                   );
@@ -392,7 +584,7 @@ export default {
                 }
 
                 uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
+                uri.searchParams.set("sni", port == 80 && protocol == 'vless' ? "" : effectiveHost);
                 uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
 
                 uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
@@ -408,10 +600,10 @@ export default {
             case "raw":
               finalResult = result.join("\n");
               break;
-            case atob(v2):
+            case "v2ray":
               finalResult = btoa(result.join("\n"));
               break;
-            case atob(neko):
+            case "clash":
             case "sfa":
             case "bfr":
               const res = await fetch(CONVERTER_URL, {
@@ -459,7 +651,7 @@ export default {
           );
         }
       } else if (url.pathname === "/kuota") {
-        const html = `
+        const script = `
 // Simulasikan JQuery $('#cover-spin').show() dan $('#cover-spin').hide() dengan Vanilla JS.
 const coverSpin = document.getElementById('cover-spin');
 function showLoader() { if(coverSpin) coverSpin.style.display = 'block'; }
@@ -679,255 +871,254 @@ const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
         let transportOpts = '';
 
         if (fields.network === 'ws') {
-            transportOpts = \`  ws-opts:
-    path: \${fields.path}
-    headers:
-      Host: \${fields.host}\`;
+            transportOpts = '  ws-opts:\\n' +
+'    path: ' + fields.path + '\\n' +
+'    headers:\\n' +
+'      Host: ' + fields.host;
         } else if (fields.network === 'grpc') {
-            transportOpts = \`  grpc-opts:
-    grpc-service-name: \${fields.serviceName || ''}\`;
+            transportOpts = '  grpc-opts:\\n' +
+'    grpc-service-name: ' + (fields.serviceName || '');
         }
 
         let proxy = '';
-        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
+        const safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim();
         
         if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            const uuidLine = fields.protocol === 'vless' ?
+                '  uuid: ' + fields.uuid :
+                '  uuid: ' + fields.uuid + '\\n  alterId: ' + fields.alterId;
             proxy =
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
-  type: \${fields.protocol}
-  \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n  alterId: \${fields.alterId}\`}
-  cipher: auto
-  tls: \${fields.security === 'tls'}
-  udp: true
-  skip-cert-verify: true
-  network: \${fields.network}
-  servername: \${fields.sni}
-\${transportOpts}\`;
+                '- name: ' + safeRemark + '\\n' +
+                '  server: ' + fields.server + '\\n' +
+                '  port: ' + fields.port + '\\n' +
+                '  type: ' + fields.protocol + '\\n' +
+                uuidLine + '\\n' +
+                '  cipher: auto\\n' +
+                '  tls: ' + (fields.security === 'tls') + '\\n' +
+                '  udp: true\\n' +
+                '  skip-cert-verify: true\\n' +
+                '  network: ' + fields.network + '\\n' +
+                '  servername: ' + fields.sni + '\\n' +
+                transportOpts;
         } else if (fields.protocol === 'trojan') {
             proxy = 
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
-  type: trojan
-  password: \${fields.password}
-  network: \${fields.network}
-  tls: \${fields.security === 'tls'}
-  skip-cert-verify: true
-  servername: \${fields.sni}
-\${transportOpts}\`;
+                '- name: ' + safeRemark + '\\n' +
+                '  server: ' + fields.server + '\\n' +
+                '  port: ' + fields.port + '\\n' +
+                '  type: trojan\\n' +
+                '  password: ' + fields.password + '\\n' +
+                '  network: ' + fields.network + '\\n' +
+                '  tls: ' + (fields.security === 'tls') + '\\n' +
+                '  skip-cert-verify: true\\n' +
+                '  servername: ' + fields.sni + '\\n' +
+                transportOpts;
         } else if (fields.protocol === 'ss') {
             proxy = 
-\`- name: \${safeRemark}
-  server: \${fields.server}
-  port: \${fields.port}
-  type: ss
-  cipher: \${fields.method}
-  password: \${fields.password}
-  plugin: \${fields.plugin || 'v2ray-plugin'}
-  plugin-opts:
-    mode: websocket
-    host: \${fields.host}
-    path: \${fields.path}
-    tls: \${fields.security === 'tls'}
-    skip-cert-verify: true
-    servername: \${fields.sni}\`;
+                '- name: ' + safeRemark + '\\n' +
+                '  server: ' + fields.server + '\\n' +
+                '  port: ' + fields.port + '\\n' +
+                '  type: ss\\n' +
+                '  cipher: ' + fields.method + '\\n' +
+                '  password: ' + fields.password + '\\n' +
+                '  plugin: ' + (fields.plugin || 'v2ray-plugin') + '\\n' +
+                '  plugin-opts:\\n' +
+                '    mode: websocket\\n' +
+                '    host: ' + fields.host + '\\n' +
+                '    path: ' + fields.path + '\\n' +
+                '    tls: ' + (fields.security === 'tls') + '\\n' +
+                '    skip-cert-verify: true\\n' +
+                '    servername: ' + fields.sni;
         } else {
-            proxy = \`# Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
+            proxy = '# Error: Protokol ' + fields.protocol + ' tidak didukung oleh Clash Meta.';
         }
         
         proxyConfigs.push(proxy);
-        proxyNames.push(\`  - \${safeRemark}\`); 
+        proxyNames.push('  - ' + safeRemark);
     }
 
     const proxyListJoined = proxyConfigs.join('\\n');
     const proxyNamesJoined = proxyNames.join('\\n');
     
     // TEMPLATE clash.js
-    const template = \`port: 7890
-socks-port: 7891
-redir-port: 7892
-mixed-port: 7893
-tproxy-port: 7895
-ipv6: false
-mode: rule
-log-level: silent
-allow-lan: true
-external-controller: 0.0.0.0:9090
-secret: ""
-bind-address: "*"
-unified-delay: true
-profile:
-  store-selected: true
-  store-fake-ip: true
-dns:
-  enable: true
-  ipv6: false
-  use-host: true
-  enhanced-mode: fake-ip
-  listen: 0.0.0.0:7874
-  proxy-server-nameserver:
-    - 112.215.203.246
-    - 112.215.203.247
-    - 112.215.203.248
-    - 112.215.203.254
-    - 112.215.198.248
-    - 112.215.198.254
-  nameserver:
-    - 1.1.1.1
-    - 8.8.8.8
-    - 1.0.0.1
-  fallback:
-    - 9.9.9.9
-    - 149.112.112.112
-    - 208.67.222.222
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter:
-    - "*.lan"
-    - "*.localdomain"
-    - "*.example"
-    - "*.invalid"
-    - "*.localhost"
-    - "*.test"
-    - "*.local"
-    - "*.home.arpa"
-    - time.*.com
-    - time.*.gov
-    - time.*.edu.cn
-    - time.*.apple.com
-    - time1.*.com
-    - time2.*.com
-    - time3.*.com
-    - time4.*.com
-    - time5.*.com
-    - time6.*.com
-    - time7.*.com
-    - ntp.*.com
-    - ntp1.*.com
-    - ntp2.*.com
-    - ntp3.*.com
-    - ntp4.*.com
-    - ntp5.*.com
-    - ntp6.*.com
-    - ntp7.*.com
-    - "*.time.edu.cn"
-    - "*.ntp.org.cn"
-    - +.pool.ntp.org
-    - time1.cloud.tencent.com
-    - music.163.com
-    - "*.music.163.com"
-    - "*.126.net"
-    - musicapi.taihe.com
-    - music.taihe.com
-    - songsearch.kugou.com
-    - trackercdn.kugou.com
-    - "*.kuwo.cn"
-    - api-jooxtt.sanook.com
-    - api.joox.com
-    - joox.com
-    - y.qq.com
-    - "*.y.qq.com"
-    - streamoc.music.tc.qq.com
-    - mobileoc.music.tc.qq.com
-    - isure.stream.qqmusic.qq.com
-    - dl.stream.qqmusic.qq.com
-    - aqqmusic.tc.qq.com
-    - amobile.music.tc.qq.com
-    - "*.xiami.com"
-    - "*.music.migu.cn"
-    - music.migu.cn
-    - "*.msftconnecttest.com"
-    - "*.msftncsi.com"
-    - msftconnecttest.com
-    - msftncsi.com
-    - localhost.ptlogin2.qq.com
-    - localhost.sec.qq.com
-    - +.srv.nintendo.net
-    - +.stun.playstation.net
-    - xbox.*.microsoft.com
-    - xnotify.xboxlive.com
-    - +.battlenet.com.cn
-    - +.wotgame.cn
-    - +.wggames.cn
-    - +.wowsgame.cn
-    - +.wargaming.net
-    - proxy.golang.org
-    - stun.*.*
-    - stun.*.*.*
-    - +.stun.*.*
-    - +.stun.*.*.*
-    - +.stun.*.*.*.*
-    - heartbeat.belkin.com
-    - "*.linksys.com"
-    - "*.linksyssmartwifi.com"
-    - "*.router.asus.com"
-    - mesu.apple.com
-    - swscan.apple.com
-    - swquery.apple.com
-    - swdownload.apple.com
-    - swcdn.apple.com
-    - swdist.apple.com
-    - lens.l.google.com
-    - stun.l.google.com
-    - +.nflxvideo.net
-    - "*.square-enix.com"
-    - "*.finalfantasyxiv.com"
-    - "*.ffxiv.com"
-    - "*.mcdn.bilivideo.cn"
-    - +.media.dssott.com
-proxies:
-\${proxyNamesJoined}
-
-proxy-groups:
-- name: INTERNET
-  type: select
-  disable-udp: false
-  proxies:
-    - DIRECT
-    - REJECT
-    - BEST-PING
-  url: http://www.gstatic.com/generate_204
-  interval: 120
-
-- name: BEST-PING
-  type: url-test
-  url: http://www.gstatic.com/generate_204
-  interval: 120
-  proxies:
-    - DIRECT
-    - REJECT
-\${proxyNamesJoined}
-
-rule-providers:
-  rule_hijacking:
-    type: file
-    behavior: classical
-    path: ./rule_provider/rule_hijacking.yaml
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml
-  rule_privacy:
-    type: file
-    behavior: classical
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml
-    path: ./rule_provider/rule_privacy.yaml
-  rule_basicads:
-    type: file
-    behavior: domain
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml
-    path: ./rule_provider/rule_basicads.yaml
-  rule_personalads:
-    type: file
-    behavior: classical
-    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml
-    path: ./rule_provider/rule_personalads.yaml
-
-rules:
-- IP-CIDR,198.18.0.1/16,REJECT,no-resolve
-- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_basicads,REJECT    # Langsung REJECT untuk memblokir iklan
-- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir
-- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir
-- MATCH,INTERNET\`;
+    const template = 'port: 7890\\n' +
+'socks-port: 7891\\n' +
+'redir-port: 7892\\n' +
+'mixed-port: 7893\\n' +
+'tproxy-port: 7895\\n' +
+'ipv6: false\\n' +
+'mode: rule\\n' +
+'log-level: silent\\n' +
+'allow-lan: true\\n' +
+'external-controller: 0.0.0.0:9090\\n' +
+'secret: ""\\n' +
+'bind-address: "*"\\n' +
+'unified-delay: true\\n' +
+'profile:\\n' +
+'  store-selected: true\\n' +
+'  store-fake-ip: true\\n' +
+'dns:\\n' +
+'  enable: true\\n' +
+'  ipv6: false\\n' +
+'  use-host: true\\n' +
+'  enhanced-mode: fake-ip\\n' +
+'  listen: 0.0.0.0:7874\\n' +
+'  proxy-server-nameserver:\\n' +
+'    - 112.215.203.246\\n' +
+'    - 112.215.203.247\\n' +
+'    - 112.215.203.248\\n' +
+'    - 112.215.203.254\\n' +
+'    - 112.215.198.248\\n' +
+'    - 112.215.198.254\\n' +
+'  nameserver:\\n' +
+'    - 1.1.1.1\\n' +
+'    - 8.8.8.8\\n' +
+'    - 1.0.0.1\\n' +
+'  fallback:\\n' +
+'    - 9.9.9.9\\n' +
+'    - 149.112.112.112\\n' +
+'    - 208.67.222.222\\n' +
+'  fake-ip-range: 198.18.0.1/16\\n' +
+'  fake-ip-filter:\\n' +
+'    - "*.lan"\\n' +
+'    - "*.localdomain"\\n' +
+'    - "*.example"\\n' +
+'    - "*.invalid"\\n' +
+'    - "*.localhost"\\n' +
+'    - "*.test"\\n' +
+'    - "*.local"\\n' +
+'    - "*.home.arpa"\\n' +
+'    - time.*.com\\n' +
+'    - time.*.gov\\n' +
+'    - time.*.edu.cn\\n' +
+'    - time.*.apple.com\\n' +
+'    - time1.*.com\\n' +
+'    - time2.*.com\\n' +
+'    - time3.*.com\\n' +
+'    - time4.*.com\\n' +
+'    - time5.*.com\\n' +
+'    - time6.*.com\\n' +
+'    - time7.*.com\\n' +
+'    - ntp.*.com\\n' +
+'    - ntp1.*.com\\n' +
+'    - ntp2.*.com\\n' +
+'    - ntp3.*.com\\n' +
+'    - ntp4.*.com\\n' +
+'    - ntp5.*.com\\n' +
+'    - ntp6.*.com\\n' +
+'    - ntp7.*.com\\n' +
+'    - "*.time.edu.cn"\\n' +
+'    - "*.ntp.org.cn"\\n' +
+'    - +.pool.ntp.org\\n' +
+'    - time1.cloud.tencent.com\\n' +
+'    - music.163.com\\n' +
+'    - "*.music.163.com"\\n' +
+'    - "*.126.net"\\n' +
+'    - musicapi.taihe.com\\n' +
+'    - music.taihe.com\\n' +
+'    - songsearch.kugou.com\\n' +
+'    - trackercdn.kugou.com\\n' +
+'    - "*.kuwo.cn"\\n' +
+'    - api-jooxtt.sanook.com\\n' +
+'    - api.joox.com\\n' +
+'    - joox.com\\n' +
+'    - y.qq.com\\n' +
+'    - "*.y.qq.com"\\n' +
+'    - streamoc.music.tc.qq.com\\n' +
+'    - mobileoc.music.tc.qq.com\\n' +
+'    - isure.stream.qqmusic.qq.com\\n' +
+'    - dl.stream.qqmusic.qq.com\\n' +
+'    - aqqmusic.tc.qq.com\\n' +
+'    - amobile.music.tc.qq.com\\n' +
+'    - "*.xiami.com"\\n' +
+'    - "*.music.migu.cn"\\n' +
+'    - music.migu.cn\\n' +
+'    - "*.msftconnecttest.com"\\n' +
+'    - "*.msftncsi.com"\\n' +
+'    - msftconnecttest.com\\n' +
+'    - msftncsi.com\\n' +
+'    - localhost.ptlogin2.qq.com\\n' +
+'    - localhost.sec.qq.com\\n' +
+'    - +.srv.nintendo.net\\n' +
+'    - +.stun.playstation.net\\n' +
+'    - xbox.*.microsoft.com\\n' +
+'    - xnotify.xboxlive.com\\n' +
+'    - +.battlenet.com.cn\\n' +
+'    - +.wotgame.cn\\n' +
+'    - +.wggames.cn\\n' +
+'    - +.wowsgame.cn\\n' +
+'    - +.wargaming.net\\n' +
+'    - proxy.golang.org\\n' +
+'    - stun.*.*\\n' +
+'    - stun.*.*.*\\n' +
+'    - +.stun.*.*\\n' +
+'    - +.stun.*.*.*\\n' +
+'    - +.stun.*.*.*.*\\n' +
+'    - heartbeat.belkin.com\\n' +
+'    - "*.linksys.com"\\n' +
+'    - "*.linksyssmartwifi.com"\\n' +
+'    - "*.router.asus.com"\\n' +
+'    - mesu.apple.com\\n' +
+'    - swscan.apple.com\\n' +
+'    - swquery.apple.com\\n' +
+'    - swdownload.apple.com\\n' +
+'    - swcdn.apple.com\\n' +
+'    - swdist.apple.com\\n' +
+'    - lens.l.google.com\\n' +
+'    - stun.l.google.com\\n' +
+'    - +.nflxvideo.net\\n' +
+'    - "*.square-enix.com"\\n' +
+'    - "*.finalfantasyxiv.com"\\n' +
+'    - "*.ffxiv.com"\\n' +
+'    - "*.mcdn.bilivideo.cn"\\n' +
+'    - +.media.dssott.com\\n' +
+'proxies:\\n' +
+proxyListJoined + '\\n\\n' +
+'proxy-groups:\\n' +
+'- name: INTERNET\\n' +
+'  type: select\\n' +
+'  disable-udp: false\\n' +
+'  proxies:\\n' +
+'    - DIRECT\\n' +
+'    - REJECT\\n' +
+'    - BEST-PING\\n' +
+'  url: http://www.gstatic.com/generate_204\\n' +
+'  interval: 120\\n\\n' +
+'- name: BEST-PING\\n' +
+'  type: url-test\\n' +
+'  url: http://www.gstatic.com/generate_204\\n' +
+'  interval: 120\\n' +
+'  proxies:\\n' +
+'    - DIRECT\\n' +
+'    - REJECT\\n' +
+proxyNamesJoined + '\\n\\n' +
+'rule-providers:\\n' +
+'  rule_hijacking:\\n' +
+'    type: file\\n' +
+'    behavior: classical\\n' +
+'    path: ./rule_provider/rule_hijacking.yaml\\n' +
+'    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml\\n' +
+'  rule_privacy:\\n' +
+'    type: file\\n' +
+'    behavior: classical\\n' +
+'    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml\\n' +
+'    path: ./rule_provider/rule_privacy.yaml\\n' +
+'  rule_basicads:\\n' +
+'    type: file\\n' +
+'    behavior: domain\\n' +
+'    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml\\n' +
+'    path: ./rule_provider/rule_basicads.yaml\\n' +
+'  rule_personalads:\\n' +
+'    type: file\\n' +
+'    behavior: classical\\n' +
+'    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml\\n' +
+'    path: ./rule_provider/rule_personalads.yaml\\n\\n' +
+'rules:\\n' +
+'- IP-CIDR,198.18.0.1/16,REJECT,no-resolve\\n' +
+'- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan\\n' +
+'- RULE-SET,rule_basicads,REJECT    # Langsung REJECT untuk memblokir iklan\\n' +
+'- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir\\n' +
+'- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir\\n' +
+'- MATCH,INTERNET';
 
     return template;
 };
@@ -939,62 +1130,65 @@ const generateClashProviderProxies = function generateClashProviderProxies(field
         let transportOpts = '';
 
         if (fields.network === 'ws') {
-            transportOpts = \`    ws-opts:
-      path: \${fields.path}
-      headers:
-        Host: \${fields.host}\`;
+            transportOpts = '    ws-opts:\\n' +
+'      path: ' + fields.path + '\\n' +
+'      headers:\\n' +
+'        Host: ' + fields.host;
         } else if (fields.network === 'grpc') {
-            transportOpts = \`    grpc-opts:
-      grpc-service-name: \${fields.serviceName || ''}\`;
+            transportOpts = '    grpc-opts:\\n' +
+'      grpc-service-name: ' + (fields.serviceName || '');
         }
 
         let proxy = '';
-        const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim(); 
+        const safeRemark = fields.remark.replace(/[^\w\s-]/g, '_').trim();
         
         if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            const uuidLine = fields.protocol === 'vless' ?
+                '    uuid: ' + fields.uuid :
+                '    uuid: ' + fields.uuid + '\\n    alterId: ' + fields.alterId;
             proxy =
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
-    type: \${fields.protocol}
-    \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\n    alterId: \${fields.alterId}\`}
-    cipher: auto
-    tls: \${fields.security === 'tls'}
-    udp: true
-    skip-cert-verify: true
-    network: \${fields.network}
-    servername: \${fields.sni}
-\${transportOpts}\`;
+'  - name: ' + safeRemark + '\\n' +
+'    server: ' + fields.server + '\\n' +
+'    port: ' + fields.port + '\\n' +
+'    type: ' + fields.protocol + '\\n' +
+uuidLine + '\\n' +
+'    cipher: auto\\n' +
+'    tls: ' + (fields.security === 'tls') + '\\n' +
+'    udp: true\\n' +
+'    skip-cert-verify: true\\n' +
+'    network: ' + fields.network + '\\n' +
+'    servername: ' + fields.sni + '\\n' +
+transportOpts;
         } else if (fields.protocol === 'trojan') {
             proxy = 
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
-    type: trojan
-    password: \${fields.password}
-    network: \${fields.network}
-    tls: \${fields.security === 'tls'}
-    skip-cert-verify: true
-    servername: \${fields.sni}
-\${transportOpts}\`;
+'  - name: ' + safeRemark + '\\n' +
+'    server: ' + fields.server + '\\n' +
+'    port: ' + fields.port + '\\n' +
+'    type: trojan\\n' +
+'    password: ' + fields.password + '\\n' +
+'    network: ' + fields.network + '\\n' +
+'    tls: ' + (fields.security === 'tls') + '\\n' +
+'    skip-cert-verify: true\\n' +
+'    servername: ' + fields.sni + '\\n' +
+transportOpts;
         } else if (fields.protocol === 'ss') {
             proxy = 
-\`  - name: \${safeRemark}
-    server: \${fields.server}
-    port: \${fields.port}
-    type: ss
-    cipher: \${fields.method}
-    password: \${fields.password}
-    plugin: \${fields.plugin || 'v2ray-plugin'}
-    plugin-opts:
-      mode: websocket
-      host: \${fields.host}
-      path: \${fields.path}
-      tls: \${fields.security === 'tls'}
-      skip-cert-verify: true
-      servername: \${fields.sni}\`;
+'  - name: ' + safeRemark + '\\n' +
+'    server: ' + fields.server + '\\n' +
+'    port: ' + fields.port + '\\n' +
+'    type: ss\\n' +
+'    cipher: ' + fields.method + '\\n' +
+'    password: ' + fields.password + '\\n' +
+'    plugin: ' + (fields.plugin || 'v2ray-plugin') + '\\n' +
+'    plugin-opts:\\n' +
+'      mode: websocket\\n' +
+'      host: ' + fields.host + '\\n' +
+'      path: ' + fields.path + '\\n' +
+'      tls: ' + (fields.security === 'tls') + '\\n' +
+'      skip-cert-verify: true\\n' +
+'      servername: ' + fields.sni;
         } else {
-            proxy = \`  # Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
+            proxy = '  # Error: Protokol ' + fields.protocol + ' tidak didukung oleh Clash Meta.';
         }
         
         proxyConfigs.push(proxy);
@@ -1002,7 +1196,7 @@ const generateClashProviderProxies = function generateClashProviderProxies(field
     
     const proxyListJoined = proxyConfigs.join('\\n');
     
-    return \`proxies:\\n\${proxyListJoined}\`;
+    return 'proxies:\\n' + proxyListJoined;
 };
 
 // Fungsi utama yang mengorkestrasi konversi
@@ -1031,7 +1225,7 @@ const convertLink = function convertLink(linksInput, format) {
             successfulConversions.push(mapFields(d));
             
         } catch (e) {
-            console.error(\`Error parsing link: \${link}\`, e);
+            console.error('Error parsing link: ' + link, e);
         }
     }
     
@@ -1093,151 +1287,7 @@ const HTML_CONTENT_TEMPLATE = `
     } } };
   </script>
   <style>
-    /* Custom Styles for Modern/Elegant Look */
-    
-    /* START: PENINGKATAN EFEK 3D */
-    body {
-        perspective: 1000px; 
-    }
-    .main-container {
-      background: rgba(30, 41, 59, 0.8); 
-      backdrop-filter: blur(8px);
-      border-radius: 1.5rem;
-      box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.7), 
-        0 0 15px rgba(102, 181, 232, 0.2) inset, 
-        0 0 5px rgba(0, 0, 0, 0.5); 
-      border: 1px solid rgba(100, 116, 139, 0.4); 
-      padding: 2rem;
-      margin-bottom: 2rem;
-      transform: translateZ(20px); 
-    }
-    .btn-gradient {
-      background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-    }
-    .btn-gradient:hover:not(:disabled) {
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-      transform: translateY(1px);
-    }
-    .input-group {
-      background-color: rgba(30, 41, 59, 0.6); 
-      border-radius: 0.75rem; 
-      padding: 1rem; 
-      border: 1px solid rgba(100, 116, 139, 0.3);
-      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-    }
-    .input-dark, .input-group textarea, .input-group select {
-      background-color: #1f2937; 
-      color: #ffffff;
-      border: 1px solid #475569; 
-      border-radius: 0.5rem;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-      border-color: var(--tw-color-accent-blue);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-    }
-    .action-btn {
-        background-color: #1e293b; 
-        color: #94a3b8;
-        border: 1px solid #475569;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #334155; 
-        color: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-        transform: translateY(1px);
-    }
-    /* END: PENINGKATAN EFEK 3D */
-
-
-    .table-dark th {
-      background-color: #1e293b; 
-      color: #94a3b8; 
-      font-weight: 600;
-    }
-    .table-dark td {
-      border-color: #334155; 
-    }
-    .table-dark tr:nth-child(even) {
-      background-color: #111827; 
-    }
-    .table-dark tr:hover {
-      background-color: #334155 !important; 
-    }
-    .centered-heading {
-        text-align: center;
-        width: 100%;
-        font-size: 1.5rem; 
-        font-weight: 800; 
-        line-height: 1.2;
-        padding-bottom: 0.5rem;
-    }
-    .nav-btn-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center; 
-        min-height: 50px;
-        padding: 0.75rem 1.5rem;
-        line-height: 1.2;
-        border-radius: 0.75rem;
-    }
-    
-    /* JUDUL PUTIH SOLID */
-    .text-solid-white {
-        color: #ffffff; 
-        text-shadow: none; 
-    }
-    
-    /* --- STYLE BARU UNTUK CEK KUOTA RESULT --- */
-    .result-success {
-      background-color: #1f2937; /* Darker background */
-      border: 1px solid #66b5e8; /* Accent blue border */
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-      transition: all 0.3s ease;
-    }
-    .result-error {
-      background-color: #1f2937; /* Darker background */
-      border: 1px solid #a466e8; /* Accent purple border */
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-      transition: all 0.3s ease;
-    }
-    
-    /* Loading Spinner */
-    #cover-spin {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      z-index: 9999;
-      display: none;
-    }
-    .loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--tw-color-accent-blue);
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    
+    ${sharedCSS}
   </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center">
@@ -1302,13 +1352,13 @@ const HTML_CONTENT_TEMPLATE = `
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script>
     // Inject semua parser, generator, dan event listener di sini
-    ${html}
+    ${script}
   </script>
 </body>
 </html>
 `;
 
-return new Response(html, {
+return new Response(HTML_CONTENT_TEMPLATE, {
         headers: { 'content-type': 'text/html;charset=UTF-8' },
     });
 }
@@ -1363,10 +1413,10 @@ async function websocketHandler(request) {
           const protocol = await protocolSniffer(chunk);
           let protocolHeader;
 
-          if (protocol === atob(horse)) {
-            protocolHeader = readHorseHeader(chunk);
-          } else if (protocol === atob(flash)) {
-            protocolHeader = readFlashHeader(chunk);
+          if (protocol === 'trojan') {
+            protocolHeader = readTrojanHeader(chunk);
+          } else if (protocol === 'vless') {
+            protocolHeader = readVlessHeader(chunk);
           } else if (protocol === "ss") {
             protocolHeader = readSsHeader(chunk);
           } else {
@@ -1430,20 +1480,20 @@ async function websocketHandler(request) {
 
 async function protocolSniffer(buffer) {
   if (buffer.byteLength >= 62) {
-    const horseDelimiter = new Uint8Array(buffer.slice(56, 60));
-    if (horseDelimiter[0] === 0x0d && horseDelimiter[1] === 0x0a) {
-      if (horseDelimiter[2] === 0x01 || horseDelimiter[2] === 0x03 || horseDelimiter[2] === 0x7f) {
-        if (horseDelimiter[3] === 0x01 || horseDelimiter[3] === 0x03 || horseDelimiter[3] === 0x04) {
-          return atob(horse);
+    const trojanDelimiter = new Uint8Array(buffer.slice(56, 60));
+    if (trojanDelimiter[0] === 0x0d && trojanDelimiter[1] === 0x0a) {
+      if (trojanDelimiter[2] === 0x01 || trojanDelimiter[2] === 0x03 || trojanDelimiter[2] === 0x7f) {
+        if (trojanDelimiter[3] === 0x01 || trojanDelimiter[3] === 0x03 || trojanDelimiter[3] === 0x04) {
+          return "trojan";
         }
       }
     }
   }
 
-  const flashDelimiter = new Uint8Array(buffer.slice(1, 17));
-  // Hanya mendukung UUID v4
-  if (arrayBufferToHex(flashDelimiter).match(/^[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}$/i)) {
-    return atob(flash);
+  const vlessDelimiter = new Uint8Array(buffer.slice(1, 17));
+  // Only support UUID v4
+  if (arrayBufferToHex(vlessDelimiter).match(/^[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}$/i)) {
+    return "vless";
   }
 
   return "ss"; // default
@@ -1575,6 +1625,11 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
   return stream;
 }
 
+/**
+ * Parses the header of a ShadowSocks request.
+ * @param {ArrayBuffer} ssBuffer The request buffer.
+ * @returns {object} The parsed header information.
+ */
 function readSsHeader(ssBuffer) {
   const view = new DataView(ssBuffer);
 
@@ -1631,7 +1686,12 @@ function readSsHeader(ssBuffer) {
   };
 }
 
-function readFlashHeader(buffer) {
+/**
+ * Parses the header of a VLESS request.
+ * @param {ArrayBuffer} buffer The request buffer.
+ * @returns {object} The parsed header information.
+ */
+function readVlessHeader(buffer) {
   const version = new Uint8Array(buffer.slice(0, 1));
   let isUDP = false;
 
@@ -1702,7 +1762,12 @@ function readFlashHeader(buffer) {
   };
 }
 
-function readHorseHeader(buffer) {
+/**
+ * Parses the header of a Trojan request.
+ * @param {ArrayBuffer} buffer The request buffer.
+ * @returns {object} The parsed header information.
+ */
+function readTrojanHeader(buffer) {
   const dataBuffer = buffer.slice(58);
   if (dataBuffer.byteLength < 6) {
     return {
@@ -1982,211 +2047,8 @@ let baseHTML = `
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     
     <style>
-    /* 1. SCROLLBAR HIDE */
-    /* For Webkit-based browsers (Chrome, Safari and Opera) */
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-    /* For IE, Edge and Firefox */
-    .scrollbar-hide {
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
-    }
-
-    /* 2. FONT IMPORT */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-    /* 3. GLASSMORPHISM EFFECT */
-    .glass-effect {
-        background-color: rgba(42, 42, 47, 0.6);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 224, 183, 0.3);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .glass-effect-light {
-        background-color: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 224, 183, 0.2);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-    
-    /* 4. FLAG SPIN ANIMATION */
-    .flag-spin {
-        animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
-        transform-origin: center center; /* Pastikan rotasi dari tengah */
-    }
-    @keyframes spin-around {
-        0% {
-            transform: rotateY(0deg); /* Posisi awal, tidak berputar */
-        }
-        50% {
-            transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
-        }
-        100% {
-            transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
-        }
-    }
-
-    /* 5. MAIN CONTAINER & BOX STYLES */
-    .main-container {
-        background: rgba(30, 41, 59, 0.8); 
-        backdrop-filter: blur(8px);
-        border-radius: 1.5rem;
-        box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.7), 
-            0 0 15px rgba(102, 181, 232, 0.2) inset, 
-            0 0 5px rgba(0, 0, 0, 0.5); 
-        border: 1px solid rgba(100, 116, 139, 0.4); 
-        padding: 2rem;
-        margin-bottom: 2rem;
-        transform: translateZ(20px); 
-    }
-
-    /* 6. BUTTON STYLES */
-    .btn-gradient {
-        background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s ease;
-    }
-    .btn-gradient:hover:not(:disabled) {
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
-        transform: translateY(1px);
-    }
-    .action-btn {
-        background-color: #1e293b; 
-        color: #94a3b8;
-        border: 1px solid #475569;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #334155; 
-        color: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-        transform: translateY(1px);
-    }
-
-    /* 7. INPUT FIELD STYLES */
-    .input-group {
-        background-color: rgba(30, 41, 59, 0.6); 
-        border-radius: 0.75rem; 
-        padding: 1rem; 
-        border: 1px solid rgba(100, 116, 139, 0.3);
-        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
-    }
-    .input-dark, .input-group textarea, .input-group select {
-        background-color: #1f2937; 
-        color: #ffffff;
-        border: 1px solid #475569; 
-        border-radius: 0.5rem;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-        border-color: var(--tw-color-accent-blue);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
-    }
-
-    /* 8. TABLE STYLES (Dark Theme) */
-    .table-dark th {
-        background-color: #1e293b; 
-        color: #94a3b8; 
-        font-weight: 600;
-    }
-    .table-dark td {
-        border-color: #334155; 
-    }
-    .table-dark tr:nth-child(even) {
-        background-color: #111827; 
-    }
-    .table-dark tr:hover {
-        background-color: #334155 !important; 
-    }
-
-    /* 9. UTILITY CLASSES */
-    .centered-heading {
-        text-align: center;
-        width: 100%;
-        font-size: 1.5rem; 
-        font-weight: 800; 
-        line-height: 1.2;
-        padding-bottom: 0.5rem;
-    }
-    .nav-btn-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center; 
-        min-height: 50px;
-        padding: 0.75rem 1.5rem;
-        line-height: 1.2;
-        border-radius: 0.75rem;
-    }
-    .text-solid-white {
-        color: #ffffff; 
-        text-shadow: none; 
-    }
-
-    /* 10. RESULT BOXES */
-    .result-success {
-        background-color: #1f2937; /* Darker background */
-        border: 1px solid #66b5e8; /* Accent blue border */
-        color: #ffffff;
-        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
-        transition: all 0.3s ease;
-    }
-    .result-error {
-        background-color: #1f2937; /* Darker background */
-        border: 1px solid #a466e8; /* Accent purple border */
-        color: #ffffff;
-        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
-        transition: all 0.3s ease;
-    }
-    
-    /* 11. LOADING SPINNER */
-    #cover-spin {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.8);
-        z-index: 9999;
-        display: none;
-    }
-    .loader {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid var(--tw-color-accent-blue);
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    /* CSS untuk efek berkedip (blink) */
-    @keyframes blink {
-        0% { opacity: 1; }
-        50% { opacity: 0.2; }
-        100% { opacity: 1; }
-    }
-    .blink-text {
-        animation: blink 1s linear infinite;
-    }
-    /* Definisi warna dasar */
-    .text-green-600 { color: #16a34a; }
-    .text-red-600 { color: #dc2626; }
-    .text-yellow-400 { color: #facc15; } /* WARNA KUNING BARU */
-    .text-xs { font-size: 0.75rem; }
-    .font-normal { font-weight: 400; }
-</style>
+        ${sharedCSS}
+    </style>
     <script>
         tailwind.config = {
             darkMode: 'selector',
@@ -2785,10 +2647,9 @@ function checkProxy() {
                             const colo = jsonResp.colo || "N/A";
 
                             // MODIFIKASI: Menampilkan Active berkedip dan Delay/Colo KUNING
-                            pingElement.innerHTML = \`
-                                <span class="blink-text">Active</span><br>
-                                <span class="text-xs font-normal text-yellow-400">\${delay} (\${colo})</span>
-                            \`;
+                            pingElement.innerHTML =
+                                '<span class="blink-text">Active</span><br>' +
+                                '<span class="text-xs font-normal text-yellow-400">' + delay + ' (' + colo + ')</span>';
                             
                             // Tambahkan kelas untuk warna hijau pada elemen utama (untuk Active)
                             pingElement.classList.add("text-green-600");
