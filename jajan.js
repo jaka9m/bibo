@@ -680,7 +680,7 @@ export default {
             $('#cover-spin').show();
             $.ajax({
                 type: 'GET',
-                url: `https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=${msisdn}&isJSON=true`,
+                url: 'https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=' + msisdn + '&isJSON=true',
                 dataType: 'JSON',
                 contentType: 'application/x-www-form-urlencoded',
                 beforeSend: function (req) {
