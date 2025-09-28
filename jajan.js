@@ -129,7 +129,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
         uri.searchParams.set("host", effectiveHost);
 
         // Build HTML
-        const document = new Document(request, wildcardDomains, rootDomain);
+        const document = new Document(request, wildcardDomains, rootDomain, startIndex);
         document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
@@ -2418,13 +2418,15 @@ class Document {
     proxies = [];
     wildcardDomains = [];
     rootDomain = "";
+    startIndex = 0;
 
-    constructor(request, wildcardDomains = [], rootDomain = "") {
+    constructor(request, wildcardDomains = [], rootDomain = "", startIndex = 0) {
         this.html = baseHTML;
         this.request = request;
         this.url = new URL(this.request.url);
         this.wildcardDomains = wildcardDomains;
         this.rootDomain = rootDomain;
+        this.startIndex = startIndex;
     }
 
     setTotalProxy(total) {
@@ -2464,7 +2466,7 @@ setTitle(title) {
             const proxyConfigs = prx.list.join(',');
             tableRows += `
                 <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${this.startIndex + i + 1}</td>
     <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
