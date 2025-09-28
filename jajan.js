@@ -138,12 +138,12 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
             const prx = prxList[i];
             if (!prx) break;
 
-            const { prxIP, prxPort, country, org } = prx;
+            const { country, org } = prx;
 
-            uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prxIP}-${prxPort}`);
+            uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
 
             const protocolsToUse = selectedProtocol && selectedProtocol !== 'all' ? [selectedProtocol] : PROTOCOLS;
-            const portsToUse = selectedPort && selectedPort !== 'all' ? [parseInt(selectedPort)] : PORTS;
+            const portsToUse = selectedPort === 'tls' ? [443] : selectedPort === 'ntls' ? [80] : PORTS;
 
             const prxs = [];
             for (const port of portsToUse) {
@@ -157,7 +157,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
                             "plugin",
                             `${atob(v2)}-plugin${
                                 port == 80 ? "" : ";tls"
-                            };mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${prxPort};host=${effectiveHost}`
+                            };mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort};host=${effectiveHost}`
                         );
                     } else {
                         uri.username = uuid;
@@ -174,8 +174,8 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
             }
             document.registerProxies(
                 {
-                    prxIP,
-                    prxPort,
+                    prxIP: prx.prxIP,
+                    prxPort: prx.prxPort,
                     country,
                     org,
                 },
@@ -383,7 +383,7 @@ export default {
                   uri.username = btoa(`none:${uuid}`);
                   uri.searchParams.set(
                     "plugin",
-                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${
+                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
                       prx.prxPort
                     };host=${effectiveHost}`
                   );
@@ -393,7 +393,7 @@ export default {
 
                 uri.searchParams.set("security", port == 443 ? "tls" : "none");
                 uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
-                uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prxIP}-${prx.prxPort}`);
+                uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
 
                 uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
                   port == 443 ? "TLS" : "NTLS"
@@ -2283,11 +2283,11 @@ buildDropdowns() {
         value: 'all',
         label: 'All Ports'
     }, {
-        value: '443',
-        label: 'TLS (443)'
+        value: 'tls',
+        label: 'TLS'
     }, {
-        value: '80',
-        label: 'NTLS (80)'
+        value: 'ntls',
+        label: 'NTLS'
     }];
 
     let portOptions = ports.map(port =>
