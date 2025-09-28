@@ -109,7 +109,7 @@ async function reverseWeb(request, target, targetPath) {
   return newResponse;
 }
 
-function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null) {
+function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null, wildcardDomains = []) {
     const startIndex = PRX_PER_PAGE * page;
     const totalProxies = prxList.length;
     const totalPages = Math.ceil(totalProxies / PRX_PER_PAGE) || 1;
@@ -129,7 +129,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
         uri.searchParams.set("host", effectiveHost);
 
         // Build HTML
-        const document = new Document(request);
+        const document = new Document(request, wildcardDomains);
         document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
@@ -268,7 +268,10 @@ export default {
           return true;
         });
 
-        const result = getAllConfig(request, hostname, prxList, pageIndex, selectedProtocol, selectedPort);
+        const cloudflareApi = new CloudflareApi();
+        const wildcardDomains = await cloudflareApi.getDomainList();
+
+        const result = getAllConfig(request, hostname, prxList, pageIndex, selectedProtocol, selectedPort, wildcardDomains);
         return new Response(result, {
           status: 200,
           headers: { "Content-Type": "text/html;charset=utf-8" },
@@ -2036,11 +2039,13 @@ setInterval(updateTime, 1000);
 
 class Document {
     proxies = [];
+    wildcardDomains = [];
 
-    constructor(request) {
+    constructor(request, wildcardDomains = []) {
         this.html = baseHTML;
         this.request = request;
         this.url = new URL(this.request.url);
+        this.wildcardDomains = wildcardDomains;
     }
 
     setTotalProxy(total) {
@@ -2254,10 +2259,9 @@ setTitle(title) {
     // ---
 
     // Host Dropdown
-    // Perbaikan: Menghapus baris 'label: 'Default'' yang tidak valid
     const hosts = [{
         value: APP_DOMAIN,
-        label: 'Default Host (' + APP_DOMAIN + ')' // Membuat label lebih jelas
+        label: 'Default Host (' + APP_DOMAIN + ')'
     }, {
         value: 'ava.game.naver.com',
         label: 'ava.game.naver.com'
@@ -2265,10 +2269,19 @@ setTitle(title) {
         value: 'investor.fb.com',
         label: 'investor.fb.com'
     }];
+
+    // Add wildcard domains to the list
+    if (this.wildcardDomains.length > 0) {
+        this.wildcardDomains.forEach(domain => {
+            hosts.push({
+                value: domain.hostname,
+                label: domain.hostname,
+            });
+        });
+    }
     
     let hostOptions = '';
     for (const host of hosts) {
-        // Menggunakan host.value dan host.label dari objek hosts
         hostOptions += `<option value="${host.value}" ${selectedHost === host.value ? 'selected' : ''}>${host.label}</option>`;
     }
 
