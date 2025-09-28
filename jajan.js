@@ -458,8 +458,6 @@ export default {
             }
           );
         }
-      }
-
       } else if (url.pathname === "/kuota") {
         return new Response("welcome to our service", {
           status: 200,
