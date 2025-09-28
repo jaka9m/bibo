@@ -2840,10 +2840,9 @@ function checkProxy() {
                             const colo = jsonResp.colo || "N/A";
 
                             // MODIFIKASI: Menampilkan Active berkedip dan Delay/Colo KUNING
-                            pingElement.innerHTML = `
-                                <span class="blink-text">Active</span><br>
-                                <span class="text-xs font-normal text-yellow-400">\${delay} (\${colo})</span>
-                            `;
+                            pingElement.innerHTML =
+                                '<span class="blink-text">Active</span><br>' +
+                                '<span class="text-xs font-normal text-yellow-400">' + delay + ' (' + colo + ')</span>';
                             
                             // Tambahkan kelas untuk warna hijau pada elemen utama (untuk Active)
                             pingElement.classList.add("text-green-600");
