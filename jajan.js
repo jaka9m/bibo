@@ -459,9 +459,22 @@ export default {
           );
         }
       } else if (url.pathname === "/kuota") {
-        return new Response("welcome to our service", {
+        const html = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome</title>
+          </head>
+          <body>
+            <h1>Welcome to our service</h1>
+          </body>
+          </html>
+        `;
+        return new Response(html, {
           status: 200,
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          headers: { 'Content-Type': 'text/html;charset=utf-8' },
         });
       }
 
