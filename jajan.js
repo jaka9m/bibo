@@ -1,13 +1,13 @@
 import { connect } from "cloudflare:sockets";
 
 // Variables
-const rootDomain = "gpj2.dpdns.org"; // Ganti dengan domain utama kalian
+const rootDomain = "gpj1.dpdns.org"; // Ganti dengan domain utama kalian
 const serviceName = "gamang"; // Ganti dengan nama workers kalian
 const apiKey = "673fee2d6747b90db9a90e9279195974d01f9"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
 const apiEmail = "paoandest2025@gmail.com"; // Ganti dengan email yang kalian gunakan
 const accountID = "c4682365bae93b9e2a94d6ba827c82a9"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
 const zoneID = "dc7a50828fc5e7cacd27318d4e7ceee5"; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
-const ownerPassword = ".";
+const ownerPassword = "dprBABI";
 let isApiReady = false;
 let prxIP = "";
 let cachedPrxList = [];
@@ -40,9 +40,9 @@ const CORS_HEADER_OPTIONS = {
   "Access-Control-Max-Age": "86400",
 };
 
-async function getKVPrxList(kvPrxUrl = KV_PRX_URL) {
+async function getKVPrxList(kvPrxUrl) {
   if (!kvPrxUrl) {
-    throw new Error("No URL Provided!");
+    return {};
   }
 
   const kvPrx = await fetch(kvPrxUrl);
@@ -109,7 +109,7 @@ async function reverseWeb(request, target, targetPath) {
   return newResponse;
 }
 
-function getAllConfig(request, hostName, prxList, page = 0) {
+function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null) {
     const startIndex = PRX_PER_PAGE * page;
     const totalProxies = prxList.length;
     const totalPages = Math.ceil(totalProxies / PRX_PER_PAGE) || 1;
@@ -117,15 +117,20 @@ function getAllConfig(request, hostName, prxList, page = 0) {
     try {
         const uuid = crypto.randomUUID();
 
+        // If a custom host is selected, the host/SNI will be a combination.
+        // Otherwise, it's just the application's domain.
+        const effectiveHost = hostName === APP_DOMAIN ? APP_DOMAIN : `${hostName}.${APP_DOMAIN}`;
+
         // Build URI
+        // The address is the selected host (e.g., ava.game.naver.com or the app domain)
         const uri = new URL(`${atob(horse)}://${hostName}`);
         uri.searchParams.set("encryption", "none");
         uri.searchParams.set("type", "ws");
-        uri.searchParams.set("host", hostName);
+        uri.searchParams.set("host", effectiveHost);
 
         // Build HTML
         const document = new Document(request);
-        document.setTitle("Free VPN <span class='text-blue-500 font-semibold'>Cloudflare</span>");
+        document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
 
@@ -137,11 +142,14 @@ function getAllConfig(request, hostName, prxList, page = 0) {
 
             uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prxIP}-${prxPort}`);
 
+            const protocolsToUse = selectedProtocol && selectedProtocol !== 'all' ? [selectedProtocol] : PROTOCOLS;
+            const portsToUse = selectedPort && selectedPort !== 'all' ? [parseInt(selectedPort)] : PORTS;
+
             const prxs = [];
-            for (const port of PORTS) {
+            for (const port of portsToUse) {
                 uri.port = port.toString();
                 uri.hash = `${i + 1} ${getFlagEmoji(country)} ${org} WS ${port == 443 ? "TLS" : "NTLS"} [${serviceName}]`;
-                for (const protocol of PROTOCOLS) {
+                for (const protocol of protocolsToUse) {
                     // Special exceptions
                     if (protocol === "ss") {
                         uri.username = btoa(`none:${uuid}`);
@@ -149,7 +157,7 @@ function getAllConfig(request, hostName, prxList, page = 0) {
                             "plugin",
                             `${atob(v2)}-plugin${
                                 port == 80 ? "" : ";tls"
-                            };mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${prxPort};host=${hostName}`
+                            };mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${prxPort};host=${effectiveHost}`
                         );
                     } else {
                         uri.username = uuid;
@@ -158,7 +166,7 @@ function getAllConfig(request, hostName, prxList, page = 0) {
 
                     uri.protocol = protocol;
                     uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                    uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : hostName);
+                    uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
 
                     // Build VPN URI
                     prxs.push(uri.toString());
@@ -216,7 +224,7 @@ export default {
           // Contoh: /ID, /SG, dll
           const prxKeys = url.pathname.replace("/", "").toUpperCase().split(",");
           const prxKey = prxKeys[Math.floor(Math.random() * prxKeys.length)];
-          const kvPrx = await getKVPrxList();
+          const kvPrx = await getKVPrxList(env.KV_PRX_URL);
 
           prxIP = kvPrx[prxKey][Math.floor(Math.random() * kvPrx[prxKey].length)];
 
@@ -230,16 +238,18 @@ export default {
       if (url.pathname.startsWith("/sub")) {
         const page = url.pathname.match(/^\/sub\/(\d+)$/);
         const pageIndex = parseInt(page ? page[1] : "0");
-        const hostname = request.headers.get("Host");
 
         // Queries
-        const countrySelect = url.searchParams.get("cc")?.toUpperCase().split(",");
+        const hostname = url.searchParams.get("host") || APP_DOMAIN;
+        const countrySelect = url.searchParams.get("cc")?.toUpperCase();
+        const selectedProtocol = url.searchParams.get("vpn");
+        const selectedPort = url.searchParams.get("port");
         const searchKeywords = url.searchParams.get("search")?.toLowerCase() || "";
         const prxBankUrl = url.searchParams.get("prx-list") || env.PRX_BANK_URL;
         let prxList = (await getPrxList(prxBankUrl)).filter((prx) => {
           // Filter prxs by Country
-          if (countrySelect && countrySelect[0]) {
-            if (!countrySelect.includes(prx.country)) return false;
+          if (countrySelect && countrySelect !== 'ALL') {
+            if (prx.country !== countrySelect) return false;
           }
 
           // Filter by search keywords
@@ -258,7 +268,7 @@ export default {
           return true;
         });
 
-        const result = getAllConfig(request, hostname, prxList, pageIndex);
+        const result = getAllConfig(request, hostname, prxList, pageIndex, selectedProtocol, selectedPort);
         return new Response(result, {
           status: 200,
           headers: { "Content-Type": "text/html;charset=utf-8" },
@@ -335,6 +345,7 @@ export default {
           const filterLimit = parseInt(url.searchParams.get("limit")) || 10;
           const filterFormat = url.searchParams.get("format") || "raw";
           const fillerDomain = url.searchParams.get("domain") || APP_DOMAIN;
+          const effectiveHost = fillerDomain === APP_DOMAIN ? APP_DOMAIN : `${fillerDomain}.${APP_DOMAIN}`;
 
           const prxBankUrl = url.searchParams.get("prx-list") || env.PRX_BANK_URL;
           const prxList = await getPrxList(prxBankUrl)
@@ -357,7 +368,7 @@ export default {
             const uri = new URL(`${atob(horse)}://${fillerDomain}`);
             uri.searchParams.set("encryption", "none");
             uri.searchParams.set("type", "ws");
-            uri.searchParams.set("host", APP_DOMAIN);
+            uri.searchParams.set("host", effectiveHost);
 
             for (const port of filterPort) {
               for (const protocol of filterVPN) {
@@ -371,14 +382,14 @@ export default {
                     "plugin",
                     `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prxIP}-${
                       prx.prxPort
-                    };host=${APP_DOMAIN}`
+                    };host=${effectiveHost}`
                   );
                 } else {
                   uri.username = uuid;
                 }
 
                 uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : APP_DOMAIN);
+                uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
                 uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prxIP}-${prx.prxPort}`);
 
                 uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
@@ -1115,52 +1126,211 @@ let baseHTML = `
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
     
     <style>
-        /* For Webkit-based browsers (Chrome, Safari and Opera) */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        /* For IE, Edge and Firefox */
-        .scrollbar-hide {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    /* 1. SCROLLBAR HIDE */
+    /* For Webkit-based browsers (Chrome, Safari and Opera) */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    /* For IE, Edge and Firefox */
+    .scrollbar-hide {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
 
-        /* Glassmorphism Effect */
-        .glass-effect {
-            background-color: rgba(42, 42, 47, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 224, 183, 0.3);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .glass-effect-light {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 224, 183, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* CSS untuk animasi bendera berputar */
-.flag-spin {
-  animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
-  transform-origin: center center; /* Pastikan rotasi dari tengah */
-}
+    /* 2. FONT IMPORT */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-@keyframes spin-around {
-  0% {
-    transform: rotateY(0deg); /* Posisi awal, tidak berputar */
-  }
-  50% {
-    transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
-  }
-  100% {
-    transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
-  }
-}
-    </style>
+    /* 3. GLASSMORPHISM EFFECT */
+    .glass-effect {
+        background-color: rgba(42, 42, 47, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 224, 183, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .glass-effect-light {
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 224, 183, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 4. FLAG SPIN ANIMATION */
+    .flag-spin {
+        animation: spin-around 4s linear infinite alternate; /* 4s: durasi, infinite: berulang, alternate: bolak-balik */
+        transform-origin: center center; /* Pastikan rotasi dari tengah */
+    }
+    @keyframes spin-around {
+        0% {
+            transform: rotateY(0deg); /* Posisi awal, tidak berputar */
+        }
+        50% {
+            transform: rotateY(180deg); /* Berputar 180 derajat (menghadap ke belakang) */
+        }
+        100% {
+            transform: rotateY(0deg); /* Kembali ke posisi awal (menghadap ke depan) */
+        }
+    }
 
+    /* 5. MAIN CONTAINER & BOX STYLES */
+    .main-container {
+        background: rgba(30, 41, 59, 0.8); 
+        backdrop-filter: blur(8px);
+        border-radius: 1.5rem;
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.7), 
+            0 0 15px rgba(102, 181, 232, 0.2) inset, 
+            0 0 5px rgba(0, 0, 0, 0.5); 
+        border: 1px solid rgba(100, 116, 139, 0.4); 
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transform: translateZ(20px); 
+    }
+
+    /* 6. BUTTON STYLES */
+    .btn-gradient {
+        background: linear-gradient(to right, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(102, 181, 232, 0.8);
+        transform: translateY(1px);
+    }
+    .action-btn {
+        background-color: #1e293b; 
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155; 
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
+
+    /* 7. INPUT FIELD STYLES */
+    .input-group {
+        background-color: rgba(30, 41, 59, 0.6); 
+        border-radius: 0.75rem; 
+        padding: 1rem; 
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); 
+    }
+    .input-dark, .input-group textarea, .input-group select {
+        background-color: #1f2937; 
+        color: #ffffff;
+        border: 1px solid #475569; 
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); 
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+        border-color: var(--tw-color-accent-blue);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue); 
+    }
+
+    /* 8. TABLE STYLES (Dark Theme) */
+    .table-dark th {
+        background-color: #1e293b; 
+        color: #94a3b8; 
+        font-weight: 600;
+    }
+    .table-dark td {
+        border-color: #334155; 
+    }
+    .table-dark tr:nth-child(even) {
+        background-color: #111827; 
+    }
+    .table-dark tr:hover {
+        background-color: #334155 !important; 
+    }
+
+    /* 9. UTILITY CLASSES */
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem; 
+        font-weight: 800; 
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center; 
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    .text-solid-white {
+        color: #ffffff; 
+        text-shadow: none; 
+    }
+
+    /* 10. RESULT BOXES */
+    .result-success {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #66b5e8; /* Accent blue border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4); /* Blue glow */
+        transition: all 0.3s ease;
+    }
+    .result-error {
+        background-color: #1f2937; /* Darker background */
+        border: 1px solid #a466e8; /* Accent purple border */
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4); /* Purple glow */
+        transition: all 0.3s ease;
+    }
+    
+    /* 11. LOADING SPINNER */
+    #cover-spin {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid var(--tw-color-accent-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* CSS untuk efek berkedip (blink) */
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.2; }
+        100% { opacity: 1; }
+    }
+    .blink-text {
+        animation: blink 1s linear infinite;
+    }
+    /* Definisi warna dasar */
+    .text-green-600 { color: #16a34a; }
+    .text-red-600 { color: #dc2626; }
+    .text-yellow-400 { color: #facc15; } /* WARNA KUNING BARU */
+    .text-xs { font-size: 0.75rem; }
+    .font-normal { font-weight: 400; }
+</style>
     <script>
         tailwind.config = {
             darkMode: 'selector',
@@ -1184,6 +1354,15 @@ let baseHTML = `
 <body
     class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
   >
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        // Setel ke mode gelap jika tema adalah 'gelap' atau jika tidak ada tema yang disetel (bawaan)
+        if (theme === 'dark' || !theme) {
+          document.getElementById('html').classList.add('dark');
+        }
+      })();
+    </script>
     <div
       id="loading-screen"
       class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80 transition-opacity duration-500"
@@ -1206,18 +1385,15 @@ let baseHTML = `
         </div>
     </div>
 
-    <!-- Select Country -->
-    <div>
-      <div
-        class="h-full fixed top-0 w-14 bg-gray-100 dark:bg-gray-900 border-r-2 border-gray-300 dark:border-gray-700 z-20 overflow-y-scroll scrollbar-hide"
-      >
-        <div class="text-2xl flex flex-col items-center h-full gap-2 py-2">
-          PLACEHOLDER_BENDERA_NEGARA
-        </div>
-      </div>
-    </div>
-    
-    <div class="ml-16 flex flex-col items-center min-h-screen relative z-10 p-4">
+<div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl **py-3** text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
+    <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
+        PLACEHOLDER_JUDUL
+    </h1>
+</div>
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div class="bg-gray-800/30 dark:bg-gray-900/40 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 p-4 sm:p-6">
+        <div class="flex flex-col items-center relative z-10">
   <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
     <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
 
@@ -1261,20 +1437,19 @@ let baseHTML = `
     </div>
     <div class="mt-4 flex gap-2">
         <input type="text" id="search-bar" placeholder="Search by IP, Port, ISP, or Country..." class="w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button onclick="searchProxy()" class="px-4 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+        <button onclick="searchProxy()" class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">Search</button>
     </div>
   </div>
 
-  <div id="container-title" class="sticky top-0 z-10 w-full max-w-7xl rounded-xl py-6 text-center shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out">
-  <div class="relative overflow-hidden">
-    <h1 id="runningTitle" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
-      PLACEHOLDER_JUDUL
-    </h1>
-  </div>
+  <div class="w-full max-w-5xl **mb-6** p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+PLACEHOLDER_PROTOCOL_DROPDOWN
+PLACEHOLDER_COUNTRY_DROPDOWN
+PLACEHOLDER_HOST_DROPDOWN
+PLACEHOLDER_PORT_DROPDOWN
 </div>
-
-        <div class="flex flex-col md:flex-row gap-4 pt-8 w-full max-w-7xl justify-center">
-    PLACEHOLDER_PROXY_GROUP
+<br>
+<div class="flex flex-col md:flex-row gap-4 w-full max-w-7xl justify-center">
+PLACEHOLDER_PROXY_GROUP
 </div>
 
         <!-- Pagination -->
@@ -1284,6 +1459,8 @@ let baseHTML = `
             </ul>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">PLACEHOLDER_PAGINATION_INFO</p>
         </nav>
+        </div>
+      </div>
     </div>
 
     <div id="container-window" class="hidden">
@@ -1342,6 +1519,15 @@ let baseHTML = `
         </div>
 
         <div id="container-domains" class="w-full h-32 rounded-md flex flex-col gap-1 overflow-y-scroll scrollbar-hide p-2 bg-gray-900"></div>
+
+        <div class="flex w-full h-full gap-2 justify-between">
+            <input id="delete-domain-input" type="number" placeholder="Input Nomor" class="w-full h-full px-4 py-2 rounded-md focus:outline-0 bg-gray-700 text-white"/>
+            <button onclick="deleteDomainByNumber()" class="p-2 rounded-full bg-red-600 hover:bg-red-700 flex justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                    <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
 
         <button onclick="toggleWildcardsWindow()" class="transform-gpu flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 p-2">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -1451,6 +1637,7 @@ let baseHTML = `
 
       // Local variable
       let rawConfig = "";
+      let wildcardDomains = [];
 
       function getDomainList() {
         if (isDomainListFetched) return;
@@ -1466,19 +1653,14 @@ let baseHTML = `
           if (res.status == 200) {
             windowInfoContainer.innerText = "Done!";
             const respJson = await res.json();
+            wildcardDomains = respJson; // Simpan daftar domain
             respJson.forEach((domain, index) => {
               const domainContainer = document.createElement("div");
-              domainContainer.className = "flex items-center justify-between w-full bg-amber-400 rounded-md p-2";
+              domainContainer.className = "flex items-center justify-between w-full rounded-md p-2 text-white";
 
               const domainText = document.createElement("span");
               domainText.innerText = (index + 1) + ". " + domain.hostname;
               domainContainer.appendChild(domainText);
-
-              const deleteButton = document.createElement("button");
-              deleteButton.innerText = "Hapus";
-              deleteButton.className = "bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded text-xs";
-              deleteButton.onclick = () => deleteDomain(domain.id, domain.hostname);
-              domainContainer.appendChild(deleteButton);
 
               domainListContainer.appendChild(domainContainer);
             });
@@ -1486,6 +1668,27 @@ let baseHTML = `
             windowInfoContainer.innerText = "Failed!";
           }
         });
+      }
+
+      function deleteDomainByNumber() {
+        const inputElement = document.getElementById("delete-domain-input");
+        const number = parseInt(inputElement.value, 10);
+
+        if (isNaN(number) || number < 1 || number > wildcardDomains.length) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Masukkan nomor urut yang valid.',
+            icon: 'error',
+            width: '300px',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          return;
+        }
+
+        const domainToDelete = wildcardDomains[number - 1];
+        deleteDomain(domainToDelete.id, domainToDelete.hostname);
+        inputElement.value = "";
       }
 
       function deleteDomain(domainId, domainName) {
@@ -1612,19 +1815,48 @@ let baseHTML = `
         window.location.href = link + window.location.search;
       }
 
-      function searchProxy() {
-        const searchBar = document.getElementById("search-bar");
-        const searchValue = searchBar.value;
-        const url = new URL(window.location.href);
-        if (searchValue.length === 2) {
-          url.searchParams.set("cc", searchValue);
-          url.searchParams.delete("search");
-        } else {
-          url.searchParams.set("search", searchValue);
-          url.searchParams.delete("cc");
-        }
-        window.location.href = url.toString();
+      function applyFilters() {
+          const protocol = document.getElementById('protocol-select').value;
+          const country = document.getElementById('country-select').value;
+          const host = document.getElementById('host-select').value;
+          const port = document.getElementById('port-select').value;
+
+          const url = new URL(window.location.href);
+          url.searchParams.set('vpn', protocol);
+          url.searchParams.set('cc', country);
+          url.searchParams.set('host', host);
+          url.searchParams.set('port', port);
+          window.location.href = url.toString();
       }
+
+      function searchProxy() {
+    const searchBar = document.getElementById("search-bar");
+    // Gunakan .trim() untuk memastikan input yang berisi spasi kosong juga dianggap kosong
+    const searchValue = searchBar.value.trim(); 
+    
+    // --- KONDISI BARU: Cek jika input kosong ---
+    if (searchValue === "") {
+        // Alihkan pengguna ke /sub jika input kosong
+        window.location.href = "/sub";
+        return; // Hentikan eksekusi fungsi selanjutnya
+    }
+    // --- Akhir Kondisi Baru ---
+
+    const url = new URL(window.location.href);
+
+    if (searchValue.length === 2) {
+        // Logika untuk kode negara (cc)
+        url.searchParams.set("cc", searchValue);
+        url.searchParams.delete("search");
+    } else {
+        // Logika untuk pencarian umum
+        url.searchParams.set("search", searchValue);
+        url.searchParams.delete("cc");
+    }
+    
+    // Alihkan ke URL baru dengan parameter pencarian
+    window.location.href = url.toString();
+}
 
       function toggleOutputWindow() {
         windowInfoContainer.innerText = "Select output:";
@@ -1661,19 +1893,22 @@ let baseHTML = `
         const rootElement = document.getElementById("html");
         if (rootElement.classList.contains("dark")) {
           rootElement.classList.remove("dark");
+          localStorage.setItem('theme', 'light');
         } else {
           rootElement.classList.add("dark");
+          localStorage.setItem('theme', 'dark');
         }
       }
-
-      function checkProxy() {
+  
+function checkProxy() {
     for (let i = 0; ; i++) {
         const pingElement = document.getElementById("ping-" + i);
         if (pingElement == undefined) return;
 
         const target = pingElement.textContent.split(" ").filter((ipPort) => ipPort.match(":"))[0];
         if (target) {
-            pingElement.textContent = "Checking...";
+            // Gunakan innerHTML untuk menampilkan multi-baris
+            pingElement.innerHTML = "Checking..."; 
         } else {
             continue;
         }
@@ -1687,25 +1922,39 @@ let baseHTML = `
                         pingElement.classList.remove("dark:text-white");
                         const jsonResp = await res.json();
                         
-                        // Periksa status dari JSON, bukan dari properti proxyip
+                        // Periksa status dari JSON
                         if (jsonResp.status === "ACTIVE") {
                             isActive = true;
                             // Mengambil delay dan colo dari data JSON
                             const delay = jsonResp.delay || "N/A";
                             const colo = jsonResp.colo || "N/A";
-                            pingElement.textContent = "Active " + delay + " (" + colo + ")";
+
+                            // MODIFIKASI: Menampilkan Active berkedip dan Delay/Colo KUNING
+                            pingElement.innerHTML = \`
+                                <span class="blink-text">Active</span><br>
+                                <span class="text-xs font-normal text-yellow-400">\${delay} (\${colo})</span>
+                            \`;
+                            
+                            // Tambahkan kelas untuk warna hijau pada elemen utama (untuk Active)
                             pingElement.classList.add("text-green-600");
-                            pingElement.classList.remove("text-red-600"); // Pastikan kelas lain dihapus
+                            pingElement.classList.remove("text-red-600"); 
+
                         } else {
                             pingElement.textContent = "Inactive";
                             pingElement.classList.add("text-red-600");
-                            pingElement.classList.remove("text-green-600"); // Pastikan kelas lain dihapus
+                            pingElement.classList.remove("text-green-600"); 
                         }
                     } else {
                         pingElement.textContent = "Check Failed!";
                         pingElement.classList.add("text-red-600");
                         pingElement.classList.remove("text-green-600");
                     }
+                })
+                .catch(() => {
+                    // Tambahkan penanganan error jika fetch gagal total (mis. masalah jaringan)
+                    pingElement.textContent = "Fetch Error!";
+                    pingElement.classList.add("text-red-600");
+                    pingElement.classList.remove("text-green-600");
                 })
                 .finally(() => {
                     resolve(0);
@@ -1825,68 +2074,51 @@ setTitle(title) {
     }
 
     buildProxyGroup() {
-    let proxyGroupElement = "";
-    proxyGroupElement += `<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">`;
-    
-    for (let i = 0; i < this.proxies.length; i++) {
-        const prx = this.proxies[i];
-
-        // Assign proxies
-        proxyGroupElement += `<div class="lozad scale-95 mb-4 bg-blue-300/30 dark:bg-slate-800 transition-all duration-300 rounded-lg p-6 flex flex-col shadow-lg border border-white/20 hover:scale-105 backdrop-blur-md">`;
-        
-        // Header Kartu: Ping dan Bendera
-        proxyGroupElement += `  <div class="flex justify-between items-center">`;
-        
-        // Elemen Ping di kiri
-        proxyGroupElement += `    <div id="ping-${i}" class="animate-pulse text-xs font-semibold text-left">
-    <span class="text-red-500 dark:text-red-400">I</span><span class="text-orange-500 dark:text-orange-400">d</span><span class="text-yellow-500 dark:text-yellow-400">l</span><span class="text-green-500 dark:text-green-400">e</span>
-    <span class="text-slate-500 dark:text-slate-400">${prx.prxIP}:${prx.prxPort}</span>
-</div>`;
-
-        // Logo Bendera di kanan
-        proxyGroupElement += `    <div class="rounded-full overflow-hidden border-4 border-white dark:border-slate-800">`;
-proxyGroupElement += `        <img width="40" src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" class="flag-spin" />`; // Tambahkan class="flag-spin"
-proxyGroupElement += `    </div>`;
-        
-        proxyGroupElement += `  </div>`; // Penutup div flexbox
-        
-        // Konten Kartu
-        proxyGroupElement += `  <div class="rounded-lg py-4 px-4 bg-blue-200/20 dark:bg-slate-700/50 flex-grow mt-4">`;
-        proxyGroupElement += `    <h5 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-1 overflow-x-scroll scrollbar-hide text-nowrap">${prx.org}</h5>`;
-        proxyGroupElement += `    <div class="text-slate-600 dark:text-slate-300 text-sm">`;
-        proxyGroupElement += `      <p>IP: ${prx.prxIP}</p>`;
-        proxyGroupElement += `      <p>Port: ${prx.prxPort}</p>`;
-        proxyGroupElement += `      <div id="container-region-check-${i}">`;
-        proxyGroupElement += `        <input id="config-sample-${i}" class="hidden" type="text" value="${prx.list[0]}">`;
-        proxyGroupElement += `      </div>`;
-        proxyGroupElement += `    </div>`;
-        proxyGroupElement += `  </div>`;
-        
-        // Tombol Konfigurasi
-        proxyGroupElement += `  <div class="grid grid-cols-2 gap-2 mt-4 text-sm">`;
-        
-        const indexName = [
-            `TROJAN TLS`,
-            `VLESS TLS`,
-            `SS TLS`,
-            `TROJAN NTLS`,
-            `VLESS NTLS`,
-            `SS NTLS`,
-        ];
-        
-        for (let x = 0; x < prx.list.length; x++) {
-            const proxy = prx.list[x];
-            // Tombol kuning keemasan di mode terang, tetap biru di mode gelap
-            proxyGroupElement += `<button class="bg-yellow-400 hover:bg-yellow-500 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-md p-1.5 w-full text-black dark:text-white font-semibold transition-colors duration-200 text-xs" onclick="copyToClipboard('${proxy}')">${indexName[x]}</button>`;
+        let tableRows = "";
+        for (let i = 0; i < this.proxies.length; i++) {
+            const prx = this.proxies[i];
+            const proxyConfigs = prx.list.join(',');
+            tableRows += `
+                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
+        <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
+        ${prx.country}
+    </td>
+    <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">
+    <div class="max-w-[150px] overflow-x-auto whitespace-nowrap">${prx.org}</div></td>
+    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white text-center">${prx.prxIP}:${prx.prxPort}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
+    </td>
+</tr>
+            `;
         }
-        
-        proxyGroupElement += `  </div>`;
-        proxyGroupElement += `</div>`; // Penutup Kartu
-    }
-    proxyGroupElement += `</div>`; // Penutup Grid Kontainer
 
-    this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", `${proxyGroupElement}`);
-}
+        const table = `
+            <div class="overflow-x-auto w-full max-w-full" style="max-height: 500px; overflow-y: auto;">
+    <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        
+        <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
+            <tr>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 50px;">No.</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 120px;">IP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Country</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 150px;">ISP</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 80px;">Status</th>
+                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 100px;">Action</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            ${tableRows}
+        </tbody>
+    </table>
+</div>
+        `;
+
+        this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
+    }
 
     buildCountryFlag() {
         const prxBankUrl = this.url.searchParams.get("prx-list");
@@ -1914,7 +2146,7 @@ proxyGroupElement += `    </div>`;
     addPageButton(text, link, isDisabled) {
         const pageButton = `<li><button ${
             isDisabled ? "disabled" : ""
-        } class="px-3 py-3 text-xs bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-400 dark:disabled:bg-slate-600 text-white font-semibold rounded-md transition-colors" onclick=navigateTo('${link}')>${text}</button></li>`;
+        } class="px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity" onclick=navigateTo('${link}')>${text}</button></li>`;
 
         this.html = this.html.replaceAll("PLACEHOLDER_PAGE_BUTTON", `${pageButton}\nPLACEHOLDER_PAGE_BUTTON`);
     }
@@ -1955,6 +2187,126 @@ proxyGroupElement += `    </div>`;
         this.html = this.html.replaceAll('PLACEHOLDER_CONVERTER_URL', CONVERTER_URL);
         this.html = this.html.replaceAll('PLACEHOLDER_DONATE_LINK', DONATE_LINK);
 
+        this.buildDropdowns();
+
         return this.html.replaceAll(/PLACEHOLDER_\w+/gim, "");
     }
+
+    buildDropdowns() {
+    // Membaca parameter query dari URL
+    const selectedProtocol = this.url.searchParams.get('vpn') || 'all';
+    const selectedCountry = this.url.searchParams.get('cc') || 'all';
+    const selectedHost = this.url.searchParams.get('host') || APP_DOMAIN;
+    const selectedPort = this.url.searchParams.get('port') || 'all';
+
+    // Protokol Dropdown
+    const protocols = [{
+        value: 'all',
+        label: 'All Protocols'
+    }, {
+        value: 'vless',
+        label: 'VLESS'
+    }, {
+        value: 'trojan',
+        label: 'TROJAN'
+    }, {
+        value: 'ss',
+        label: 'SHADOWSOCKS'
+    }];
+
+    let protocolOptions = '';
+    for (const proto of protocols) {
+        protocolOptions += `<option value="${proto.value}" ${selectedProtocol === proto.value ? 'selected' : ''}>${proto.label}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_PROTOCOL_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="protocol-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Protocol</label>
+            <select onchange="applyFilters()" id="protocol-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${protocolOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Country Dropdown
+    // Menggunakan Set untuk mendapatkan negara unik dan mengurutkannya
+    const countries = new Set(cachedPrxList.map(p => p.country));
+
+    // Inisialisasi dengan opsi "All Countries"
+    // Perbaikan: Tidak perlu .toLowerCase() pada 'all'
+    let countryOptions = `<option value="all" ${'all' === selectedCountry ? 'selected' : ''}>All Countries</option>`;
+
+    for (const country of [...countries].sort()) {
+        countryOptions += `<option value="${country}" ${selectedCountry === country ? 'selected' : ''}>${getFlagEmoji(country)} ${country}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_COUNTRY_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="country-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Country</label>
+            <select onchange="applyFilters()" id="country-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${countryOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Host Dropdown
+    // Perbaikan: Menghapus baris 'label: 'Default'' yang tidak valid
+    const hosts = [{
+        value: APP_DOMAIN,
+        label: 'Default Host (' + APP_DOMAIN + ')' // Membuat label lebih jelas
+    }, {
+        value: 'ava.game.naver.com',
+        label: 'ava.game.naver.com'
+    }, {
+        value: 'investor.fb.com',
+        label: 'investor.fb.com'
+    }];
+    
+    let hostOptions = '';
+    for (const host of hosts) {
+        // Menggunakan host.value dan host.label dari objek hosts
+        hostOptions += `<option value="${host.value}" ${selectedHost === host.value ? 'selected' : ''}>${host.label}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_HOST_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="host-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Wildcard/Host</label>
+            <select onchange="applyFilters()" id="host-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${hostOptions}
+            </select>
+        </div>
+    `);
+
+    // ---
+
+    // Port Dropdown
+    const ports = [{
+        value: 'all',
+        label: 'All Ports'
+    }, {
+        value: '443',
+        label: 'TLS (443)'
+    }, {
+        value: '80',
+        label: 'NTLS (80)'
+    }];
+
+    let portOptions = '';
+    for (const port of ports) {
+        portOptions += `<option value="${port.value}" ${selectedPort === port.value ? 'selected' : ''}>${port.label}</option>`;
+    }
+
+    this.html = this.html.replace('PLACEHOLDER_PORT_DROPDOWN', `
+        <div class="relative max-w-xs mx-auto">
+            <label for="port-select" class="block font-medium mb-2 text-gray-300 text-sm text-center">Security/Port</label>
+            <select onchange="applyFilters()" id="port-select" class="w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                ${portOptions}
+            </select>
+        </div>
+    `);
+}
 }
