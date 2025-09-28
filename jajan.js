@@ -109,7 +109,7 @@ async function reverseWeb(request, target, targetPath) {
   return newResponse;
 }
 
-function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null, wildcardDomains = []) {
+function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null, wildcardDomains = [], rootDomain) {
     const startIndex = PRX_PER_PAGE * page;
     const totalProxies = prxList.length;
     const totalPages = Math.ceil(totalProxies / PRX_PER_PAGE) || 1;
@@ -129,7 +129,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
         uri.searchParams.set("host", effectiveHost);
 
         // Build HTML
-        const document = new Document(request, wildcardDomains);
+        const document = new Document(request, wildcardDomains, rootDomain);
         document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
@@ -271,7 +271,7 @@ export default {
         const cloudflareApi = new CloudflareApi();
         const wildcardDomains = await cloudflareApi.getDomainList();
 
-        const result = getAllConfig(request, hostname, prxList, pageIndex, selectedProtocol, selectedPort, wildcardDomains);
+        const result = getAllConfig(request, hostname, prxList, pageIndex, selectedProtocol, selectedPort, wildcardDomains, rootDomain);
         return new Response(result, {
           status: 200,
           headers: { "Content-Type": "text/html;charset=utf-8" },
@@ -2040,12 +2040,14 @@ setInterval(updateTime, 1000);
 class Document {
     proxies = [];
     wildcardDomains = [];
+    rootDomain = "";
 
-    constructor(request, wildcardDomains = []) {
+    constructor(request, wildcardDomains = [], rootDomain = "") {
         this.html = baseHTML;
         this.request = request;
         this.url = new URL(this.request.url);
         this.wildcardDomains = wildcardDomains;
+        this.rootDomain = rootDomain;
     }
 
     setTotalProxy(total) {
@@ -2273,9 +2275,10 @@ setTitle(title) {
     // Add wildcard domains to the list
     if (this.wildcardDomains.length > 0) {
         this.wildcardDomains.forEach(domain => {
+            const subDomain = domain.hostname.replace(`.${this.rootDomain}`, '');
             hosts.push({
-                value: domain.hostname,
-                label: domain.hostname,
+                value: subDomain,
+                label: subDomain,
             });
         });
     }
