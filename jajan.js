@@ -130,7 +130,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
 
         // Build HTML
         const document = new Document(request, wildcardDomains, rootDomain, startIndex);
-        document.setTitle("Free VPN Cloudflare");
+        document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
 
@@ -474,195 +474,268 @@ export default {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
     <script>
-        // Konfigurasi Tailwind CSS untuk warna kustom
-        tailwind.config = { darkMode: 'selector', theme: { extend: {
-            colors: {
-                'accent-blue': '#66b5e8',
-                'accent-purple': '#a466e8',
+    tailwind.config = {
+        darkMode: 'selector',
+        theme: {
+            extend: {
+                colors: {
+                    'accent-blue': '#66b5e8',
+                    'accent-purple': '#a466e8',
+                }
             }
-        } } };
-    </script>
-    <style>
-        /* BASE & CONTAINER GLASSMORPHISM (BLUR 3D) */
-        body {
-            background-image: url('https://picsum.photos/1920/1080?random=1');
-            background-size: cover;
-            background-attachment: fixed;
-            perspective: 1500px;
         }
+    };
+</script>
+<style>
+    /* Custom Styles for Modern/Elegant Look - Merged and Optimized */
 
-        .main-container {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(18px);
-            border-radius: 1.5rem;
-            border: 1px solid rgba(102, 181, 232, 0.4);
-            box-shadow:
-                0 40px 80px rgba(0, 0, 0, 0.8),
-                0 0 30px rgba(102, 181, 232, 0.4) inset;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transform: translateZ(50px) rotateX(0deg) rotateY(0deg);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    /* BASE & CONTAINER GLASSMORPHISM (Mengambil dari blok CSS kedua) */
+    body {
+        background-image: url('https://picsum.photos/1920/1080?random=1');
+        background-size: cover;
+        background-attachment: fixed;
+        perspective: 1500px; /* Nilai yang lebih besar dari blok kedua */
+    }
 
-        .main-container:hover {
-            transform: translateZ(80px) rotateX(1deg) rotateY(-1deg);
-            box-shadow:
-                0 60px 100px rgba(0, 0, 0, 0.9),
-                0 0 40px rgba(102, 181, 232, 0.6) inset;
-        }
+    .main-container {
+        background: rgba(30, 41, 59, 0.4); /* Mengambil dari blok kedua (lebih transparan) */
+        backdrop-filter: blur(18px); /* Mengambil dari blok kedua (blur lebih tinggi) */
+        border-radius: 1.5rem;
+        border: 1px solid rgba(102, 181, 232, 0.4); /* Border dari blok kedua (accent-blue) */
+        box-shadow:
+            0 40px 80px rgba(0, 0, 0, 0.8),
+            0 0 30px rgba(102, 181, 232, 0.4) inset; /* Shadow dari blok kedua (lebih detail) */
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transform: translateZ(50px) rotateX(0deg) rotateY(0deg); /* Transform 3D dari blok kedua */
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .main-container:hover {
+        transform: translateZ(80px) rotateX(1deg) rotateY(-1deg);
+        box-shadow:
+            0 60px 100px rgba(0, 0, 0, 0.9),
+            0 0 40px rgba(102, 181, 232, 0.6) inset;
+    }
 
-        /* FORM CONTAINER */
-        #formnya {
-            background-color: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(100, 116, 139, 0.5);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.3);
-            transform: translateZ(10px);
-            transition: all 0.3s ease;
-        }
-        #formnya:hover {
-            transform: translateZ(15px);
-        }
+    /* FORM CONTAINER (Mengambil dari blok CSS kedua) */
+    #formnya {
+        background-color: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(100, 116, 139, 0.5);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+    }
+    #formnya:hover {
+        transform: translateZ(15px);
+    }
 
-        /* INPUT FIELD STYLES */
-        .input-dark, .input-group textarea, .input-group select {
-            background-color: rgba(17, 24, 39, 0.7);
-            color: #ffffff;
-            border: 1px solid rgba(102, 181, 232, 0.5);
-            border-radius: 0.5rem;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5);
-            transform: translateZ(2px);
-            transition: all 0.2s;
-        }
-        .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-            border-color: var(--tw-color-accent-blue);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px var(--tw-color-accent-blue);
-            transform: translateZ(5px);
-        }
-        
-        /* BUTTON STYLES (3D) - UKURAN LEBIH KECIL */
-        .btn-gradient {
-            background: linear-gradient(45deg, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3); /* Shadow dikurangi */
-            transform: translateZ(10px); /* Kedalaman dikurangi */
-            transition: all 0.3s ease;
-            border: none;
-        }
-        .btn-gradient:hover:not(:disabled) {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px var(--tw-color-accent-blue); /* Shadow dikurangi */
-            transform: translateZ(15px) translateY(-1px); /* Kedalaman dan translasi dikurangi */
-        }
-        
-        /* Style untuk tombol Home (UKURAN LEBIH KECIL) */
-        .btn-home {
-            background: linear-gradient(45deg, #4c566a, #2e3440); /* Warna gradient lebih netral */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3); /* Shadow dikurangi */
-            transform: translateZ(10px); /* Kedalaman dikurangi */
-            transition: all 0.3s ease;
-            border: none;
-        }
-        .btn-home:hover:not(:disabled) {
-             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px #88c0d0; /* Warna biru es */
-             transform: translateZ(15px) translateY(-1px); /* Kedalaman dan translasi dikurangi */
-        }
+    /* INPUT GROUP (Mengambil dari blok CSS pertama, karena lebih umum) */
+    .input-group {
+        background-color: rgba(30, 41, 59, 0.6);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    }
 
-        /* CARD HASIL BARU (GLASSMORPHISM & RATA KIRI) */
-        .result-card {
-            background: rgba(45, 62, 80, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(102, 181, 232, 0.5);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(102, 181, 232, 0.2);
-            transform: translateZ(10px);
-            text-align: left; /* RATA KIRI */
-            margin-top: 1.5rem;
-            color: white;
-        }
-        .result-card h4 {
-            color: var(--tw-color-accent-blue);
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(100, 116, 139, 0.5);
-            padding-bottom: 0.5rem;
-        }
-        .result-item {
-            padding: 0.4rem 0;
-            border-bottom: 1px dashed rgba(100, 116, 139, 0.3);
-            overflow: hidden; /* Clear float */
-        }
-        .result-item:last-child {
-            border-bottom: none;
-        }
+    /* INPUT FIELD STYLES (Mengambil dari blok CSS kedua, lebih detail) */
+    .input-dark, .input-group textarea, .input-group select {
+        background-color: rgba(17, 24, 39, 0.7); /* Background lebih transparan */
+        color: #ffffff;
+        border: 1px solid rgba(102, 181, 232, 0.5); /* Border accent-blue */
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5); /* Shadow lebih gelap */
+        transform: translateZ(2px);
+        transition: all 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+        border-color: var(--tw-color-accent-blue);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px var(--tw-color-accent-blue); /* Glow yang lebih kuat */
+        transform: translateZ(5px);
+    }
+
+    /* BUTTON GRADIENT (Mengambil dari blok CSS kedua, lebih fokus 3D kecil) */
+    .btn-gradient {
+        background: linear-gradient(45deg, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px var(--tw-color-accent-blue);
+        transform: translateZ(15px) translateY(-1px);
+    }
+
+    /* ACTION BUTTON (Mempertahankan style dari blok pertama yang unik) */
+    .action-btn {
+        background-color: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155;
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
+
+    /* Style untuk tombol Home (Dari blok CSS kedua) */
+    .btn-home {
+        background: linear-gradient(45deg, #4c566a, #2e3440);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .btn-home:hover:not(:disabled) {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px #88c0d0;
+        transform: translateZ(15px) translateY(-1px);
+    }
+
+    /* JUDUL PUTIH SOLID (Properti yang sama, cukup satu) */
+    .text-solid-white {
+        color: #ffffff;
+        text-shadow: none;
+    }
+
+    /* HEADINGS & LAYOUT */
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+        /* Tambahan dari blok kedua */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* LOGO BULAT DAN BESAR (Dari blok CSS kedua) */
+    .heading-icon {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    .info-box {
+        background-color: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(100, 116, 139, 0.5);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+    footer {
+        background-color: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(3px);
+        border-top: 1px solid rgba(100, 116, 139, 0.3);
+        transform: translateZ(0);
+    }
 
 
-        /* UTILITY & LAYOUT STYLES */
-        .info-box {
-            background-color: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(100, 116, 139, 0.5);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-        }
-        
-        footer {
-            background-color: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(3px);
-            border-top: 1px solid rgba(100, 116, 139, 0.3);
-            transform: translateZ(0);
-        }
-        
-        .centered-heading {
-            text-align: center;
-            width: 100%;
-            font-size: 1.5rem;
-            font-weight: 800;
-            line-height: 1.2;
-            padding-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        /* LOGO BULAT DAN BESAR */
-        .heading-icon {
-            width: 50px; /* Ukuran gambar diperbesar */
-            height: 50px; /* Ukuran gambar diperbesar */
-            margin-right: 15px;
-            border-radius: 50%; /* Bulat sempurna */
-            object-fit: cover;
-        }
+    /* TABLE STYLES (Dari blok CSS pertama) */
+    .table-dark th {
+        background-color: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .table-dark td {
+        border-color: #334155;
+    }
+    .table-dark tr:nth-child(even) {
+        background-color: #111827;
+    }
+    .table-dark tr:hover {
+        background-color: #334155 !important;
+    }
 
-        .text-solid-white {
-            color: #ffffff;
-            text-shadow: none;
-        }
-        /* SPINNER */
-        #cover-spin {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            z-index: 9999;
-            display: none;
-        }
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid var(--tw-color-accent-blue);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
+    /* RESULT STYLES */
+    /* RESULT CARD BARU (Dari blok CSS kedua, lebih lengkap) */
+    .result-card {
+        background: rgba(45, 62, 80, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(102, 181, 232, 0.5);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(102, 181, 232, 0.2);
+        transform: translateZ(10px);
+        text-align: left;
+        margin-top: 1.5rem;
+        color: white;
+    }
+    .result-card h4 {
+        color: var(--tw-color-accent-blue);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(100, 116, 139, 0.5);
+        padding-bottom: 0.5rem;
+    }
+    .result-item {
+        padding: 0.4rem 0;
+        border-bottom: 1px dashed rgba(100, 116, 139, 0.3);
+        overflow: hidden;
+    }
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    /* RESULT SUCCESS/ERROR (Dari blok CSS pertama, tetap berguna) */
+    .result-success {
+        background-color: #1f2937;
+        border: 1px solid #66b5e8;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4);
+        transition: all 0.3s ease;
+    }
+    .result-error {
+        background-color: #1f2937;
+        border: 1px solid #a466e8;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    /* LOADING SPINNER (Properti yang sama, cukup satu) */
+    #cover-spin {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid var(--tw-color-accent-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+    </head>
 <br>
 <br>
 <body class="text-white min-h-screen flex flex-col items-center">
@@ -740,10 +813,10 @@ export default {
                     $('#cover-spin').hide();
                     $('#hasilnya').html('');
                     if (res.status) {
-                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-left font-semibold">\${res.data.hasil}</div>\`);
+                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
                     } else {
                         console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-left font-semibold">\${res.data.keteranganError}</div>\`);
+                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
                     }
                 },
                 error: function () {
@@ -1444,16 +1517,6 @@ let baseHTML = `
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-    body {
-        background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?auto=format&fit=crop&w=1920&q=80');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-    }
-
-    html.dark body {
-        background-image: url('https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&w=1920&q=80');
-    }
     /* 1. SCROLLBAR HIDE */
     /* For Webkit-based browsers (Chrome, Safari and Opera) */
     .scrollbar-hide::-webkit-scrollbar {
@@ -1470,17 +1533,17 @@ let baseHTML = `
 
     /* 3. GLASSMORPHISM EFFECT */
     .glass-effect {
-        background-color: rgba(255, 255, 255, 0.15); /* Darker white blur */
+        background-color: rgba(42, 42, 47, 0.6);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(0, 224, 183, 0.3);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .glass-effect-light {
-        background-color: rgba(255, 255, 255, 0.4); /* White blur */
+        background-color: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(0, 224, 183, 0.2);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
@@ -1573,24 +1636,20 @@ let baseHTML = `
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue);
     }
 
-    /* 8. TABLE STYLES (Glass) */
-    .table-glass th {
-        background-color: rgba(255, 255, 255, 0.1);
+    /* 8. TABLE STYLES (Dark Theme) */
+    .table-dark th {
+        background-color: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
     }
-    .dark .table-glass th {
-        background-color: rgba(255, 255, 255, 0.05);
+    .table-dark td {
+        border-color: #334155;
     }
-    .table-glass tr:nth-child(even) {
-        background-color: rgba(0, 0, 0, 0.02);
+    .table-dark tr:nth-child(even) {
+        background-color: #111827;
     }
-    .dark .table-glass tr:nth-child(even) {
-        background-color: rgba(255, 255, 255, 0.02);
-    }
-    .table-glass tr:hover {
-        background-color: rgba(0, 0, 0, 0.05) !important;
-    }
-    .dark .table-glass tr:hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
+    .table-dark tr:hover {
+        background-color: #334155 !important;
     }
 
     /* 9. UTILITY CLASSES */
@@ -1719,7 +1778,7 @@ let baseHTML = `
     </script>
 </head>
 <body
-    class="font-bold text-black dark:text-white bg-fixed transition-colors duration-300"
+    class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
 >
     <script>
       (function() {
@@ -1752,9 +1811,9 @@ let baseHTML = `
         </div>
     </div>
 
-<div id="" class="title-3d-glass sticky top-0 z-10 w-full max-w-7xl rounded-xl py-3 text-center transition-all duration-300 ease-in-out">
+<div id="container-title" class="title-3d-glass sticky top-0 z-10 w-full max-w-7xl rounded-xl py-3 text-center transition-all duration-300 ease-in-out text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
     <h1 id="" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-pulse">
-        FREF VPN CLOUDFLARE
+        FRE VPN CLOUDFLARE
     </h1>
 </div>
 
@@ -1809,7 +1868,7 @@ let baseHTML = `
                     </div>
                 </div>
 
-                <div class="glass-effect-light dark:glass-effect w-full max-w-5xl mb-6 rounded-xl p-6 shadow-lg grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="w-full max-w-5xl mb-6 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
                     PLACEHOLDER_PROTOCOL_DROPDOWN
                     PLACEHOLDER_COUNTRY_DROPDOWN
                     PLACEHOLDER_HOST_DROPDOWN
@@ -1863,7 +1922,7 @@ let baseHTML = `
                 </div>
 
                 <div class="flex justify-center">
-                    <button onclick="toggleOutputWindow()" class="mt-1 p-3 rounded-lg bg-red-500 hover:bg-red-600 text-xs text-white font-semibold transition-colors duration-300 flex items-center justify-center gap-1 px-6 py-2 rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity w-full px-4 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full px-3 py-2 rounded-lg input-dark text-base focus:ring-2">
+                    <button onclick="toggleOutputWindow()" class="mt-1 p-3 rounded-lg bg-red-500 hover:bg-red-600 text-xs text-white font-semibold transition-colors duration-300 flex items-center justify-center gap-1 px-6 py-2 rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" class="size-3">
                             <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
                         </svg>
@@ -1898,7 +1957,7 @@ let baseHTML = `
                 </button>
             </div>
 
-            <button onclick="toggleWildcardsWindow()" class="transform-gpu flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 p-2">
+            <button onclick="toggleWildcardsWindow()" class="mt-1 p-3 rounded-lg bg-red-500 hover:bg-red-600 text-xs text-white font-semibold transition-colors duration-300 flex items-center justify-center gap-1 px-6 py-2 rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd"/>
                 </svg>
@@ -2460,15 +2519,15 @@ setTitle(title) {
             const proxyConfigs = prx.list.join(',');
             tableRows += `
                 <tr>
-     <td class="px-3 py-3 text-base text-center">${this.startIndex + i + 1}</td>
+     <td class="px-3 py-3 text-base text-center">${this.startIndex + i + 1}.</td>
      <td class="px-3 py-3 text-base font-mono text-center">${prx.prxIP}:${prx.prxPort}</td>
+     <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-center">${prx.prxIP}:${prx.prxPort}</td>
      <td class="px-6 py-4 whitespace-nowrap text-sm flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
         ${prx.country}
     </td>
-    <td class="px-3 py-3 text-base font-mono text-center">
+    <td class="px-3 py-3 text-base font-mono">
     <div class="max-w-[150px] overflow-x-auto whitespace-nowrap">${prx.org}</div></td>
-    <td id="ping-${i}" class="px-6 py-4 whitespace-nowrap text-sm text-center">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
         <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
     </td>
@@ -2477,25 +2536,25 @@ setTitle(title) {
         }
 
         const table = `
-            <div class="glass-effect-light dark:glass-effect w-full rounded-xl p-4 shadow-lg">
-                <div class="overflow-x-auto w-full" style="max-height: 500px; overflow-y: auto;">    
-                    <table class="min-w-full table-glass border-collapse rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                        <thead class="sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
-                            <tr>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 50px;">No.</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 120px;">IP</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 100px;">Country</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 150px;">ISP</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 80px;">Status</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider" style="min-width: 100px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200/30 dark:divide-gray-700/30">
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="overflow-x-auto w-full max-w-full" style="max-height: 500px; overflow-y: auto;">
+    
+    <table class="min-w-full backdrop-blur-lg bg-gray-900/10 border border-gray-200 dark:border-gray-700 rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        
+        <thead class="backdrop-gray-sm bg-blue-900/30 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
+            <tr>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 50px;">No.</th>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 120px;">IP PORT</th>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 100px;">Status</th>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 150px;">Country</th>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 80px;">ISP</th>
+                <th class="px-3 py-3 text-center text-xs text-white font-bold uppercase tracking-wider" style="min-width: 100px;">Action</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            ${tableRows}
+        </tbody>
+    </table>
+</div>
         `;
 
         this.html = this.html.replaceAll("PLACEHOLDER_PROXY_GROUP", table);
