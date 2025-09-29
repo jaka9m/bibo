@@ -129,7 +129,7 @@ function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = n
         uri.searchParams.set("host", effectiveHost);
 
         // Build HTML
-        const document = new Document(request, wildcardDomains, rootDomain);
+        const document = new Document(request, wildcardDomains, rootDomain, startIndex);
         document.setTitle("Free Vless Trojan SS");
         document.setTotalProxy(totalProxies);
         document.setPage(page + 1, totalPages);
@@ -701,34 +701,10 @@ export default {
                 </div>
             </form>
 
-            <div id="hasilnya" class="mt-6">
-                <div class="result-card hidden">
-                    <h4><i class="fas fa-check-circle mr-2"></i> Detail Kuota</h4>
-                    
-                    <div class="result-item">
-                        <span class="font-medium text-gray-300">Nomor:</span> 
-                        <span class="float-right font-bold text-accent-blue">62878xxxxxxx</span>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span class="font-medium text-gray-300">Jenis Paket:</span> 
-                        <span class="float-right font-bold text-white">Xtra Combo VIP 50GB</span>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span class="font-medium text-gray-300">Sisa Kuota Utama:</span> 
-                        <span class="float-right font-bold text-white">12.5 GB</span>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span class="font-medium text-gray-300">Masa Aktif Kuota:</span> 
-                        <span class="float-right font-bold text-white">2025-12-31</span>
-                    </div>
-                </div>
-            </div>
+            <div id="hasilnya" class="mt-6"></div>
         </div>
     
-    </div>
+  </div>
 
     <footer class="w-full p-4 text-center mt-auto border-t">
         <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
@@ -764,10 +740,10 @@ export default {
                     $('#cover-spin').hide();
                     $('#hasilnya').html('');
                     if (res.status) {
-                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
+                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-left font-semibold">\${res.data.hasil}</div>\`);
                     } else {
                         console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
+                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-left font-semibold">\${res.data.keteranganError}</div>\`);
                     }
                 },
                 error: function () {
@@ -1913,12 +1889,12 @@ let baseHTML = `
         </div>
     </div>
     <footer>
-    <div class="fixed bottom-4 right-4 flex flex-col items-end gap-3 z-50">
-        <button onclick="toggleDropdown()" class="transition-colors rounded-full p-2 block text-white shadow-lg transform hover:scale-105 bg-accent-blue hover:bg-opacity-80">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-white">
-                <path d="M12 2.25a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75h-6.75a.75.75 0 0 1 0-1.5h6.75V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
-            </svg>
-        </button>
+    <div class="fixed top-16 right-4 flex flex-col items-end gap-3 z-50">
+    <button onclick="toggleDropdown()" class="transition-colors rounded-full block text-white shadow-lg transform hover:scale-105 bg-accent-blue hover:bg-opacity-80 p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 text-white">
+            <path fill-rule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75h-6.75a.75.75 0 0 1 0-1.5h6.75V3a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+        </svg>
+    </button>
 
         <div id="dropdown-menu" class="hidden flex flex-col gap-3">
             
@@ -2418,13 +2394,15 @@ class Document {
     proxies = [];
     wildcardDomains = [];
     rootDomain = "";
+    startIndex = 0;
 
-    constructor(request, wildcardDomains = [], rootDomain = "") {
+    constructor(request, wildcardDomains = [], rootDomain = "", startIndex = 0) {
         this.html = baseHTML;
         this.request = request;
         this.url = new URL(this.request.url);
         this.wildcardDomains = wildcardDomains;
         this.rootDomain = rootDomain;
+        this.startIndex = startIndex;
     }
 
     setTotalProxy(total) {
@@ -2464,7 +2442,7 @@ setTitle(title) {
             const proxyConfigs = prx.list.join(',');
             tableRows += `
                 <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
+    <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${this.startIndex + i + 1}</td>
     <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
         <img src="https://hatscripts.github.io/circle-flags/flags/${prx.country.toLowerCase()}.svg" width="20" class="inline mr-2 rounded-full"/>
