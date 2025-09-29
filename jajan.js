@@ -1085,7 +1085,7 @@ export default {
     server: d.server,
     port: d.port,
     password: pass,
-    uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined,
+    uuid: d.protocol === atob(flash) || d.protocol === atob(vmess) ? pass : undefined,
     alterId: d.alterId,
     method: d.method,
     network: d.network,
