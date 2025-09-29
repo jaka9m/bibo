@@ -1087,24 +1087,26 @@ export default {
   catch { return s; }
 };
 
-        document.getElementById('convert-button').addEventListener('click', function() {
-            const linkInput = document.getElementById('link-input').value;
-            const format = document.getElementById('format-select').value;
-            const resultOutput = document.getElementById('result-output');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('convert-button').addEventListener('click', function() {
+                const linkInput = document.getElementById('link-input').value;
+                const format = document.getElementById('format-select').value;
+                const resultOutput = document.getElementById('result-output');
 
-            if (!linkInput.trim()) {
-                console.error('Link tidak boleh kosong.');
-                resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
-                return;
-            }
+                if (!linkInput.trim()) {
+                    console.error('Link tidak boleh kosong.');
+                    resultOutput.value = '❌ Gagal: Link tidak boleh kosong.';
+                    return;
+                }
 
-            const converted = convertLink(linkInput, format);
+                const converted = convertLink(linkInput, format);
 
-            if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
-                resultOutput.value = converted;
-            } else {
-                resultOutput.value = converted;
-            }
+                if (converted.startsWith('❌ Gagal:') || converted.startsWith('Error:')) {
+                    resultOutput.value = converted;
+                } else {
+                    resultOutput.value = converted;
+                }
+            });
         });
 
 
