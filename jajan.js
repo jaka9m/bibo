@@ -19,11 +19,15 @@ const horse = "dHJvamFu";
 const flash = "dmxlc3M=";
 const v2 = "djJyYXk=";
 const neko = "Y2xhc2g=";
-const v3 = "djJyYXk=";
-const mlash = "dm1lc3M=";
-const babi = "Z3JwYw==";
 
-    
+// VARIABEL /CONVERT
+const horse = "dHJvamFu";
+const flash = "dmxlc3M=";
+const v3 = "djJyYXk="; // ""
+const neko = "Y2xhc2g="; 
+const mlash = "dm1lc3M="; 
+const melo = "Z3JwYw==";
+
 
 const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
@@ -707,10 +711,12 @@ export default {
     </footer>
 
       <script>
-// Fungsi SPA Navigasi Client-Side
+        // Memuat semua fungsi dasar
+
+    // Fungsi SPA Navigasi Client-Side
     const mainContentContainer = document.getElementById('main-content-container');
     const navButtonsContainer = document.getElementById('nav-buttons-container');
-    
+
     async function renderContentFromPath(path, pushState = true) {
         // Tampilkan loading spinner
         $('#cover-spin').show();
@@ -807,7 +813,7 @@ export default {
         let filename = 'config_converter';
         let mimeType = 'text/plain';
 
-        if (format === '${neko}' || format === '${neko}-provider') {
+        if (format === 'clash' || format === 'clash-provider') {
             filename += '.yaml';
             mimeType = 'text/yaml';
         } else {
@@ -830,10 +836,10 @@ export default {
     const convertLink = function convertLink(linksInput, format) {
     const linkArray = linksInput.split('\\n')
         .map(line => line.trim())
-        .filter(line => line.length > 0 && (line.startsWith('${flash}://') || line.startsWith('${mlash}://') || line.startsWith('${horse}://') || line.startsWith('ss://')));
+        .filter(line => line.length > 0 && (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://') || line.startsWith('ss://')));
 
     if (linkArray.length === 0) {
-        return '❌ Gagal: Tidak ada link ${flash}, ${mlash}, ${horse}, atau sosok yang valid ditemukan.';
+        return '❌ Gagal: Tidak ada link VLESS, VMess, Trojan, atau Shadowsocks yang valid ditemukan.';
     }
 
     const successfulConversions = [];
@@ -843,10 +849,10 @@ export default {
             let d;
             const decodedLink = tryUrlDecode(link);
 
-            if (decodedLink.startsWith('${flash}://')) d = parse${flash}Uri(decodedLink);
-            else if (decodedLink.startsWith('${mlash}://')) d = parse${mlash}Uri(decodedLink);
-            else if (decodedLink.startsWith('${horse}://')) d = parse${horse}Uri(decodedLink);
-            else if (decodedLink.startsWith('ss://')) d = parsesosokUri(decodedLink);
+            if (decodedLink.startsWith('vless://')) d = parseVlessUri(decodedLink);
+            else if (decodedLink.startsWith('vmess://')) d = parseVmessUri(decodedLink);
+            else if (decodedLink.startsWith('trojan://')) d = parseTrojanUri(decodedLink);
+            else if (decodedLink.startsWith('ss://')) d = parseShadowsocksUri(decodedLink);
             else continue;
 
             successfulConversions.push(mapFields(d));
@@ -860,12 +866,12 @@ export default {
         return '❌ Gagal: Semua link yang dimasukkan tidak valid atau gagal di-parse.';
     }
 
-    if (format === '${neko}') return generate${neko}Metaprxs(successfulConversions);
-    if (format === '${neko}-provider') return generate${neko}Providerprxs(successfulConversions);
+    if (format === 'clash') return generateClashMetaProxies(successfulConversions);
+    if (format === 'clash-provider') return generateClashProviderProxies(successfulConversions);
 
     return 'Format konversi tidak valid.';
 };
-    const parse${flash}Uri = function parse${flash}Uri(uri) {
+    const parseVlessUri = function parseVlessUri(uri) {
   const u = new URL(uri);
   const network = u.searchParams.get('type') || 'tcp';
 
@@ -874,8 +880,8 @@ export default {
   const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
 
   return {
-    protocol: '${flash}',
-    remark: decodeURIComponent(u.hash.substring(1)) || '${flash}',
+    protocol: 'vless',
+    remark: decodeURIComponent(u.hash.substring(1)) || 'VLESS',
     server: u.hostname,
     port: parseInt(u.port, 10),
     password: decodeURIComponent(u.username),
@@ -884,11 +890,11 @@ export default {
     sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
     host: host,
     path: path,
-    serviceName: serviceName || (network === '${babi}' ? path : ''),
+    serviceName: serviceName || (network === 'grpc' ? path : ''),
   };
 };
-    const parse${mlash}Uri = function parse${mlash}Uri(uri){
-  const base64Part = uri.substring('${mlash}://'.length).trim();
+    const parseVmessUri = function parseVmessUri(uri){
+  const base64Part = uri.substring('vmess://'.length).trim();
   const decodedStr = atob(base64Part);
   const decoded = JSON.parse(decodedStr);
 
@@ -896,8 +902,8 @@ export default {
   const path = decoded.path || '/';
 
   return {
-      protocol: '${mlash}',
-      remark: decoded.ps || '${mlash}',
+      protocol: 'vmess',
+      remark: decoded.ps || 'VMess',
       server: decoded.add,
       port: parseInt(decoded.port, 10),
       password: decoded.id,
@@ -907,10 +913,10 @@ export default {
       sni: decoded.sni || decoded.host || decoded.add,
       host: decoded.host || decoded.sni || decoded.add,
       path: path,
-      serviceName: decoded.serviceName || (network === '${babi}' ? path : ''),
+      serviceName: decoded.serviceName || (network === 'grpc' ? path : ''),
   };
 };
-    const parse${horse}Uri = function parse${horse}Uri(uri) {
+    const parseTrojanUri = function parseTrojanUri(uri) {
   const u = new URL(uri);
   const network = u.searchParams.get('type') || 'tcp';
 
@@ -919,8 +925,8 @@ export default {
   const host = u.searchParams.get('host') || u.searchParams.get('sni') || u.hostname;
 
   return {
-    protocol: '${horse}',
-    remark: decodeURIComponent(u.hash.substring(1)) || '${horse}',
+    protocol: 'trojan',
+    remark: decodeURIComponent(u.hash.substring(1)) || 'Trojan',
     server: u.hostname,
     port: parseInt(u.port, 10),
     password: decodeURIComponent(u.username),
@@ -929,12 +935,12 @@ export default {
     sni: u.searchParams.get('sni') || u.searchParams.get('host') || u.hostname,
     host: host,
     path: path,
-    serviceName: serviceName || (network === '${babi}' ? path : ''),
+    serviceName: serviceName || (network === 'grpc' ? path : ''),
   };
 };
-    const parsesosokUri = function parsesosokUri(uri) {
+    const parseShadowsocksUri = function parseShadowsocksUri(uri) {
   const parts = uri.substring('ss://'.length).split('#');
-  const remark = decodeURIComponent(parts[1] || 'sosok');
+  const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
   const corePart = parts[0];
 
   const pluginMatch = corePart.match(/@(.+?)\\/\\/?plugin=(.*)/);
@@ -953,7 +959,7 @@ export default {
           else if (param.startsWith('host=')) pluginData.host = param.substring(5);
           else if (param.startsWith('path=')) pluginData.path = param.substring(5);
       });
-      pluginData.plugin = '${v3}-plugin';
+      pluginData.plugin = 'v2ray-plugin';
       pluginExists = true;
   } else {
       userServerPort = atob(corePart);
@@ -979,87 +985,87 @@ export default {
     serviceName: '',
   };
 };
-    const generate${neko}Metaprxs = function generate${neko}Metaprxs(fieldsList) {
-    let prxConfigs = [];
-    let prxNames = []; // Digunakan untuk mengisi grup BEST-PING
+    const generateClashMetaProxies = function generateClashMetaProxies(fieldsList) {
+    let proxyConfigs = [];
+    let proxyNames = []; // Digunakan untuk mengisi grup BEST-PING
 
     for (const fields of fieldsList) {
         let transportOpts = '';
 
         if (fields.network === 'ws') {
             transportOpts = \`  ws-opts:\\n    path: \${fields.path}\\n    headers:\\n      Host: \${fields.host}\`;
-        } else if (fields.network === '${babi}') {
-            transportOpts = \`  ${babi}-opts:\\n    ${babi}-service-name: \${fields.serviceName || ''}\`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = \`  grpc-opts:\\n    grpc-service-name: \${fields.serviceName || ''}\`;
         }
 
-        let prx = '';
+        let proxy = '';
         // Ubah format penamaan untuk keamanan dan konsistensi di YAML
         const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim();
 
-        if (fields.protocol === '${flash}' || fields.protocol === '${mlash}') {
-            prx =
-\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: \${fields.protocol}\\n  \${fields.protocol === '${flash}' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\\\n  alterId: \${fields.alterId}\`}\\n  cipher: auto\\n  tls: \${fields.security === 'tls'}\\n  udp: true\\n  skip-cert-verify: true\\n  network: \${fields.network}\\n  servername: \${fields.sni}\\n\${transportOpts}\`;
-        } else if (fields.protocol === '${horse}') {
-            prx =
-\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: ${horse}\\n  password: \${fields.password}\\n  network: \${fields.network}\\n  tls: \${fields.security === 'tls'}\\n  skip-cert-verify: true\\n  servername: \${fields.sni}\\n\${transportOpts}\`;
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: \${fields.protocol}\\n  \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\\\n  alterId: \${fields.alterId}\`}\\n  cipher: auto\\n  tls: \${fields.security === 'tls'}\\n  udp: true\\n  skip-cert-verify: true\\n  network: \${fields.network}\\n  servername: \${fields.sni}\\n\${transportOpts}\`;
+        } else if (fields.protocol === 'trojan') {
+            proxy =
+\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: trojan\\n  password: \${fields.password}\\n  network: \${fields.network}\\n  tls: \${fields.security === 'tls'}\\n  skip-cert-verify: true\\n  servername: \${fields.sni}\\n\${transportOpts}\`;
         } else if (fields.protocol === 'ss') {
-            prx =
-\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: ss\\n  cipher: \${fields.method}\\n  password: \${fields.password}\\n  plugin: \${fields.plugin || '${v3}-plugin'}\\n  plugin-opts:\\n    mode: websocket\\n    host: \${fields.host}\\n    path: \${fields.path}\\n    tls: \${fields.security === 'tls'}\\n    skip-cert-verify: true\\n    servername: \${fields.sni}\`;
+            proxy =
+\`- name: \${safeRemark}\\n  server: \${fields.server}\\n  port: \${fields.port}\\n  type: ss\\n  cipher: \${fields.method}\\n  password: \${fields.password}\\n  plugin: \${fields.plugin || 'v2ray-plugin'}\\n  plugin-opts:\\n    mode: websocket\\n    host: \${fields.host}\\n    path: \${fields.path}\\n    tls: \${fields.security === 'tls'}\\n    skip-cert-verify: true\\n    servername: \${fields.sni}\`;
         } else {
-            prx = \`# Error: Protokol \${fields.protocol} tidak didukung oleh ${neko} Meta.\`;
+            proxy = \`# Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
         }
 
-        prxConfigs.push(prx);
-        prxNames.push(\`  - \${safeRemark}\`); // Tambahkan nama prx ke daftar untuk BEST-PING
+        proxyConfigs.push(proxy);
+        proxyNames.push(\`  - \${safeRemark}\`); // Tambahkan nama proxy ke daftar untuk BEST-PING
     }
 
-    const prxListJoined = prxConfigs.join('\\n');
-    const prxNamesJoined = prxNames.join('\\n');
+    const proxyListJoined = proxyConfigs.join('\\n');
+    const proxyNamesJoined = proxyNames.join('\\n');
 
-    // TEMPLATE ${neko}.js
-    const template = \`port: 7890\\nsocks-port: 7891\\nredir-port: 7892\\nmixed-port: 7893\\ntprx-port: 7895\\nipv6: false\\nmode: rule\\nlog-level: silent\\nallow-lan: true\\nexternal-controller: 0.0.0.0:9090\\nsecret: ""\\nbind-address: "*_\\nunified-delay: true\\nprofile:\\n  store-selected: true\\n  store-fake-ip: true\\ndns:\\n  enable: true\\n  ipv6: false\\n  use-host: true\\n  enhanced-mode: fake-ip\\n  listen: 0.0.0.0:7874\\n  prx-server-nameserver:\\n    - 112.215.203.246\\n    - 112.215.203.247\\n    - 112.215.203.248\\n    - 112.215.203.254\\n    - 112.215.198.248\\n    - 112.215.198.254\\n  nameserver:\\n    - 1.1.1.1\\n    - 8.8.8.8\\n    - 1.0.0.1\\n  fallback:\\n    - 9.9.9.9\\n    - 149.112.112.112\\n    - 208.67.222.222\\n  fake-ip-range: 198.18.0.1/16\\n  fake-ip-filter:\\n    - "*.lan"\\n    - "*.localdomain"\\n    - "*.example"\\n    - "*.invalid"\\n    - "*.localhost"\\n    - "*.test"\\n    - "*.local"\\n    - "*.home.arpa"\\n    - time.*.com\\n    - time.*.gov\\n    - time.*.edu.cn\\n    - time.*.apple.com\\n    - time1.*.com\\n    - time2.*.com\\n    - time3.*.com\\n    - time4.*.com\\n    - time5.*.com\\n    - time6.*.com\\n    - time7.*.com\\n    - ntp.*.com\\n    - ntp1.*.com\\n    - ntp2.*.com\\n    - ntp3.*.com\\n    - ntp4.*.com\\n    - ntp5.*.com\\n    - ntp6.*.com\\n    - ntp7.*.com\\n    - "*.time.edu.cn"\\n    - "*.ntp.org.cn"\\n    - +.pool.ntp.org\\n    - time1.cloud.tencent.com\\n    - music.163.com\\n    - "*.music.163.com"\\n    - "*.126.net"\\n    - musicapi.taihe.com\\n    - music.taihe.com\\n    - songsearch.kugou.com\\n    - trackercdn.kugou.com\\n    - "*.kuwo.cn"\\n    - api-jooxtt.sanook.com\\n    - api.joox.com\\n    - joox.com\\n    - y.qq.com\\n    - "*.y.qq.com"\\n    - streamoc.music.tc.qq.com\\n    - mobileoc.music.tc.qq.com\\n    - isure.stream.qqmusic.qq.com\\n    - dl.stream.qqmusic.qq.com\\n    - aqqmusic.tc.qq.com\\n    - amobile.music.tc.qq.com\\n    - "*.xiami.com"\\n    - "*.music.migu.cn"\\n    - music.migu.cn\\n    - "*.msftconnecttest.com"\\n    - "*.msftncsi.com"\\n    - msftconnecttest.com\\n    - msftncsi.com\\n    - localhost.ptlogin2.qq.com\\n    - localhost.sec.qq.com\\n    - +.srv.nintendo.net\\n    - +.stun.playstation.net\\n    - xbox.*.microsoft.com\\n    - xnotify.xboxlive.com\\n    - +.battlenet.com.cn\\n    - +.wotgame.cn\\n    - +.wggames.cn\\n    - +.wowsgame.cn\\n    - +.wargaming.net\\n    - prx.golang.org\\n    - stun.*.*\\n    - stun.*.*.*\\n    - +.stun.*.*\\n    - +.stun.*.*.*\\n    - +.stun.*.*.*.*\\n    - heartbeat.belkin.com\\n    - "*.linksys.com"\\n    - "*.linksyssmartwifi.com"\\n    - "*.router.asus.com"\\n    - mesu.apple.com\\n    - swscan.apple.com\\n    - swquery.apple.com\\n    - swdownload.apple.com\\n    - swcdn.apple.com\\n    - swdist.apple.com\\n    - lens.l.google.com\\n    - stun.l.google.com\\n    - +.nflxvideo.net\\n    - "*.square-enix.com"\\n    - "*.finalfantasyxiv.com"\\n    - "*.ffxiv.com"\\n    - "*.mcdn.bilivideo.cn"\\n    - +.media.dssott.com\\nprxs:\\n\${prxNamesJoined}\\n\\nprx-groups:\\n- name: INTERNET\\n  type: select\\n  disable-udp: false\\n  prxs:\\n    - DIRECT\\n    - REJECT\\n    - BEST-PING\\n  url: http://www.gstatic.com/generate_204\\n  interval: 120\\n\\n- name: BEST-PING\\n  type: url-test\\n  url: http://www.gstatic.com/generate_204\\n  interval: 120\\n  prxs:\\n    - DIRECT\\n    - REJECT\\n\${prxNamesJoined}\\n\\nrule-providers:\\n  rule_hijacking:\\n    type: file\\n    behavior: classical\\n    path: ./rule_provider/rule_hijacking.yaml\\n    url: https://raw.githubusercontent.com/malikshi/open_${neko}/main/rule_provider/rule_hijacking.yaml\\n  rule_privacy:\\n    type: file\\n    behavior: classical\\n    url: https://raw.githubusercontent.com/malikshi/open_${neko}/main/rule_provider/rule_privacy.yaml\\n    path: ./rule_provider/rule_privacy.yaml\\n  rule_basicads:\\n    type: file\\n    behavior: domain\\n    url: https://raw.githubusercontent.com/malikshi/open_${neko}/main/rule_provider/rule_basicads.yaml\\n    path: ./rule_provider/rule_basicads.yaml\\n  rule_personalads:\\n    type: file\\n    behavior: classical\\n    url: https://raw.githubusercontent.com/malikshi/open_${neko}/main/rule_provider/rule_personalads.yaml\\n    path: ./rule_provider/rule_personalads.yaml\\n\\nrules:\\n- IP-CIDR,198.18.0.1/16,REJECT,no-resolve\\n- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan\\n- RULE-SET,rule_basicads,REJECT     # Langsung REJECT untuk memblokir iklan\\n- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir\\n- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir\\n- MATCH,INTERNET\`;
+    // TEMPLATE clash.js
+    const template = \`port: 7890\\nsocks-port: 7891\\nredir-port: 7892\\nmixed-port: 7893\\ntproxy-port: 7895\\nipv6: false\\nmode: rule\\nlog-level: silent\\nallow-lan: true\\nexternal-controller: 0.0.0.0:9090\\nsecret: ""\\nbind-address: "*_\\nunified-delay: true\\nprofile:\\n  store-selected: true\\n  store-fake-ip: true\\ndns:\\n  enable: true\\n  ipv6: false\\n  use-host: true\\n  enhanced-mode: fake-ip\\n  listen: 0.0.0.0:7874\\n  proxy-server-nameserver:\\n    - 112.215.203.246\\n    - 112.215.203.247\\n    - 112.215.203.248\\n    - 112.215.203.254\\n    - 112.215.198.248\\n    - 112.215.198.254\\n  nameserver:\\n    - 1.1.1.1\\n    - 8.8.8.8\\n    - 1.0.0.1\\n  fallback:\\n    - 9.9.9.9\\n    - 149.112.112.112\\n    - 208.67.222.222\\n  fake-ip-range: 198.18.0.1/16\\n  fake-ip-filter:\\n    - "*.lan"\\n    - "*.localdomain"\\n    - "*.example"\\n    - "*.invalid"\\n    - "*.localhost"\\n    - "*.test"\\n    - "*.local"\\n    - "*.home.arpa"\\n    - time.*.com\\n    - time.*.gov\\n    - time.*.edu.cn\\n    - time.*.apple.com\\n    - time1.*.com\\n    - time2.*.com\\n    - time3.*.com\\n    - time4.*.com\\n    - time5.*.com\\n    - time6.*.com\\n    - time7.*.com\\n    - ntp.*.com\\n    - ntp1.*.com\\n    - ntp2.*.com\\n    - ntp3.*.com\\n    - ntp4.*.com\\n    - ntp5.*.com\\n    - ntp6.*.com\\n    - ntp7.*.com\\n    - "*.time.edu.cn"\\n    - "*.ntp.org.cn"\\n    - +.pool.ntp.org\\n    - time1.cloud.tencent.com\\n    - music.163.com\\n    - "*.music.163.com"\\n    - "*.126.net"\\n    - musicapi.taihe.com\\n    - music.taihe.com\\n    - songsearch.kugou.com\\n    - trackercdn.kugou.com\\n    - "*.kuwo.cn"\\n    - api-jooxtt.sanook.com\\n    - api.joox.com\\n    - joox.com\\n    - y.qq.com\\n    - "*.y.qq.com"\\n    - streamoc.music.tc.qq.com\\n    - mobileoc.music.tc.qq.com\\n    - isure.stream.qqmusic.qq.com\\n    - dl.stream.qqmusic.qq.com\\n    - aqqmusic.tc.qq.com\\n    - amobile.music.tc.qq.com\\n    - "*.xiami.com"\\n    - "*.music.migu.cn"\\n    - music.migu.cn\\n    - "*.msftconnecttest.com"\\n    - "*.msftncsi.com"\\n    - msftconnecttest.com\\n    - msftncsi.com\\n    - localhost.ptlogin2.qq.com\\n    - localhost.sec.qq.com\\n    - +.srv.nintendo.net\\n    - +.stun.playstation.net\\n    - xbox.*.microsoft.com\\n    - xnotify.xboxlive.com\\n    - +.battlenet.com.cn\\n    - +.wotgame.cn\\n    - +.wggames.cn\\n    - +.wowsgame.cn\\n    - +.wargaming.net\\n    - proxy.golang.org\\n    - stun.*.*\\n    - stun.*.*.*\\n    - +.stun.*.*\\n    - +.stun.*.*.*\\n    - +.stun.*.*.*.*\\n    - heartbeat.belkin.com\\n    - "*.linksys.com"\\n    - "*.linksyssmartwifi.com"\\n    - "*.router.asus.com"\\n    - mesu.apple.com\\n    - swscan.apple.com\\n    - swquery.apple.com\\n    - swdownload.apple.com\\n    - swcdn.apple.com\\n    - swdist.apple.com\\n    - lens.l.google.com\\n    - stun.l.google.com\\n    - +.nflxvideo.net\\n    - "*.square-enix.com"\\n    - "*.finalfantasyxiv.com"\\n    - "*.ffxiv.com"\\n    - "*.mcdn.bilivideo.cn"\\n    - +.media.dssott.com\\nproxies:\\n\${proxyNamesJoined}\\n\\nproxy-groups:\\n- name: INTERNET\\n  type: select\\n  disable-udp: false\\n  proxies:\\n    - DIRECT\\n    - REJECT\\n    - BEST-PING\\n  url: http://www.gstatic.com/generate_204\\n  interval: 120\\n\\n- name: BEST-PING\\n  type: url-test\\n  url: http://www.gstatic.com/generate_204\\n  interval: 120\\n  proxies:\\n    - DIRECT\\n    - REJECT\\n\${proxyNamesJoined}\\n\\nrule-providers:\\n  rule_hijacking:\\n    type: file\\n    behavior: classical\\n    path: ./rule_provider/rule_hijacking.yaml\\n    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_hijacking.yaml\\n  rule_privacy:\\n    type: file\\n    behavior: classical\\n    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_privacy.yaml\\n    path: ./rule_provider/rule_privacy.yaml\\n  rule_basicads:\\n    type: file\\n    behavior: domain\\n    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_basicads.yaml\\n    path: ./rule_provider/rule_basicads.yaml\\n  rule_personalads:\\n    type: file\\n    behavior: classical\\n    url: https://raw.githubusercontent.com/malikshi/open_clash/main/rule_provider/rule_personalads.yaml\\n    path: ./rule_provider/rule_personalads.yaml\\n\\nrules:\\n- IP-CIDR,198.18.0.1/16,REJECT,no-resolve\\n- RULE-SET,rule_personalads,REJECT  # Langsung REJECT untuk memblokir iklan\\n- RULE-SET,rule_basicads,REJECT     # Langsung REJECT untuk memblokir iklan\\n- RULE-SET,rule_hijacking,REJECT    # Langsung REJECT untuk memblokir\\n- RULE-SET,rule_privacy,REJECT      # Langsung REJECT untuk memblokir\\n- MATCH,INTERNET\`;
 
     return template;
 };
-    const generate${neko}Providerprxs = function generate${neko}Providerprxs(fieldsList) {
-    let prxConfigs = [];
+    const generateClashProviderProxies = function generateClashProviderProxies(fieldsList) {
+    let proxyConfigs = [];
 
     for (const fields of fieldsList) {
         let transportOpts = '';
 
-        // Indentasi untuk ws-opts/${babi}-opts harus ditambah 2 spasi dari indentasi prx utamanya.
+        // Indentasi untuk ws-opts/grpc-opts harus ditambah 2 spasi dari indentasi proxy utamanya.
         if (fields.network === 'ws') {
             transportOpts = \`    ws-opts:\\n      path: \${fields.path}\\n      headers:\\n        Host: \${fields.host}\`;
-        } else if (fields.network === '${babi}') {
-            transportOpts = \`    ${babi}-opts:\\n      ${babi}-service-name: \${fields.serviceName || ''}\`;
+        } else if (fields.network === 'grpc') {
+            transportOpts = \`    grpc-opts:\\n      grpc-service-name: \${fields.serviceName || ''}\`;
         }
 
-        let prx = '';
+        let proxy = '';
         // Ubah format penamaan untuk keamanan dan konsistensi di YAML
         const safeRemark = fields.remark.replace(/[^\\w\\s-]/g, '_').trim();
 
-        // Setiap prx dimulai dengan dua spasi
-        if (fields.protocol === '${flash}' || fields.protocol === '${mlash}') {
-            prx =
-\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: \${fields.protocol}\\n    \${fields.protocol === '${flash}' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\\\n    alterId: \${fields.alterId}\`}\\n    cipher: auto\\n    tls: \${fields.security === 'tls'}\\n    udp: true\\n    skip-cert-verify: true\\n    network: \${fields.network}\\n    servername: \${fields.sni}\\n\${transportOpts}\`;
-        } else if (fields.protocol === '${horse}') {
-            prx =
-\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: ${horse}\\n    password: \${fields.password}\\n    network: \${fields.network}\\n    tls: \${fields.security === 'tls'}\\n    skip-cert-verify: true\\n    servername: \${fields.sni}\\n\${transportOpts}\`;
+        // Setiap proxy dimulai dengan dua spasi
+        if (fields.protocol === 'vless' || fields.protocol === 'vmess') {
+            proxy =
+\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: \${fields.protocol}\\n    \${fields.protocol === 'vless' ? \`uuid: \${fields.uuid}\` : \`uuid: \${fields.uuid}\\\\n    alterId: \${fields.alterId}\`}\\n    cipher: auto\\n    tls: \${fields.security === 'tls'}\\n    udp: true\\n    skip-cert-verify: true\\n    network: \${fields.network}\\n    servername: \${fields.sni}\\n\${transportOpts}\`;
+        } else if (fields.protocol === 'trojan') {
+            proxy =
+\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: trojan\\n    password: \${fields.password}\\n    network: \${fields.network}\\n    tls: \${fields.security === 'tls'}\\n    skip-cert-verify: true\\n    servername: \${fields.sni}\\n\${transportOpts}\`;
         } else if (fields.protocol === 'ss') {
             // Indentasi plugin-opts juga harus disesuaikan
-            prx =
-\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: ss\\n    cipher: \${fields.method}\\n    password: \${fields.password}\\n    plugin: \${fields.plugin || '${v3}-plugin'}\\n    plugin-opts:\\n      mode: websocket\\n      host: \${fields.host}\\n      path: \${fields.path}\\n      tls: \${fields.security === 'tls'}\\n      skip-cert-verify: true\\n      servername: \${fields.sni}\`;
+            proxy =
+\`  - name: \${safeRemark}\\n    server: \${fields.server}\\n    port: \${fields.port}\\n    type: ss\\n    cipher: \${fields.method}\\n    password: \${fields.password}\\n    plugin: \${fields.plugin || 'v2ray-plugin'}\\n    plugin-opts:\\n      mode: websocket\\n      host: \${fields.host}\\n      path: \${fields.path}\\n      tls: \${fields.security === 'tls'}\\n      skip-cert-verify: true\\n      servername: \${fields.sni}\`;
         } else {
-            prx = \`  # Error: Protokol \${fields.protocol} tidak didukung oleh ${neko} Meta.\`;
+            proxy = \`  # Error: Protokol \${fields.protocol} tidak didukung oleh Clash Meta.\`;
         }
 
-        prxConfigs.push(prx);
+        proxyConfigs.push(proxy);
     }
 
-    const prxListJoined = prxConfigs.join('\\n');
+    const proxyListJoined = proxyConfigs.join('\\n');
 
-    // Prefix 'prxs:' tanpa indentasi
-    return \`prxs:\\n\${prxListJoined}\`;
+    // Prefix 'proxies:' tanpa indentasi
+    return \`proxies:\\n\${proxyListJoined}\`;
 };
     const mapFields = function mapFields(d) {
   const pass = d.password;
@@ -1070,7 +1076,7 @@ export default {
     server: d.server,
     port: d.port,
     password: pass,
-    uuid: d.protocol === '${flash}' || d.protocol === '${mlash}' ? pass : undefined,
+    uuid: d.protocol === 'vless' || d.protocol === 'vmess' ? pass : undefined,
     alterId: d.alterId,
     method: d.method,
     network: d.network,
@@ -1086,6 +1092,9 @@ export default {
   try { return /%[0-9A-Fa-f]{2}/.test(s) ? decodeURIComponent(s) : s; }
   catch { return s; }
 };
+
+
+
 
         document.getElementById('convert-button').addEventListener('click', function() {
             const linkInput = document.getElementById('link-input').value;
@@ -1108,7 +1117,12 @@ export default {
         });
 
 
-        </script>
+        // Panggil render konten untuk path saat ini saat halaman dimuat (untuk load pertama)
+        // Note: Karena konten sudah di-render oleh Worker saat full load, ini tidak perlu dipanggil lagi.
+        // Jika ada script spesifik slide, ia akan disuntikkan oleh worker/client script
+        // Pemasangan script cek kuota harus dilakukan di buildCekKuotaHTMLContentOnly.
+
+      </script>
     </body>
     </html>
   `;
