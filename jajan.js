@@ -1444,6 +1444,16 @@ let baseHTML = `
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
+    body {
+        background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+    }
+
+    html.dark body {
+        background-image: url('https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&w=1920&q=80');
+    }
     /* 1. SCROLLBAR HIDE */
     /* For Webkit-based browsers (Chrome, Safari and Opera) */
     .scrollbar-hide::-webkit-scrollbar {
@@ -1563,9 +1573,13 @@ let baseHTML = `
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 5px var(--tw-color-accent-blue);
     }
 
-    /* 8. TABLE STYLES (Dark Theme) */
+    /* 8. TABLE STYLES (Transparent) */
+    .table-dark {
+        background-color: rgba(17, 24, 39, 0.6); /* bg-gray-900 with 60% opacity */
+        border-color: rgba(51, 65, 85, 0.5);
+    }
     .table-dark th {
-        background-color: #1e293b;
+        background-color: rgba(30, 41, 59, 0.8); /* bg-slate-800 with 80% opacity */
         color: #94a3b8;
         font-weight: 600;
     }
@@ -1573,10 +1587,29 @@ let baseHTML = `
         border-color: #334155;
     }
     .table-dark tr:nth-child(even) {
-        background-color: #111827;
+        background-color: rgba(255, 255, 255, 0.05); /* subtle white for alternating rows */
     }
     .table-dark tr:hover {
-        background-color: #334155 !important;
+        background-color: rgba(51, 65, 85, 0.7) !important; /* bg-slate-700 with 70% opacity */
+    }
+
+    .table-light {
+        background-color: rgba(255, 255, 255, 0.5); /* white with 50% opacity */
+        border-color: rgba(209, 213, 219, 0.5);
+    }
+    .table-light th {
+        background-color: rgba(243, 244, 246, 0.7); /* bg-gray-100 with 70% opacity */
+        color: #374151; /* text-gray-700 */
+        font-weight: 600;
+    }
+    .table-light td {
+        border-color: #e5e7eb; /* border-gray-200 */
+    }
+    .table-light tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.02); /* subtle black for alternating rows */
+    }
+    .table-light tr:hover {
+        background-color: rgba(229, 231, 235, 0.6) !important; /* bg-gray-200 with 60% opacity */
     }
 
     /* 9. UTILITY CLASSES */
@@ -1705,7 +1738,7 @@ let baseHTML = `
     </script>
 </head>
 <body
-    class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white bg-fixed transition-colors duration-300"
+    class="text-gray-800 dark:text-white bg-fixed transition-colors duration-300"
 >
     <script>
       (function() {
@@ -2441,7 +2474,7 @@ setTitle(title) {
             const prx = this.proxies[i];
             const proxyConfigs = prx.list.join(',');
             tableRows += `
-                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                <tr>
     <td class="px-3 py-3 text-base text-gray-500 dark:text-gray-400 text-center">${this.startIndex + i + 1}</td>
     <td class="px-3 py-3 text-base font-mono text-center text-gray-800 dark:text-gray-200">${prx.prxIP}:${prx.prxPort}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 flex items-center justify-center">
@@ -2460,9 +2493,9 @@ setTitle(title) {
 
         const table = `
             <div class="overflow-x-auto w-full max-w-full" style="max-height: 500px; overflow-y: auto;">    
-    <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <table class="min-w-full table-light dark:table-dark border rounded-xl text-base" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         
-        <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
+        <thead class="sticky top-0 z-10" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);">
             <tr>
                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 50px;">No.</th>
                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 120px;">IP</th>
