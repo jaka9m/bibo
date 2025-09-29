@@ -952,7 +952,7 @@ export default {
   const remark = decodeURIComponent(parts[1] || 'Shadowsocks');
   const corePart = parts[0];
 
-  const pluginMatch = corePart.match(/@(.+?)\\/\\/?plugin=(.*)/);
+  const pluginMatch = corePart.match(/@(.+?)\/?\?plugin=(.*)/);
   let userServerPort, pluginData = {};
   let pluginExists = false;
 
