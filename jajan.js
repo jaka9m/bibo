@@ -458,27 +458,45 @@ export default {
             }
           );
         }
-      } else if (url.pathname === "/convert") {
-        const converterHtml = `
-    <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Converter</title>
+      } else if (url.pathname.startsWith("/convert")) {
+        const targetUrl = "https://jaka9m.github.io/web";
+		const requestUrl = new URL(request.url);
+		let path = requestUrl.pathname.replace("/convert", "");
+		if (path === "" || path === "/") {
+			path = "/index.html";
+		}
 
-    <link rel="icon" href="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" type="image/jpeg">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+        const newUrl = `${targetUrl}${path}`;
+        const newRequest = new Request(newUrl, {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+            redirect: 'follow'
+        });
 
-    </body>
-    </html>
+        const response = await fetch(newRequest);
+        const contentType = response.headers.get('content-type') || '';
 
-        `;
-        return new Response(html, {
-          status: 200,
-          headers: { 'Content-Type': 'text/html;charset=utf-8' },
+        if (contentType.includes('text/html')) {
+            let body = await response.text();
+
+            // Rewrite absolute URLs
+            body = body.replace(/https:\/\/jaka9m\.github\.io\/web/g, `https://${APP_DOMAIN}/convert`);
+
+            // Rewrite root-relative URLs
+            body = body.replace(/(src|href)="\//g, `$1="/convert/`);
+
+            return new Response(body, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers
+            });
+        }
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
         });
       }
 
