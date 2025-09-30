@@ -850,12 +850,12 @@ ul, ol {
                         </div>
                     </div>
                     <div class="form-group">
-    <label for="config-type-select">Configuration Type</label>
-    <select id="config-type-select" class="form-control">
-        <option value="minimal-config-reverse" selected>Minimal (Proxies Only)</option>
-        <option value="full-config-reverse">Full Configuration</option>
-    </select>
-</div>
+                        <label>Configuration Type</label>
+                        <div class="config-type-selector">
+                            <button id="minimal-config-reverse" class="format-btn active">Minimal (Proxies Only)</button>
+                            <button id="full-config-reverse" class="format-btn">Full Configuration</button>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="config-input">Configuration</label>
                         <textarea id="config-input" class="converter-textarea" placeholder="Paste your Clash or Nekobox configuration here..."></textarea>
