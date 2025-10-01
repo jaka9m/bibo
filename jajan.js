@@ -1121,271 +1121,298 @@ export default {
           status: 200,
           headers: { 'Content-Type': 'text/html;charset=utf-8' },
         });
-      } else // --- Endpoint Cek Kuota (Proxy API) ---
-    if (url.pathname === "/kuota") {
-      const nomor = url.searchParams.get("nomor");
-
-      // 1. Validasi Input
-      if (!nomor) {
-        return new Response(
-          JSON.stringify({
-            status: false,
-            error: "Nomor XL/AXIS wajib diisi!",
-          }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      // 2. Memanggil API Eksternal dari Worker
-      try {
-        const apiUrl = `https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=${encodeURIComponent(
-          nomor
-        )}&isJSON=true`;
-
-        // Gunakan Native fetch API
-        const apiResponse = await fetch(apiUrl, {
-          method: "GET",
-          headers: {
-            // Header otorisasi
-            Authorization: "Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw",
-            "X-API-Key": "60ef29aa-a648-4668-90ae-20951ef90c55",
-            "X-App-Version": "4.0.0",
-          },
-        });
-
-        // 3. Mengembalikan Response API mentah
-        const responseData = await apiResponse.json().catch(() => ({}));
-        
-        return new Response(JSON.stringify(responseData), {
-            status: apiResponse.status,
-            headers: { 
-                "Content-Type": "application/json",
-                // Tambahkan CORS header untuk penggunaan web
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, OPTIONS"
-            },
-        });
-
-      } catch (error) {
-        // 4. Menangani Error Koneksi Worker
-        return new Response(
-          JSON.stringify({
-            status: false,
-            error: "Terjadi kesalahan saat menghubungi API.",
-          }),
-          {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-    }
-
-    // --- Jika bukan endpoint yang dikenal, tampilkan HTML ---
-    return new Response(getHtml(), {
-      headers: { "Content-Type": "text/html" },
-    });
-  },
-};
-
-// Fungsi untuk menampilkan halaman HTML utama
-function getHtml() {
-  return `
-<!DOCTYPE html>
-<html lang="id">
+      } else if (url.pathname === "/kuota") {
+        const html = `
+      <!DOCTYPE html>
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cek Kuota Sidompul</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-  /* Reset dasar */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cek Kuota XL/AXIS</title>
 
-  /* Body */
-  body {
-    font-family: monospace;
-    background: black;
-    color: #0f0;
-    text-align: center;
-    padding: 20px;
-  }
+    <link rel="icon" href="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" type="image/jpeg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-  /* Canvas Matrix */
-  canvas, #matrix {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-  }
-
-  .container {
-    width: 90%;
-    max-width: 600px;
-    margin: 50px auto;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px #0f0;
-  }
-
-  /* Responsif untuk layar besar (laptop/desktop) */
-  @media (min-width: 1024px) {
-    .container {
-        width: 98%; 
-        max-width: 1800px;
-        padding: 40px;
+    <script>
+    tailwind.config = {
+        darkMode: 'selector',
+        theme: {
+            extend: {
+                colors: {
+                    'accent-blue': '#66b5e8',
+                    'accent-purple': '#a466e8',
+                }
+            }
+        }
+    };
+    
+    // Fungsi navigasiPlaceholder harus didefinisikan untuk menghindari error
+    function navigateTo(url) {
+        // Logika navigasi placeholder
+        console.log('Navigating to:', url);
+        // window.location.href = url; // Uncomment ini jika Anda ingin navigasi sesungguhnya
     }
-  }
+    </script>
+<style>
+    /* Custom Styles for Modern/Elegant Look - Merged and Optimized */
 
-  h3 {
-    margin-bottom: 15px;
-  }
+    /* BASE & CONTAINER GLASSMORPHISM (Mengambil dari blok CSS kedua) */
+    body {
+        background-image: url('https://picsum.photos/1920/1080?random=1');
+        background-size: cover;
+        background-attachment: fixed;
+        perspective: 1500px; /* Nilai yang lebih besar dari blok kedua */
+    }
 
-  /* Input dan tombol */
-  input, button {
-    width: 100%;
-    padding: 12px;
-    margin: 6px 0;
-    font-size: 16px;
-    border-radius: 5px;
-    border: none;
-  }
+    .main-container {
+        background: rgba(30, 41, 59, 0.4); /* Mengambil dari blok kedua (lebih transparan) */
+        backdrop-filter: blur(18px); /* Mengambil dari blok kedua (blur lebih tinggi) */
+        border-radius: 1.5rem;
+        border: 1px solid rgba(102, 181, 232, 0.4); /* Border dari blok kedua (accent-blue) */
+        box-shadow:
+            0 40px 80px rgba(0, 0, 0, 0.8),
+            0 0 30px rgba(102, 181, 232, 0.4) inset; /* Shadow dari blok kedua (lebih detail) */
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transform: translateZ(50px) rotateX(0deg) rotateY(0deg); /* Transform 3D dari blok kedua */
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .main-container:hover {
+        transform: translateZ(80px) rotateX(1deg) rotateY(-1deg);
+        box-shadow:
+            0 60px 100px rgba(0, 0, 0, 0.9),
+            0 0 40px rgba(102, 181, 232, 0.6) inset;
+    }
 
-  input {
-    background: #2d3748;
-    color: #00FF00;
-  }
+    /* FORM CONTAINER (Mengambil dari blok CSS kedua) */
+    #formnya {
+        background-color: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(100, 116, 139, 0.5);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+    }
+    #formnya:hover {
+        transform: translateZ(15px);
+    }
 
-  button {
-    background: #0f0;
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-  }
+    /* INPUT GROUP (Mengambil dari blok CSS pertama, karena lebih umum) */
+    .input-group {
+        background-color: rgba(30, 41, 59, 0.6);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    }
 
-  button:hover:enabled {
-    background: #0d0;
-  }
+    /* INPUT FIELD STYLES (Mengambil dari blok CSS kedua, lebih detail) */
+    .input-dark, .input-group textarea, .input-group select {
+        background-color: rgba(17, 24, 39, 0.7); /* Background lebih transparan */
+        color: #ffffff;
+        border: 1px solid rgba(102, 181, 232, 0.5); /* Border accent-blue */
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5); /* Shadow lebih gelap */
+        transform: translateZ(2px);
+        transition: all 0.2s;
+    }
+    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
+        border-color: var(--tw-color-accent-blue);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px var(--tw-color-accent-blue); /* Glow yang lebih kuat */
+        transform: translateZ(5px);
+    }
 
-  button:disabled {
-    background: #555;
-    cursor: not-allowed;
-  }
+    /* BUTTON GRADIENT (Mengambil dari blok CSS kedua, lebih fokus 3D kecil) */
+    .btn-gradient {
+        background: linear-gradient(45deg, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px var(--tw-color-accent-blue);
+        transform: translateZ(15px) translateY(-1px);
+    }
 
-  /* Loading text */
-  .loading {
-    display: none;
-    font-size: 18px;
-    margin-top: 10px;
-  }
+    /* ACTION BUTTON (Mempertahankan style dari blok pertama yang unik) */
+    .action-btn {
+        background-color: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #475569;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #334155;
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+        transform: translateY(1px);
+    }
 
-  /* Tabel */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    overflow: hidden;
-  }
+    /* Style untuk tombol Home (Dari blok CSS kedua) */
+    .btn-home {
+        background: linear-gradient(45deg, #4c566a, #2e3440);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transform: translateZ(10px);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .btn-home:hover:not(:disabled) {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px #88c0d0;
+        transform: translateZ(15px) translateY(-1px);
+    }
 
-  th, td {
-    padding: 12px 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-align: left;
-  }
+    /* JUDUL PUTIH SOLID (Properti yang sama, cukup satu) */
+    .text-solid-white {
+        color: #ffffff;
+        text-shadow: none;
+    }
 
-  th {
-    background: rgba(255, 255, 255, 0.2);
-  }
+    /* HEADINGS & LAYOUT */
+    .centered-heading {
+        text-align: center;
+        width: 100%;
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        padding-bottom: 0.5rem;
+        /* Tambahan dari blok kedua */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* LOGO BULAT DAN BESAR (Dari blok CSS kedua) */
+    .heading-icon {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .nav-btn-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 50px;
+        padding: 0.75rem 1.5rem;
+        line-height: 1.2;
+        border-radius: 0.75rem;
+    }
+    .info-box {
+        background-color: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(100, 116, 139, 0.5);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+    footer {
+        background-color: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(3px);
+        border-top: 1px solid rgba(100, 116, 139, 0.3);
+        transform: translateZ(0);
+    }
 
-  tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  /* Logo */
-  .logo {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-  }
 
-  /* Hasil Container */
-  .info-card {
-    background: #2d3748;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 15px;
-    color: #ff3333; /* Warna merah untuk error default */
-    font-weight: bold;
-  }
+    /* TABLE STYLES (Dari blok CSS pertama) */
+    .table-dark th {
+        background-color: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .table-dark td {
+        border-color: #334155;
+    }
+    .table-dark tr:nth-child(even) {
+        background-color: #111827;
+    }
+    .table-dark tr:hover {
+        background-color: #334155 !important;
+    }
 
-  /* Efek fade-in */
-  .fade-in {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-  }
+    /* RESULT STYLES */
+    /* RESULT CARD BARU (Dari blok CSS kedua, lebih lengkap) */
+    .result-card {
+        background: rgba(45, 62, 80, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(102, 181, 232, 0.5);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(102, 181, 232, 0.2);
+        transform: translateZ(10px);
+        text-align: left;
+        margin-top: 1.5rem;
+        color: white;
+    }
+    .result-card h4 {
+        color: var(--tw-color-accent-blue);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(100, 116, 139, 0.5);
+        padding-bottom: 0.5rem;
+    }
+    .result-item {
+        padding: 0.4rem 0;
+        border-bottom: 1px dashed rgba(100, 116, 139, 0.3);
+        overflow: hidden;
+    }
+    .result-item:last-child {
+        border-bottom: none;
+    }
 
-  .fade-in.show {
-    opacity: 1;
-  }
+    /* RESULT SUCCESS/ERROR (Dari blok CSS pertama, tetap berguna) */
+    .result-success {
+        background-color: #1f2937;
+        border: 1px solid #66b5e8;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4);
+        transition: all 0.3s ease;
+    }
+    .result-error {
+        background-color: #1f2937;
+        border: 1px solid #a466e8;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4);
+        transition: all 0.3s ease;
+    }
 
-  /* Efek teks ala hacker */
-  .matrix-alert {
-    font-family: 'Courier New', monospace;
-    text-shadow: 0 0 5px #00FF00, 0 0 10px #00FF00;
-  }
-
-  /* Footer */
-  footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    color: #9ca3af;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px 0;
-  }
-  
-  .quota-package-title {
-      background: rgba(0, 255, 0, 0.1);
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 5px;
-      font-weight: bold;
-      text-align: center;
-  }
-  .benefit-table {
-      margin-top: 5px;
-      margin-bottom: 20px;
-  }
-
-  </style>
-
-</head>
-<body>
-  <canvas id="matrix"></canvas>
-  <div class="container">
-    <img
-      class="logo"
-      src="https://raw.githubusercontent.com/jaka2m/project/main/social/Screenshot_20250317-114541.jpg"
-      alt="Sidompul Logo"
-    />
+    /* LOADING SPINNER (Properti yang sama, cukup satu) */
+    #cover-spin {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid var(--tw-color-accent-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+    </head>
+<body class="text-white min-h-screen flex flex-col items-center">
+    <div id="cover-spin"><div class="loader"></div></div>
+    <div id="custom-notification"></div> 
+    
+    <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
+    <div id="slide-2" class="slide w-full max-w-4xl main-container p-4 sm:p-6">
+    
     <div class="flex justify-center mb-6">
         <div class="grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full">
             <a href="/sub"
@@ -1407,219 +1434,102 @@ function getHtml() {
             </a>
         </div>
     </div>
-    <h3>Cek Kuota Sidompul</h3>
+    <div class="w-full max-w-lg mx-auto main-container">
+            <div class="text-center mb-6">
+                <h2 class="text-solid-white centered-heading">
+                    <img src="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" alt="Logo Sidompul" class="heading-icon">
+                    Sidompul Cek Kuota XL/AXIS
+                </h2>
+            </div>
+            
+            <div class="p-4 rounded-lg mb-6 text-center text-gray-400 border info-box" style="box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+                <i class="fa fa-info-circle text-accent-blue mr-1"></i> Gunakan layanan ini secara bijak dan hindari spam.
+            </div>
+            
+            <form id="formnya" class="p-6 rounded-xl shadow-xl border">
+                <div class="mb-6">
+                    <label for="msisdn" class="block font-medium mb-2 text-gray-300 text-sm">Nomor HP XL/AXIS:</label>
+                    <input type="number" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-accent-blue" id="msisdn" placeholder="08xxx / 628xxx" maxlength="16" required>
+                </div>
+                
+                <div class="flex gap-4">
+                    
+                    <a href="/sub" class="flex-1 text-center py-2 rounded-lg text-white font-bold text-base btn-home hover:opacity-90 transition-opacity">
+                        <i class="fa fa-home mr-2"></i>Home
+                    </a>
 
-    <input type="text" id="nomor" placeholder="Masukkan nomor XL/AXIS" />
-    <br>
-    <button id="cekButton">🔍 Check Kuota</button>
+                    <button type="button" id="submitCekKuota" class="flex-1 py-2 rounded-lg text-white font-bold text-base btn-gradient hover:opacity-90 transition-opacity">
+                        <i class="fa fa-search mr-2"></i>Cek
+                    </button>
+                </div>
+            </form>
+
+            <div id="hasilnya" class="mt-6"></div>
+        </div>
     
-    <div class="loading" id="loading">🔄 Memproses...</div>
-    <div id="hasil" class="fade-in"></div>
   </div>
 
-  <footer>
-    Made with ❤️ Geo Project.
-  </footer>
+    <footer class="w-full p-4 text-center mt-auto border-t">
+        <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
+            <span>Sumbawa Support</span>
+            <a href="https://t.me/sampiiiiu" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
+                <i class="fab fa-telegram"></i>
+                <span>GEO PROJECT</span>
+            </a>
+        </div>
+    </footer>
 
-  <script>
-    // Helper function untuk format data kuota (Hanya untuk konsistensi, API Anda sudah mengembalikan string unit)
-    function formatRemaining(remaining, unit) {
-        if (!remaining) return '0';
-        // Asumsi API mengembalikan nilai dan unit (misalnya "2.59" dan "GB")
-        if (unit) return \`\${remaining} \${unit}\`.trim();
-        return remaining;
-    }
-
-    // Saat halaman pertama kali diload
-    document.addEventListener("DOMContentLoaded", function() {
-      const nomorInput = document.getElementById("nomor");
-      const hasilDiv = document.getElementById("hasil");
-      const cekButton = document.getElementById("cekButton");
-
-      const savedNomor = localStorage.getItem("nomorXL");
-      if (savedNomor) {
-        nomorInput.value = savedNomor;
-      }
-
-      const savedHasil = localStorage.getItem("hasilKuota");
-      if (savedHasil) {
-        hasilDiv.innerHTML = savedHasil;
-        setTimeout(() => hasilDiv.classList.add("show"), 10);
-      }
-      
-      cekButton.addEventListener('click', cekKuota);
-
-      nomorInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-          cekKuota();
-        }
-      });
-    });
-
-    /**
-     * Fungsi utama untuk melakukan pengecekan kuota melalui Worker API.
-     */
-    async function cekKuota() {
-      const nomor = document.getElementById("nomor").value.trim();
-      const button = document.getElementById("cekButton");
-      const loading = document.getElementById("loading");
-      const hasilDiv = document.getElementById("hasil");
-
-      if (!nomor) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Peringatan!',
-          text: 'Masukkan nomor XL/AXIS terlebih dahulu!',
-          confirmButtonText: 'OK',
-          background: '#000',
-          color: '#00FF00',
-          iconColor: '#00FF00',
-          customClass: { popup: 'matrix-alert' }
-        });
-        return;
-      }
-
-      localStorage.setItem("nomorXL", nomor);
-      hasilDiv.classList.remove("show");
-      hasilDiv.innerHTML = "";
-      button.disabled = true;
-      loading.style.display = "block";
-
-      try {
-        const response = await fetch("/cek_kuota?nomor=" + encodeURIComponent(nomor));
-        const data = await response.json(); 
-
-        if (data.status && data.data && data.data.data_sp) {
-          const info = data.data.data_sp;
-          
-          // --- Informasi Kartu ---
-          let resultHtml = \`
-            <h3>\${info.msisdn || nomor} | Informasi Kartu</h3>
-            <table>
-              <tr><th>Operator</th><td>\${info.prefix?.value || 'N/A'}</td></tr>
-              <tr><th>Status 4G</th><td>\${info.status_4g?.value || 'N/A'}</td></tr>
-              <tr><th>Status Dukcapil</th><td>\${info.dukcapil?.value || 'N/A'}</td></tr>
-              <tr><th>Umur Kartu</th><td>\${info.active_card?.value || 'N/A'}</td></tr>
-              <tr><th>Masa Aktif</th><td>\${info.active_period?.value || 'N/A'}</td></tr>
-              <tr><th>Masa Tenggang</th><td>\${info.grace_period?.value || 'N/A'}</td></tr>
-              <tr><th>Status VoLTE Device</th><td>\${(info.status_volte?.value?.device ? '✅' : '❌') || 'N/A'}</td></tr>
-              <tr><th>Status VoLTE Area</th><td>\${(info.status_volte?.value?.area ? '✅' : '❌') || 'N/A'}</td></tr>
-              <tr><th>Status VoLTE Simcard</th><td>\${(info.status_volte?.value?.simcard ? '✅' : '❌') || 'N/A'}</td></tr>
-            </table>
-          \`;
-
-          // --- Daftar Kuota (Iterasi Struktur Array of Arrays) ---
-          if (info.quotas && info.quotas.value && info.quotas.value.length > 0) {
-            resultHtml += \`<h3>Daftar Paket Aktif</h3>\`;
-
-            // Iterasi array terluar (yang berisi paket-paket)
-            info.quotas.value.forEach((packageArray, index) => {
-                const packageData = packageArray[0]; // Ambil objek pertama dari array
-                
-                if (!packageData || !packageData.packages) return;
-
-                const packageName = packageData.packages.name || 'Paket Tidak Dikenal';
-                const expDate = packageData.packages.expDate ? packageData.packages.expDate.split('T')[0] : 'N/A';
-                const benefits = packageData.benefits || [];
-
-                resultHtml += \`
-                    <div class="quota-package-title">
-                        🎁 Paket: \${packageName} <br>
-                        \ud83c\udf42 Aktif Hingga: \${expDate}
-                    </div>
-                \`;
-
-                // Tampilkan daftar benefit di dalam paket ini
-                if (benefits.length > 0) {
-                    resultHtml += \`
-                        <table class="benefit-table">
-                            <tr>
-                                <th>Benefit</th>
-                                <th>Tipe</th>
-                                <th>Sisa Kuota</th>
-                            </tr>
-                    \`;
-
-                    benefits.forEach(b => {
-                        const remaining = b.remaining || '0';
-                        // Ambil unit dari string "Quota" (contoh: "6 GB" -> "GB") atau dari "remaining" jika ada
-                        const unitMatch = b.quota ? b.quota.match(/[a-zA-Z]+$/) : null;
-                        const unit = unitMatch ? unitMatch[0] : '';
-
-                        resultHtml += \`
-                            <tr>
-                                <td>\${b.bname || 'N/A'}</td>
-                                <td>\${b.type || 'N/A'}</td>
-                                <td>\${formatRemaining(remaining, unit)}</td>
-                            </tr>
-                        \`;
-                    });
-
-                    resultHtml += \`</table>\`;
+      <script>
+        
+        function cekKuota() {
+            const msisdn = document.getElementById('msisdn').value;
+            if (!msisdn) {
+                console.error('Nomor tidak boleh kosong.');
+                return;
+            }
+            
+            $('#cover-spin').show();
+            $.ajax({
+                type: 'GET',
+                url: \`https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=\${msisdn}&isJSON=true\`,
+                dataType: 'JSON',
+                contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function (req) {
+                    req.setRequestHeader('Authorization', 'Basic c2lkb21wdWxhcGk6YXBpZ3drbXNw');
+                    req.setRequestHeader('X-API-Key', '60ef29aa-a648-4668-90ae-20951ef90c55');
+                    req.setRequestHeader('X-App-Version', '4.0.0');
+                },
+                success: function (res) {
+                    $('#cover-spin').hide();
+                    $('#hasilnya').html('');
+                    if (res.status) {
+                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
+                    } else {
+                        console.error('Gagal Cek Kuota: ' + res.message);
+                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
+                    }
+                },
+                error: function () {
+                    $('#cover-spin').hide();
+                    console.error('Terjadi kesalahan koneksi.');
+                    $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>\`);
                 }
             });
-          } else {
-            resultHtml += \`<div class='info-card' style='color:#00FF00; background:#1a1a1a;'>✅ Tidak ada kuota aktif yang terdeteksi.</div>\`;
-          }
-
-          hasilDiv.innerHTML = resultHtml;
-          localStorage.setItem("hasilKuota", resultHtml);
-        } else {
-          // Menampilkan pesan error dari body API 
-          const errorMessage = data.data?.keteranganError || data.message || 'Nomor tidak valid atau gagal mendapatkan data.';
-          hasilDiv.innerHTML = \`<div class='info-card'>❌ \${errorMessage}</div>\`;
-          localStorage.removeItem("hasilKuota");
         }
-      } catch (error) {
-        hasilDiv.innerHTML = "<div class='info-card'>⚠️ Terjadi kesalahan koneksi atau server tidak merespons.</div>";
-        localStorage.removeItem("hasilKuota");
-      }
+        
+        // Pemasangan event listener setelah konten dimuat
+        $(document).ready(function() {
+            $('#submitCekKuota').off('click').on('click', cekKuota); 
+            $('#msisdn').off('keypress').on('keypress', function (e) {
+                if (e.which === 13) cekKuota();
+            });
+        });
+        
+      </script>
+    </body>
+    </html>
 
-      button.disabled = false;
-      loading.style.display = "none";
-      hasilDiv.classList.add("show");
-    }
-
-    // --- Efek Matrix di background ---
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-    
-    if (ctx) { 
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const letters = "GEO@PROJECT";
-      const fontSize = 16;
-      const columns = canvas.width / fontSize;
-      const drops = Array(Math.floor(columns)).fill(1);
-    
-      function drawMatrix() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#0f0";
-        ctx.font = fontSize + "px monospace";
-    
-        for (let i = 0; i < drops.length; i++) {
-          const text = letters.charAt(Math.floor(Math.random() * letters.length));
-          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-          }
-          drops[i]++;
-        }
-      }
-      setInterval(drawMatrix, 35);
-
-      window.addEventListener('resize', () => {
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
-      });
-    }
-
-  </script>
-</body>
-</html>
-  `;
-}
+        `;
         return new Response(html, {
           status: 200,
           headers: { 'Content-Type': 'text/html;charset=utf-8' },
