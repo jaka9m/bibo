@@ -1,5 +1,13 @@
 import { connect } from "cloudflare:sockets";
 
+const rootDomain = "gpj2.dpdns.org"; // Ganti dengan domain utama kalian
+const serviceName = "gamang"; // Ganti dengan nama workers kalian
+const apiKey = "e1d2b64d4da5e42f24c88535f12f21bc84d06"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
+const apiEmail = "paoandest@gmail.com"; // Ganti dengan email yang kalian gunakan
+const accountID = "723b4d7d922c6af940791b5624a7cb05"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+const zoneID = "143d6f80528eae02e7a909f85e5320ab"; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+let isApiReady = false;
+
 const proxyListURL = 'https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt';
 const namaWeb = 'GEO PROJECT'
 const telegrambot = 'https://t.me/VLTRSSbot'
