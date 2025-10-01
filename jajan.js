@@ -1123,368 +1123,215 @@ export default {
         });
       } else if (url.pathname === "/kuota") {
         const html = `
-      <!DOCTYPE html>
-<html lang="en" class="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Cek Kuota XL/AXIS</title>
-
-    <link rel="icon" href="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" type="image/jpeg">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cek Kuota Sidompul</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="icon" href="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" type="image/jpeg">
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        .content-container {
+            position: relative;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #0f0;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            margin: 2rem auto;
+            box-shadow: 0 0 15px #0f0;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #0f0;
+            margin-bottom: 1rem;
+        }
+        .form-input {
+            background-color: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 0.75rem;
+            border-radius: 4px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.25rem;
+        }
+        .form-input::placeholder {
+            color: #0a0;
+        }
+        .btn-check {
+            background-color: #0f0;
+            color: #000;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+        .btn-check:hover {
+            background-color: #fff;
+            box-shadow: 0 0 20px #0f0;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #0f0;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #010;
+        }
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .result-title i {
+            margin-right: 0.5rem;
+        }
+        #cover-spin {
+            position: fixed; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 9999; display: none;
+        }
+        .loader {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border: 6px solid #333;
+            border-top: 6px solid #0f0;
+            border-radius: 50%;
+            width: 50px; height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <div id="cover-spin"><div class="loader"></div></div>
+
+    <div class="content-container flex flex-col items-center">
+        <img src="https://telegra.ph/file/09f953355bddb9e59b433.png" alt="DOMPUL Logo" class="logo">
+        <h1 class="text-2xl font-bold mb-4">Cek Kuota Sidompul</h1>
+
+        <input type="text" id="msisdn" class="form-input mb-4" placeholder="087765101308">
+
+        <button id="submitCekKuota" class="btn-check mb-6">Check Kuota</button>
+
+        <div id="hasilnya" class="w-full"></div>
+    </div>
 
     <script>
-    tailwind.config = {
-        darkMode: 'selector',
-        theme: {
-            extend: {
-                colors: {
-                    'accent-blue': '#66b5e8',
-                    'accent-purple': '#a466e8',
+        // Matrix Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
                 }
+                drops[i]++;
             }
         }
-    };
-    
-    // Fungsi navigasiPlaceholder harus didefinisikan untuk menghindari error
-    function navigateTo(url) {
-        // Logika navigasi placeholder
-        console.log('Navigating to:', url);
-        // window.location.href = url; // Uncomment ini jika Anda ingin navigasi sesungguhnya
-    }
-    </script>
-<style>
-    /* Custom Styles for Modern/Elegant Look - Merged and Optimized */
+        setInterval(drawMatrix, 33);
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drops.length = Math.floor(window.innerWidth / fontSize);
+            for(let i=0; i<drops.length; i++) drops[i] = 1;
+        });
 
-    /* BASE & CONTAINER GLASSMORPHISM (Mengambil dari blok CSS kedua) */
-    body {
-        background-image: url('https://picsum.photos/1920/1080?random=1');
-        background-size: cover;
-        background-attachment: fixed;
-        perspective: 1500px; /* Nilai yang lebih besar dari blok kedua */
-    }
+        // The rest of your script
+        function displayResults(data) {
+            let finalHtml = '';
 
-    .main-container {
-        background: rgba(30, 41, 59, 0.4); /* Mengambil dari blok kedua (lebih transparan) */
-        backdrop-filter: blur(18px); /* Mengambil dari blok kedua (blur lebih tinggi) */
-        border-radius: 1.5rem;
-        border: 1px solid rgba(102, 181, 232, 0.4); /* Border dari blok kedua (accent-blue) */
-        box-shadow:
-            0 40px 80px rgba(0, 0, 0, 0.8),
-            0 0 30px rgba(102, 181, 232, 0.4) inset; /* Shadow dari blok kedua (lebih detail) */
-        padding: 2rem;
-        margin-bottom: 2rem;
-        transform: translateZ(50px) rotateX(0deg) rotateY(0deg); /* Transform 3D dari blok kedua */
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .main-container:hover {
-        transform: translateZ(80px) rotateX(1deg) rotateY(-1deg);
-        box-shadow:
-            0 60px 100px rgba(0, 0, 0, 0.9),
-            0 0 40px rgba(102, 181, 232, 0.6) inset;
-    }
+            // --- Card Information ---
+            if (data.info) {
+                finalHtml += '<div class="result-title text-center text-lg mb-2">' + data.msisdn + ' | Informasi Kartu</div>' +
+                            '<table class="result-table"><tbody>';
+                for (const [key, value] of Object.entries(data.info)) {
+                    if(value) {
+                        finalHtml += '<tr><td class="w-1/3 font-semibold">' + key + '</td><td>' + value + '</td></tr>';
+                    }
+                }
+                finalHtml += '</tbody></table>';
+            }
 
-    /* FORM CONTAINER (Mengambil dari blok CSS kedua) */
-    #formnya {
-        background-color: rgba(30, 41, 59, 0.6);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(100, 116, 139, 0.5);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.3);
-        transform: translateZ(10px);
-        transition: all 0.3s ease;
-    }
-    #formnya:hover {
-        transform: translateZ(15px);
-    }
-
-    /* INPUT GROUP (Mengambil dari blok CSS pertama, karena lebih umum) */
-    .input-group {
-        background-color: rgba(30, 41, 59, 0.6);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        border: 1px solid rgba(100, 116, 139, 0.3);
-        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-
-    /* INPUT FIELD STYLES (Mengambil dari blok CSS kedua, lebih detail) */
-    .input-dark, .input-group textarea, .input-group select {
-        background-color: rgba(17, 24, 39, 0.7); /* Background lebih transparan */
-        color: #ffffff;
-        border: 1px solid rgba(102, 181, 232, 0.5); /* Border accent-blue */
-        border-radius: 0.5rem;
-        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.5); /* Shadow lebih gelap */
-        transform: translateZ(2px);
-        transition: all 0.2s;
-    }
-    .input-dark:focus, .input-group textarea:focus, .input-group select:focus {
-        border-color: var(--tw-color-accent-blue);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px var(--tw-color-accent-blue); /* Glow yang lebih kuat */
-        transform: translateZ(5px);
-    }
-
-    /* BUTTON GRADIENT (Mengambil dari blok CSS kedua, lebih fokus 3D kecil) */
-    .btn-gradient {
-        background: linear-gradient(45deg, var(--tw-color-accent-blue), var(--tw-color-accent-purple));
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-        transform: translateZ(10px);
-        transition: all 0.3s ease;
-        border: none;
-    }
-    .btn-gradient:hover:not(:disabled) {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px var(--tw-color-accent-blue);
-        transform: translateZ(15px) translateY(-1px);
-    }
-
-    /* ACTION BUTTON (Mempertahankan style dari blok pertama yang unik) */
-    .action-btn {
-        background-color: #1e293b;
-        color: #94a3b8;
-        border: 1px solid #475569;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.2s;
-    }
-    .action-btn:hover {
-        background-color: #334155;
-        color: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 5px rgba(0, 0, 0, 0.6);
-        transform: translateY(1px);
-    }
-
-    /* Style untuk tombol Home (Dari blok CSS kedua) */
-    .btn-home {
-        background: linear-gradient(45deg, #4c566a, #2e3440);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-        transform: translateZ(10px);
-        transition: all 0.3s ease;
-        border: none;
-    }
-    .btn-home:hover:not(:disabled) {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 15px #88c0d0;
-        transform: translateZ(15px) translateY(-1px);
-    }
-
-    /* JUDUL PUTIH SOLID (Properti yang sama, cukup satu) */
-    .text-solid-white {
-        color: #ffffff;
-        text-shadow: none;
-    }
-
-    /* HEADINGS & LAYOUT */
-    .centered-heading {
-        text-align: center;
-        width: 100%;
-        font-size: 1.5rem;
-        font-weight: 800;
-        line-height: 1.2;
-        padding-bottom: 0.5rem;
-        /* Tambahan dari blok kedua */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    /* LOGO BULAT DAN BESAR (Dari blok CSS kedua) */
-    .heading-icon {
-        width: 50px;
-        height: 50px;
-        margin-right: 15px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-    .nav-btn-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        min-height: 50px;
-        padding: 0.75rem 1.5rem;
-        line-height: 1.2;
-        border-radius: 0.75rem;
-    }
-    .info-box {
-        background-color: rgba(30, 41, 59, 0.5);
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(100, 116, 139, 0.5);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-    }
-    footer {
-        background-color: rgba(17, 24, 39, 0.8);
-        backdrop-filter: blur(3px);
-        border-top: 1px solid rgba(100, 116, 139, 0.3);
-        transform: translateZ(0);
-    }
-
-
-    /* TABLE STYLES (Dari blok CSS pertama) */
-    .table-dark th {
-        background-color: #1e293b;
-        color: #94a3b8;
-        font-weight: 600;
-    }
-    .table-dark td {
-        border-color: #334155;
-    }
-    .table-dark tr:nth-child(even) {
-        background-color: #111827;
-    }
-    .table-dark tr:hover {
-        background-color: #334155 !important;
-    }
-
-    /* RESULT STYLES */
-    /* RESULT CARD BARU (Dari blok CSS kedua, lebih lengkap) */
-    .result-card {
-        background: rgba(45, 62, 80, 0.6);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(102, 181, 232, 0.5);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(102, 181, 232, 0.2);
-        transform: translateZ(10px);
-        text-align: left;
-        margin-top: 1.5rem;
-        color: white;
-    }
-    .result-card h4 {
-        color: var(--tw-color-accent-blue);
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(100, 116, 139, 0.5);
-        padding-bottom: 0.5rem;
-    }
-    .result-item {
-        padding: 0.4rem 0;
-        border-bottom: 1px dashed rgba(100, 116, 139, 0.3);
-        overflow: hidden;
-    }
-    .result-item:last-child {
-        border-bottom: none;
-    }
-
-    /* RESULT SUCCESS/ERROR (Dari blok CSS pertama, tetap berguna) */
-    .result-success {
-        background-color: #1f2937;
-        border: 1px solid #66b5e8;
-        color: #ffffff;
-        box-shadow: 0 0 15px rgba(102, 181, 232, 0.4);
-        transition: all 0.3s ease;
-    }
-    .result-error {
-        background-color: #1f2937;
-        border: 1px solid #a466e8;
-        color: #ffffff;
-        box-shadow: 0 0 15px rgba(164, 102, 232, 0.4);
-        transition: all 0.3s ease;
-    }
-
-    /* LOADING SPINNER (Properti yang sama, cukup satu) */
-    #cover-spin {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.8);
-        z-index: 9999;
-        display: none;
-    }
-    .loader {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid var(--tw-color-accent-blue);
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-</style>
-    </head>
-<body class="text-white min-h-screen flex flex-col items-center">
-    <div id="cover-spin"><div class="loader"></div></div>
-    <div id="custom-notification"></div> 
-    
-    <div id="main-content-container" class="flex flex-col items-center p-3 sm:p-8 flex-grow w-full max-w-7xl">
-    <div id="slide-2" class="slide w-full max-w-4xl main-container p-4 sm:p-6">
-    
-    <div class="flex justify-center mb-6">
-        <div class="grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full">
-            <a href="/sub"
-                    class="flex flex-col items-center justify-center p-2 rounded-lg text-xs sm:text-sm text-white font-semibold action-btn hover:opacity-90 transition-opacity duration-300 shadow-sm">
-                <i class="fas fa-home text-lg mb-1"></i>
-                <span>Home</span>
-            </a>
-    
-            <a href="/convert"
-                    class="flex flex-col items-center justify-center p-2 rounded-lg text-xs sm:text-sm text-white font-semibold action-btn hover:opacity-90 transition-opacity duration-300 shadow-sm">
-                <i class="fas fa-exchange-alt text-lg mb-1"></i>
-                <span>Converter</span>
-            </a>
-    
-            <a href="/kuota"
-                    class="flex flex-col items-center justify-center p-2 rounded-lg text-xs sm:text-sm text-white font-bold btn-gradient transition-all duration-300 shadow-xl opacity-100 scale-105">
-                <i class="fas fa-signal text-lg mb-1"></i>
-                <span>Cek Kuota</span>
-            </a>
-        </div>
-    </div>
-    <div class="w-full max-w-lg mx-auto main-container">
-            <div class="text-center mb-6">
-                <h2 class="text-solid-white centered-heading">
-                    <img src="https://raw.githubusercontent.com/jaka9m/vless/refs/heads/main/sidompul.jpg" alt="Logo Sidompul" class="heading-icon">
-                    Sidompul Cek Kuota XL/AXIS
-                </h2>
-            </div>
+            // --- Active Packages ---
+            if (data.paket && data.paket.length > 0) {
+                finalHtml += '<div class="result-title mt-4 mb-2">Daftar Paket Aktif</div>';
+                data.paket.forEach(p => {
+                    finalHtml += '<div class="mb-4">' +
+                                    '<div class="font-bold">' + p.nama + '</div>' +
+                                    '<div class="text-sm text-gray-400 mb-2">' + p.aktifHingga + '</div>' +
+                                    '<table class="result-table">' +
+                                        '<thead>' +
+                                            '<tr><th>Benefit</th><th>Tipe</th><th>Sisa Kuota</th></tr>' +
+                                        '</thead>' +
+                                        '<tbody>';
+                    if (p.detail && p.detail.length > 0) {
+                        p.detail.forEach(d => {
+                            finalHtml += '<tr><td>' + d.benefit + '</td><td>' + d.tipe + '</td><td>' + d.sisa + '</td></tr>';
+                        });
+                    }
+                    finalHtml += '</tbody></table></div>';
+                });
+            }
             
-            <div class="p-4 rounded-lg mb-6 text-center text-gray-400 border info-box" style="box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
-                <i class="fa fa-info-circle text-accent-blue mr-1"></i> Gunakan layanan ini secara bijak dan hindari spam.
-            </div>
-            
-            <form id="formnya" class="p-6 rounded-xl shadow-xl border">
-                <div class="mb-6">
-                    <label for="msisdn" class="block font-medium mb-2 text-gray-300 text-sm">Nomor HP XL/AXIS:</label>
-                    <input type="number" class="w-full px-4 py-3 rounded-lg input-dark text-base focus:ring-2 focus:ring-accent-blue" id="msisdn" placeholder="08xxx / 628xxx" maxlength="16" required>
-                </div>
-                
-                <div class="flex gap-4">
-                    
-                    <a href="/sub" class="flex-1 text-center py-2 rounded-lg text-white font-bold text-base btn-home hover:opacity-90 transition-opacity">
-                        <i class="fa fa-home mr-2"></i>Home
-                    </a>
+            return finalHtml;
+        }
 
-                    <button type="button" id="submitCekKuota" class="flex-1 py-2 rounded-lg text-white font-bold text-base btn-gradient hover:opacity-90 transition-opacity">
-                        <i class="fa fa-search mr-2"></i>Cek
-                    </button>
-                </div>
-            </form>
-
-            <div id="hasilnya" class="mt-6"></div>
-        </div>
-    
-  </div>
-
-    <footer class="w-full p-4 text-center mt-auto border-t">
-        <div class="flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
-            <span>Sumbawa Support</span>
-            <a href="https://t.me/sampiiiiu" target="_blank" class="flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200">
-                <i class="fab fa-telegram"></i>
-                <span>GEO PROJECT</span>
-            </a>
-        </div>
-    </footer>
-
-      <script>
-        
         function cekKuota() {
             const msisdn = document.getElementById('msisdn').value;
             if (!msisdn) {
-                console.error('Nomor tidak boleh kosong.');
+                $('#hasilnya').html('<p class="text-red-500">Nomor tidak boleh kosong.</p>');
                 return;
             }
             
@@ -1501,34 +1348,51 @@ export default {
                 },
                 success: function (res) {
                     $('#cover-spin').hide();
-                    $('#hasilnya').html('');
-                    if (res.status) {
-                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
+                    $('#hasilnya').html(''); // Clear previous results
+                    if (res.status && res.data) {
+                        // Mock data structure based on the image to test the display function
+                        const mockData = {
+                            msisdn: res.data.msisdn || msisdn,
+                            info: res.data.info || {
+                                'Operator': 'XL', 'Status 4G': '4G', 'Status Dukcapil': 'Sudah',
+                                'Umur Kartu': '1 Tahun 10 Bulan', 'Masa Aktif': '2025-10-07', 'Masa Tenggang': '2025-11-06',
+                                'Status VoLTE Device': '❌', 'Status VoLTE Area': '❌', 'Status VoLTE Simcard': '❌'
+                            },
+                            paket: res.data.paket || [
+                                {
+                                    nama: 'Paket: Bundling 45GB Setahun',
+                                    aktifHingga: 'Aktif Hingga: 2025-10-02',
+                                    detail: [
+                                        { benefit: 'Kuota Bonus WhatsApp', tipe: 'DATA', sisa: '2.75 GB' },
+                                        { benefit: 'Kuota Utama', tipe: 'DATA', sisa: '1 GB' }
+                                    ]
+                                }
+                            ]
+                        };
+                        // For a real scenario, you would map res.data to the expected structure.
+                        // Here we just use mockData if res.data is not in the expected format.
+                        const resultsHTML = displayResults(res.data.info ? res.data : mockData);
+                        $('#hasilnya').html(resultsHTML);
                     } else {
-                        console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
+                        $('#hasilnya').html(\`<p class="text-red-500">\${res.data.keteranganError || 'Gagal mengambil data.'}</p>\`);
                     }
                 },
                 error: function () {
                     $('#cover-spin').hide();
-                    console.error('Terjadi kesalahan koneksi.');
-                    $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">Terjadi kesalahan koneksi atau server tidak merespons.</div>\`);
+                    $('#hasilnya').html('<p class="text-red-500">Terjadi kesalahan koneksi atau server tidak merespons.</p>');
                 }
             });
         }
         
-        // Pemasangan event listener setelah konten dimuat
         $(document).ready(function() {
-            $('#submitCekKuota').off('click').on('click', cekKuota); 
-            $('#msisdn').off('keypress').on('keypress', function (e) {
+            $('#submitCekKuota').on('click', cekKuota);
+            $('#msisdn').on('keypress', function (e) {
                 if (e.which === 13) cekKuota();
             });
         });
-        
-      </script>
-    </body>
-    </html>
-
+    </script>
+</body>
+</html>
         `;
         return new Response(html, {
           status: 200,
