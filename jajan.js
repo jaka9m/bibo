@@ -943,15 +943,11 @@ async function websocketHandler(request) {
   let remoteSocketWrapper = {
     value: null,
   };
-  let isDNS = false;
 
   readableWebSocketStream
     .pipeTo(
       new WritableStream({
         async write(chunk, controller) {
-          if (isDNS) {
-            return handleUDPOutbound(DNS_SERVER_ADDRESS, DNS_SERVER_PORT, chunk, webSocket, null, log);
-          }
           if (remoteSocketWrapper.value) {
             const writer = remoteSocketWrapper.value.writable.getWriter();
             await writer.write(chunk);
@@ -981,22 +977,10 @@ async function websocketHandler(request) {
 
           if (protocolHeader.isUDP) {
             if (protocolHeader.portRemote === 53) {
-              isDNS = true;
+              return handleDNSQuery(protocolHeader, webSocket, log);
             } else {
-              // return handleUDPOutbound(protocolHeader.addressRemote, protocolHeader.portRemote, chunk, webSocket, protocolHeader.version, log);
               throw new Error("UDP only support for DNS port 53");
             }
-          }
-
-          if (isDNS) {
-            return handleUDPOutbound(
-              DNS_SERVER_ADDRESS,
-              DNS_SERVER_PORT,
-              chunk,
-              webSocket,
-              protocolHeader.version,
-              log
-            );
           }
 
           handleTCPOutBound(
@@ -1091,43 +1075,83 @@ async function handleTCPOutBound(
   remoteSocketToWS(tcpSocket, webSocket, responseHeader, retry, log);
 }
 
-async function handleUDPOutbound(targetAddress, targetPort, udpChunk, webSocket, responseHeader, log) {
-  try {
-    let protocolHeader = responseHeader;
-    const tcpSocket = connect({
-      hostname: targetAddress,
-      port: targetPort,
-    });
+async function handleDNSQuery(protocolHeader, webSocket, log) {
+    try {
+        const dnsRequest = protocolHeader.rawClientData;
+        const dnsResponse = await fetch("https://cloudflare-dns.com/dns-query", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/dns-message',
+            },
+            body: dnsRequest,
+        });
 
-    log(`Connected to ${targetAddress}:${targetPort}`);
+        const dnsWireformat = await dnsResponse.arrayBuffer();
+        log(`Successfully fetched DNS response: ${dnsWireformat.byteLength} bytes`);
 
-    const writer = tcpSocket.writable.getWriter();
-    await writer.write(udpChunk);
-    writer.releaseLock();
+        if (webSocket.readyState === WS_READY_STATE_OPEN) {
+            let responsePacket;
 
-    await tcpSocket.readable.pipeTo(
-      new WritableStream({
-        async write(chunk) {
-          if (webSocket.readyState === WS_READY_STATE_OPEN) {
-            if (protocolHeader) {
-              webSocket.send(await new Blob([protocolHeader, chunk]).arrayBuffer());
-              protocolHeader = null;
+            // For VLESS, the response is encapsulated with the version header.
+            if (protocolHeader.version) {
+                responsePacket = await new Blob([protocolHeader.version, dnsWireformat]).arrayBuffer();
             } else {
-              webSocket.send(chunk);
+                // For Trojan and SS, we must reconstruct the protocol frame with the original
+                // destination address and port, as the client expects a properly-framed UDP response.
+                const addressType = protocolHeader.addressType;
+                const address = protocolHeader.addressRemote;
+                const port = protocolHeader.portRemote;
+
+                let addressBytes;
+                // ATYP values: 1 for IPv4, 3 for domain, 4 for IPv6
+                if (addressType === 3) {
+                    addressBytes = new TextEncoder().encode(address);
+                } else if (addressType === 1) {
+                    addressBytes = new Uint8Array(address.split('.').map(Number));
+                } else if (addressType === 4) {
+                    // This is a simplified parser for non-collapsed IPv6 addresses.
+                    const parts = address.split(':');
+                    addressBytes = new Uint8Array(16);
+                    let byteIndex = 0;
+                    for (const part of parts) {
+                        const hex = part.padStart(4, '0');
+                        addressBytes[byteIndex++] = parseInt(hex.substring(0, 2), 16);
+                        addressBytes[byteIndex++] = parseInt(hex.substring(2, 4), 16);
+                    }
+                } else {
+                    console.error(`Unsupported address type: ${addressType}`);
+                    return;
+                }
+
+                const portBytes = new Uint8Array(2);
+                new DataView(portBytes.buffer).setUint16(0, port);
+
+                // Construct the SS/Trojan UDP response frame.
+                // [ATYP][DST.ADDR][DST.PORT][Payload]
+                let header;
+                if (addressType === 3) { // Domain Name
+                    // [ATYP][1-byte length][Domain][Port]
+                    header = new Uint8Array(1 + 1 + addressBytes.length + 2);
+                    header[0] = addressType;
+                    header[1] = addressBytes.length;
+                    header.set(addressBytes, 2);
+                    header.set(portBytes, 2 + addressBytes.length);
+                } else { // IPv4 or IPv6
+                    // [ATYP][Address][Port]
+                    header = new Uint8Array(1 + addressBytes.length + 2);
+                    header[0] = addressType;
+                    header.set(addressBytes, 1);
+                    header.set(portBytes, 1 + addressBytes.length);
+                }
+
+                responsePacket = await new Blob([header, dnsWireformat]).arrayBuffer();
             }
-          }
-        },
-        close() {
-          log(`UDP connection to ${targetAddress} closed`);
-        },
-        abort(reason) {
-          console.error(`UDP connection to ${targetPort} aborted due to ${reason}`);
-        },
-      })
-    );
-  } catch (e) {
-    console.error(`Error while handling UDP outbound, error ${e.message}`);
-  }
+
+            webSocket.send(responsePacket);
+        }
+    } catch (e) {
+        console.error(`Error while handling DNS query, error: ${e.message}`);
+    }
 }
 
 function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
@@ -1359,13 +1383,19 @@ function readHorseHeader(buffer) {
   const portIndex = addressValueIndex + addressLength;
   const portBuffer = dataBuffer.slice(portIndex, portIndex + 2);
   const portRemote = new DataView(portBuffer).getUint16(0);
+
+  // The Trojan protocol spec requires a CRLF for TCP connections, but not for UDP.
+  // We must slice the rawClientData accordingly.
+  const rawData = dataBuffer.slice(portIndex + 2);
+  const rawClientData = isUDP ? rawData : rawData.slice(2);
+
   return {
     hasError: false,
     addressRemote: addressValue,
     addressType: addressType,
     portRemote: portRemote,
-    rawDataIndex: portIndex + 4,
-    rawClientData: dataBuffer.slice(portIndex + 4),
+    rawDataIndex: portIndex + 4, // This index is now less relevant
+    rawClientData: rawClientData,
     version: null,
     isUDP: isUDP,
   };
