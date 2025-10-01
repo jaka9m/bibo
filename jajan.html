@@ -1734,7 +1734,31 @@ dns:
                 "independent_cache": true
             },
             "inbounds": [
-                { "type": "tun", "mtu": 1400, "inet4_address": "172.19.0.1/30", "inet6_address": "fdfe:dcba:9876::1/126", "auto_route": true, "strict_route": true, "endpoint_independent_nat": true, "stack": "mixed", "sniff": true }
+                {
+                    "type": "mixed",
+                    "tag": "mixed-in",
+                    "listen": "0.0.0.0",
+                    "listen_port": 2080,
+                    "sniff": true
+                },
+                {
+                    "type": "dns",
+                    "tag": "dns-in",
+                    "listen": "0.0.0.0",
+                    "listen_port": 5353
+                },
+                {
+                    "type": "tun",
+                    "tag": "tun-in",
+                    "mtu": 1400,
+                    "inet4_address": "172.19.0.1/30",
+                    "inet6_address": "fdfe:dcba:9876::1/126",
+                    "auto_route": true,
+                    "strict_route": true,
+                    "endpoint_independent_nat": true,
+                    "stack": "mixed",
+                    "sniff": true
+                }
             ],
             "outbounds": [
                 { "tag": "Internet", "type": "selector", "outbounds": ["Best Latency", ...proxyNames, "direct"] },
