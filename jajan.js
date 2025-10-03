@@ -24,8 +24,9 @@ const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
 const PROTOCOLS = [atob(horse), atob(flash), "ss"];
 const PRX_BANK_URL = "https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt";
-const DNS_SERVER_ADDRESS = "8.8.8.8";
-const DNS_SERVER_PORT = 53;
+// const DOH_URL = "https://1.1.1.1/dns-query";
+// const DOH_URL = "https://8.8.8.8/dns-query";
+const DOH_URL = "https://1.1.1.1/dns-query";
 const PRX_HEALTH_CHECK_API = "https://geovpn.vercel.app/check";
 const CONVERTER_URL = "https://api.foolvpn.me/convert";
 const DONATE_LINK = "https://github.com/jaka1m/project/raw/main/BAYAR.jpg";
@@ -107,6 +108,82 @@ async function reverseWeb(request, target, targetPath) {
   newResponse.headers.set("X-Proxied-By", "Cloudflare Worker");
 
   return newResponse;
+}
+
+async function generateSubscription(
+  {
+    countryCodes = [],
+    limit = 10,
+    vpnType = null,
+    ports = null,
+    bug = null,
+    useWildcard = false,
+    prxBankUrl = null,
+    domain = null
+  }
+) {
+    const filterVPN = vpnType ? [vpnType] : PROTOCOLS;
+    const filterPort = ports || PORTS;
+    const filterCC = countryCodes;
+    const filterLimit = limit;
+
+    const effectiveHost = domain || APP_DOMAIN;
+    const address = bug || effectiveHost;
+
+    const prxList = await getPrxList(prxBankUrl || PRX_BANK_URL)
+        .then((prxs) => {
+          if (filterCC.length) {
+            return prxs.filter((prx) => filterCC.includes(prx.country));
+          }
+          return prxs;
+        })
+        .then((prxs) => {
+          shuffleArray(prxs);
+          return prxs;
+        });
+
+    const uuid = crypto.randomUUID();
+    const result = [];
+    for (const prx of prxList) {
+        const uri = new URL(`${atob(horse)}://${address}`);
+        uri.searchParams.set("encryption", "none");
+        uri.searchParams.set("type", "ws");
+        uri.searchParams.set("host", effectiveHost);
+
+        for (const port of filterPort) {
+          for (const protocol of filterVPN) {
+            if (result.length >= filterLimit) break;
+
+            uri.protocol = protocol;
+            uri.port = port.toString();
+            if (protocol == "ss") {
+              uri.username = btoa(`none:${uuid}`);
+              uri.searchParams.set(
+                "plugin",
+                `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
+                  prx.prxPort
+                };host=${effectiveHost}`
+              );
+            } else {
+              uri.username = uuid;
+              uri.searchParams.delete("plugin");
+            }
+
+            uri.searchParams.set("security", port == 443 ? "tls" : "none");
+            uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
+            uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
+
+            uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
+              port == 443 ? "TLS" : "NTLS"
+            } [${serviceName}]`;
+            result.push(uri.toString());
+          }
+          if (result.length >= filterLimit) break;
+        }
+        if (result.length >= filterLimit) break;
+    }
+
+    return result;
 }
 
 function getAllConfig(request, hostName, prxList, page = 0, selectedProtocol = null, selectedPort = null, wildcardDomains = [], rootDomain) {
@@ -227,15 +304,97 @@ export default {
           const kvPrx = await getKVPrxList(env.KV_PRX_URL);
 
           prxIP = kvPrx[prxKey][Math.floor(Math.random() * kvPrx[prxKey].length)];
-
-          return await websocketHandler(request);
         } else if (prxMatch) {
           prxIP = prxMatch[1];
-          return await websocketHandler(request);
+        } else {
+          prxIP = "";
         }
+        return await websocketHandler(request);
       }
 
-      if (url.pathname.startsWith("/sub")) {
+      if (url.pathname.startsWith("/sub/v2rayng")) {
+        const vpnType = url.searchParams.get("type");
+        const bug = url.searchParams.get("bug");
+        const useTls = url.searchParams.get("tls") === "true";
+        const countryCodes = url.searchParams.get("country")?.toUpperCase().split(",");
+        const limit = parseInt(url.searchParams.get("limit")) || 10;
+        const prxBankUrl = url.searchParams.get("prx-list") || env.PRX_BANK_URL;
+
+        let ports;
+        if (url.searchParams.has("tls")) {
+            ports = useTls ? [443] : [80];
+        } else {
+            ports = PORTS;
+        }
+
+        const result = await generateSubscription({
+            countryCodes: countryCodes || [],
+            limit: limit,
+            vpnType: vpnType,
+            ports: ports,
+            bug: bug,
+            prxBankUrl: prxBankUrl
+        });
+
+        return new Response(result.join("\n"), {
+            status: 200,
+            headers: { ...CORS_HEADER_OPTIONS, "Content-Type": "text/plain;charset=utf-8" },
+        });
+      } else if (url.pathname.startsWith("/api/v1/sub")) {
+        const filterCC = url.searchParams.get("cc")?.split(",") || [];
+        const filterPort = url.searchParams.get("port")?.split(",").map(p => parseInt(p)) || PORTS;
+        const filterVPN = url.searchParams.get("vpn")?.split(",") || PROTOCOLS;
+        const filterLimit = parseInt(url.searchParams.get("limit")) || 10;
+        const filterFormat = url.searchParams.get("format") || "raw";
+        const bug = url.searchParams.get("bug");
+        const domain = url.searchParams.get("domain") || APP_DOMAIN;
+        const prxBankUrl = url.searchParams.get("prx-list") || env.PRX_BANK_URL;
+
+        const result = await generateSubscription({
+            countryCodes: filterCC,
+            limit: filterLimit,
+            vpnType: filterVPN,
+            ports: filterPort,
+            bug: bug,
+            domain: domain,
+            prxBankUrl: prxBankUrl
+        });
+
+        let finalResult = "";
+        switch (filterFormat) {
+            case "raw":
+                finalResult = result.join("\n");
+                break;
+            case atob(v2):
+                finalResult = btoa(result.join("\n"));
+                break;
+            case atob(neko):
+            case "sfa":
+            case "bfr":
+                const res = await fetch(CONVERTER_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        url: result.join(","),
+                        format: filterFormat,
+                        template: "cf",
+                    }),
+                });
+                if (res.status == 200) {
+                    finalResult = await res.text();
+                } else {
+                    return new Response(res.statusText, {
+                        status: res.status,
+                        headers: { ...CORS_HEADER_OPTIONS },
+                    });
+                }
+                break;
+        }
+
+        return new Response(finalResult, {
+            status: 200,
+            headers: { ...CORS_HEADER_OPTIONS },
+        });
+      } else if (url.pathname.startsWith("/sub")) {
         const page = url.pathname.match(/^\/sub\/(\d+)$/);
         const pageIndex = parseInt(page ? page[1] : "0");
 
@@ -341,106 +500,6 @@ export default {
               headers: { ...CORS_HEADER_OPTIONS },
             });
           }
-        } else if (apiPath.startsWith("/sub")) {
-          const filterCC = url.searchParams.get("cc")?.split(",") || [];
-          const filterPort = url.searchParams.get("port")?.split(",") || PORTS;
-          const filterVPN = url.searchParams.get("vpn")?.split(",") || PROTOCOLS;
-          const filterLimit = parseInt(url.searchParams.get("limit")) || 10;
-          const filterFormat = url.searchParams.get("format") || "raw";
-          const fillerDomain = url.searchParams.get("domain") || APP_DOMAIN;
-          const effectiveHost = fillerDomain === APP_DOMAIN ? APP_DOMAIN : `${fillerDomain}.${APP_DOMAIN}`;
-
-          const prxBankUrl = url.searchParams.get("prx-list") || env.PRX_BANK_URL;
-          const prxList = await getPrxList(prxBankUrl)
-            .then((prxs) => {
-              // Filter CC
-              if (filterCC.length) {
-                return prxs.filter((prx) => filterCC.includes(prx.country));
-              }
-              return prxs;
-            })
-            .then((prxs) => {
-              // shuffle result
-              shuffleArray(prxs);
-              return prxs;
-            });
-
-          const uuid = crypto.randomUUID();
-          const result = [];
-          for (const prx of prxList) {
-            const uri = new URL(`${atob(horse)}://${fillerDomain}`);
-            uri.searchParams.set("encryption", "none");
-            uri.searchParams.set("type", "ws");
-            uri.searchParams.set("host", effectiveHost);
-
-            for (const port of filterPort) {
-              for (const protocol of filterVPN) {
-                if (result.length >= filterLimit) break;
-
-                uri.protocol = protocol;
-                uri.port = port.toString();
-                if (protocol == "ss") {
-                  uri.username = btoa(`none:${uuid}`);
-                  uri.searchParams.set(
-                    "plugin",
-                    `${atob(v2)}-plugin${port == 80 ? "" : ";tls"};mux=0;mode=websocket;path=/Free-VPN-Geo-Project/${prx.prxIP}-${
-                      prx.prxPort
-                    };host=${effectiveHost}`
-                  );
-                } else {
-                  uri.username = uuid;
-                }
-
-                uri.searchParams.set("security", port == 443 ? "tls" : "none");
-                uri.searchParams.set("sni", port == 80 && protocol == atob(flash) ? "" : effectiveHost);
-                uri.searchParams.set("path", `/Free-VPN-Geo-Project/${prx.prxIP}-${prx.prxPort}`);
-
-                uri.hash = `${result.length + 1} ${getFlagEmoji(prx.country)} ${prx.org} WS ${
-                  port == 443 ? "TLS" : "NTLS"
-                } [${serviceName}]`;
-                result.push(uri.toString());
-              }
-            }
-          }
-
-          let finalResult = "";
-          switch (filterFormat) {
-            case "raw":
-              finalResult = result.join("\n");
-              break;
-            case atob(v2):
-              finalResult = btoa(result.join("\n"));
-              break;
-            case atob(neko):
-            case "sfa":
-            case "bfr":
-              const res = await fetch(CONVERTER_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                  url: result.join(","),
-                  format: filterFormat,
-                  template: "cf",
-                }),
-              });
-              if (res.status == 200) {
-                finalResult = await res.text();
-              } else {
-                return new Response(res.statusText, {
-                  status: res.status,
-                  headers: {
-                    ...CORS_HEADER_OPTIONS,
-                  },
-                });
-              }
-              break;
-          }
-
-          return new Response(finalResult, {
-            status: 200,
-            headers: {
-              ...CORS_HEADER_OPTIONS,
-            },
-          });
         } else if (apiPath.startsWith("/myip")) {
           return new Response(
             JSON.stringify({
@@ -457,6 +516,24 @@ export default {
               },
             }
           );
+        } else if (apiPath.startsWith("/stats")) {
+          if (!isApiReady) {
+              return new Response("API not ready", { status: 500 });
+          }
+          const cloudflareApi = new CloudflareApi();
+          const stats = await cloudflareApi.getStats();
+          if (stats) {
+              return new Response(JSON.stringify(stats), {
+                  headers: { ...CORS_HEADER_OPTIONS, 'Content-Type': 'application/json' },
+              });
+          }
+          return new Response("Could not fetch stats", { status: 500 });
+        } else if (apiPath.startsWith("/countries")) {
+            await getPrxList(env.PRX_BANK_URL);
+            const countries = [...new Set(cachedPrxList.map(p => p.country))].filter(Boolean);
+            return new Response(JSON.stringify(countries.sort()), {
+                headers: { ...CORS_HEADER_OPTIONS, 'Content-Type': 'application/json' },
+            });
         }
       } else if (url.pathname === "/kuota") {
         const html = `
@@ -828,7 +905,7 @@ export default {
             $('#cover-spin').show();
             $.ajax({
                 type: 'GET',
-                url: \`https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=\${msisdn}&isJSON=true\`,
+                url: 'https://apigw.kmsp-store.com/sidompul/v4/cek_kuota?msisdn=' + msisdn + '&isJSON=true',
                 dataType: 'JSON',
                 contentType: 'application/x-www-form-urlencoded',
                 beforeSend: function (req) {
@@ -840,10 +917,10 @@ export default {
                     $('#cover-spin').hide();
                     $('#hasilnya').html('');
                     if (res.status) {
-                        $('#hasilnya').html(\`<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.hasil}</div>\`);
+                        $('#hasilnya').html('<div class="result-success p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.hasil + '</div>');
                     } else {
                         console.error('Gagal Cek Kuota: ' + res.message);
-                        $('#hasilnya').html(\`<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">\${res.data.keteranganError}</div>\`);
+                        $('#hasilnya').html('<div class="result-error p-4 rounded-lg mt-4 text-center font-semibold">' + res.data.keteranganError + '</div>');
                     }
                 },
                 error: function () {
@@ -870,6 +947,174 @@ export default {
             status: 200,
             headers: { 'Content-Type': 'text/html;charset=utf-8' },
         });
+      } else if (url.pathname.startsWith("/sublink")) {
+        const sublinkHTML = `
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Link Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #111827;
+            color: #d1d5db;
+        }
+        .form-container {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        .form-label {
+            color: #9ca3af;
+        }
+        .form-input, .form-select {
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            color: #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+        }
+        .btn-generate {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-generate:hover {
+            background-color: #1d4ed8;
+        }
+        .result-box {
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            word-wrap: break-word;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 class="text-2xl font-bold text-center mb-6">Subscription Link Generator</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="format" class="block mb-2 form-label">Format</label>
+                <select id="format" class="form-select">
+                    <option value="v2ray">V2RAY</option>
+                    <option value="sfa">SFA</option>
+                    <option value="bfr">BFR</option>
+                    <option value="raw">RAW</option>
+                    <option value="clash">CLASH</option>
+                </select>
+            </div>
+            <div>
+                <label for="vpn" class="block mb-2 form-label">VPN Protocol</label>
+                <select id="vpn" class="form-select">
+                    <option value="vless">VLESS</option>
+                    <option value="trojan">TROJAN</option>
+                    <option value="ss">SHADOWSOCKS</option>
+                </select>
+            </div>
+            <div>
+                <label for="tls" class="block mb-2 form-label">TLS/Port</label>
+                <select id="tls" class="form-select">
+                    <option value="true">True (443)</option>
+                    <option value="false">False (80)</option>
+                </select>
+            </div>
+            <div>
+                <label for="wildcard" class="block mb-2 form-label">Wildcard/WC</label>
+                <select id="wildcard" class="form-select">
+                    <option value="false">False</option>
+                    <option value="true">True</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label for="bug" class="block mb-2 form-label">Bug Host</label>
+                <input type="text" id="bug" class="form-input" placeholder="e.g., ava.game.naver.com">
+            </div>
+            <div>
+                <label for="country" class="block mb-2 form-label">Country (CC)</label>
+                <select id="country" class="form-select">
+                    <option value="">All Countries</option>
+                </select>
+            </div>
+            <div>
+                <label for="limit" class="block mb-2 form-label">Limit</label>
+                <input type="number" id="limit" class="form-input" value="10">
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <button id="generate-btn" class="btn-generate">Generate Sublink</button>
+        </div>
+
+        <div class="mt-6">
+            <label class="block mb-2 form-label">Generated Link:</label>
+            <div id="result" class="result-box text-gray-400">Your link will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const countrySelect = document.getElementById('country');
+
+            // Fetch proxy list to populate country dropdown
+            try {
+                const response = await fetch('/api/v1/countries');
+                if (!response.ok) throw new Error('Failed to fetch country list');
+
+                const countries = await response.json();
+
+                countries.forEach(cc => {
+                    const option = document.createElement('option');
+                    option.value = cc;
+                    option.textContent = cc;
+                    countrySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Could not populate countries:", error);
+                countrySelect.innerHTML = '<option value="">Could not load countries</option>';
+            }
+
+            document.getElementById('generate-btn').addEventListener('click', () => {
+                const format = document.getElementById('format').value;
+                const vpn = document.getElementById('vpn').value;
+                const port = document.getElementById('tls').value === 'true' ? '443' : '80';
+                const bug = document.getElementById('bug').value;
+                const wc = document.getElementById('wildcard').value;
+                const cc = document.getElementById('country').value;
+                const limit = document.getElementById('limit').value;
+
+                const params = new URLSearchParams();
+                params.set('format', format);
+                params.set('limit', limit);
+                if (vpn) params.set('vpn', vpn);
+                if (port) params.set('port', port);
+                if (bug) params.set('bug', bug);
+                if (wc) params.set('wc', wc);
+                if (cc) params.set('cc', cc);
+
+                const link = window.location.protocol + '//' + window.location.host + '/api/v1/sub?' + params.toString();
+
+                document.getElementById('result').textContent = link;
+            });
+        });
+    </script>
+</body>
+</html>`;
+        return new Response(sublinkHTML, { headers: { 'Content-Type': 'text/html;charset=utf-8' } });
       } else if (url.pathname.startsWith("/convert")) {
         const targetUrl = "https://jaka9m.github.io/web";
 		const requestUrl = new URL(request.url);
@@ -950,7 +1195,7 @@ async function websocketHandler(request) {
       new WritableStream({
         async write(chunk, controller) {
           if (isDNS) {
-            return handleUDPOutbound(DNS_SERVER_ADDRESS, DNS_SERVER_PORT, chunk, webSocket, null, log);
+            return handleUDPOutbound(DOH_URL, chunk, webSocket, null, log);
           }
           if (remoteSocketWrapper.value) {
             const writer = remoteSocketWrapper.value.writable.getWriter();
@@ -990,8 +1235,7 @@ async function websocketHandler(request) {
 
           if (isDNS) {
             return handleUDPOutbound(
-              DNS_SERVER_ADDRESS,
-              DNS_SERVER_PORT,
+              DOH_URL,
               chunk,
               webSocket,
               protocolHeader.version,
@@ -1091,42 +1335,34 @@ async function handleTCPOutBound(
   remoteSocketToWS(tcpSocket, webSocket, responseHeader, retry, log);
 }
 
-async function handleUDPOutbound(targetAddress, targetPort, udpChunk, webSocket, responseHeader, log) {
+async function handleUDPOutbound(dohURL, udpChunk, webSocket, responseHeader, log) {
   try {
     let protocolHeader = responseHeader;
-    const tcpSocket = connect({
-      hostname: targetAddress,
-      port: targetPort,
+
+    log(`Forwarding DNS query to ${dohURL}`);
+
+    const dohResponse = await fetch(dohURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/dns-message',
+      },
+      body: udpChunk,
     });
 
-    log(`Connected to ${targetAddress}:${targetPort}`);
-
-    const writer = tcpSocket.writable.getWriter();
-    await writer.write(udpChunk);
-    writer.releaseLock();
-
-    await tcpSocket.readable.pipeTo(
-      new WritableStream({
-        async write(chunk) {
-          if (webSocket.readyState === WS_READY_STATE_OPEN) {
-            if (protocolHeader) {
-              webSocket.send(await new Blob([protocolHeader, chunk]).arrayBuffer());
-              protocolHeader = null;
-            } else {
-              webSocket.send(chunk);
-            }
-          }
-        },
-        close() {
-          log(`UDP connection to ${targetAddress} closed`);
-        },
-        abort(reason) {
-          console.error(`UDP connection to ${targetPort} aborted due to ${reason}`);
-        },
-      })
-    );
+    if (dohResponse.ok) {
+      const dnsAnswer = await dohResponse.arrayBuffer();
+      if (webSocket.readyState === WS_READY_STATE_OPEN) {
+        if (protocolHeader) {
+          webSocket.send(await new Blob([protocolHeader, dnsAnswer]).arrayBuffer());
+        } else {
+          webSocket.send(dnsAnswer);
+        }
+      }
+    } else {
+      log(`DoH request failed with status: ${dohResponse.status}`);
+    }
   } catch (e) {
-    console.error(`Error while handling UDP outbound, error ${e.message}`);
+    console.error(`Error while handling DoH outbound: ${e.message}`);
   }
 }
 
@@ -1557,6 +1793,42 @@ class CloudflareApi {
 
     return res.status;
   }
+
+  async getStats() {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const query = `
+    query {
+      viewer {
+        accounts(filter: {accountTag: "${this.accountID}"}) {
+          httpRequests1dGroups(limit: 1, filter: {date_gt: "${yesterday}"}) {
+            sum {
+              requests
+              bytes
+            }
+          }
+        }
+      }
+    }`;
+
+    const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+        method: 'POST',
+        headers: {
+            ...this.headers,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+    });
+
+    if (res.status === 200) {
+        const respJson = await res.json();
+        const data = respJson.data.viewer.accounts[0].httpRequests1dGroups[0].sum;
+        return {
+            requests: data.requests,
+            bandwidth: data.bytes,
+        };
+    }
+    return null;
+  }
 }
 
 
@@ -1821,6 +2093,41 @@ let baseHTML = `
         border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
         object-fit: cover;
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 768px) {
+        .glass-3d-blur {
+            padding: 1.5rem; /* Kurangi padding di mobile */
+            margin-bottom: 1.5rem;
+        }
+        #container-title h1 {
+            font-size: 1.75rem; /* Kecilkan judul di mobile */
+        }
+        .info-container {
+            gap: 0.5rem; /* Kurangi jarak antar item info */
+        }
+        .filter-container {
+            grid-template-columns: 1fr 1fr; /* 2 kolom di mobile */
+            gap: 0.75rem;
+        }
+        #container-pagination {
+            transform: none; /* Hapus translate-y di mobile */
+            position: static; /* Kembalikan ke posisi normal */
+            margin-top: 1.5rem;
+        }
+        .container {
+            padding: 1rem; /* Kurangi padding container utama */
+        }
+    }
+    @media (max-width: 480px) {
+        .filter-container {
+            grid-template-columns: 1fr; /* 1 kolom di layar sangat kecil */
+        }
+        #container-info-ip, #container-info-country, #container-info-isp,
+        #container-info-requests, #container-info-bandwidth {
+            font-size: 0.8rem; /* Kecilkan font info di mobile */
+        }
+    }
     </style>
     <script>
         tailwind.config = {
@@ -1887,7 +2194,7 @@ let baseHTML = `
         <div class="glass-3d-blur p-4 sm:p-6">
             <div class="flex flex-col items-center relative z-10">
                 <div class="glass-effect-light dark:glass-effect w-full mb-6 rounded-xl p-4 shadow-lg">
-                    <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
+                    <div class="info-container flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
                         <p id="container-info-ip" class="flex items-center gap-1 text-blue-500 dark:text-blue-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M5.5 13a4.5 4.5 0 011.692-3.377l1.72-1.725A4.5 4.5 0 0113 5.5V6a.5.5 0 001 0V5.5A4.5 4.5 0 009.377 2.308L7.653 4.032A4.5 4.5 0 005 8.5v.5a.5.5 0 001 0V8.5A3.5 3.5 0 017.377 5.79l.995.996a.5.5 0 00.707-.707l-.996-.995A4.5 4.5 0 008.5 2.5a.5.5 0 000-1z" />
@@ -1925,6 +2232,18 @@ let baseHTML = `
                             </svg>
                             Time: <strong id="time-info-value" class="font-semibold text-slate-800 dark:text-white">00:00:00</strong>
                         </p>
+                        <p id="container-info-requests" class="flex items-center gap-1 text-cyan-500 dark:text-cyan-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm0 4a1 1 0 100 2h12a1 1 0 100-2H4z" />
+                            </svg>
+                            Daily Requests: <span class="font-bold text-slate-800 dark:text-white">...</span>
+                        </p>
+                        <p id="container-info-bandwidth" class="flex items-center gap-1 text-rose-500 dark:text-rose-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 10a7 7 0 019.307-6.611 1 1 0 00.658-1.888 9 9 0 10-2.583 13.562 1 1 0 10-1.414-1.414 7 7 0 013.032-10.26zM10 3a1 1 0 011 1v1a1 1 0 11-2 0V4a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                            </svg>
+                            Daily Bandwidth: <span class="font-bold text-slate-800 dark:text-white">...</span>
+                        </p>
                     </div>
                     <div class="mt-4 flex flex-col gap-2">
                         <div class="flex gap-2">
@@ -1934,7 +2253,7 @@ let baseHTML = `
                     </div>
                 </div>
 
-                <div class="w-full max-w-5xl mb-6 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
+                <div class="filter-container w-full max-w-5xl mb-6 p-6 bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4" style="box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);">
                     PLACEHOLDER_PROTOCOL_DROPDOWN
                     PLACEHOLDER_COUNTRY_DROPDOWN
                     PLACEHOLDER_HOST_DROPDOWN
@@ -1968,6 +2287,8 @@ let baseHTML = `
             <h4 class="text-xl font-bold text-white mt-1">Pilih Format</h4>
         </div>
 
+        <textarea id="config-preview" class="w-full h-32 p-2 rounded-md bg-gray-800 text-white text-xs" readonly></textarea>
+
         <div class="grid grid-cols-2 gap-1">
             <button onclick="copyToClipboardAsTarget('clash')" class="p-1.5 rounded-md bg-sky-500 hover:bg-sky-600 text-xs font-semibold text-white flex flex-row justify-center items-center transition-transform transform hover:scale-105 shadow-sm px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" class="size-5 mr-1"><path d="M479.9 32.1C479.9 14.46 465.4 0 448 0H192c-17.47 0-32.22 14.46-31.99 31.99L160 384c0 17.46 14.46 32 32 32h128l-32.99 95.82c-4.141 12.19 2.594 25.75 14.78 29.89C304.8 512.9 308.8 512 312.4 512c8.203 0 16.28-4.484 20.78-12.14l128-224C474.7 269.8 480 263.2 480 256v-224C480 29.8 479.9 32.1 479.9 32.1zM384 256L272 448l64.01-192.1c.1406-.4375 .2812-.875 .4375-1.312L384 256z"/></svg>
@@ -1978,7 +2299,7 @@ let baseHTML = `
                         SFA
                     </button>
                     <button onclick="copyToClipboardAsTarget('bfr')" class="p-1.5 rounded-md bg-sky-500 hover:bg-sky-600 text-xs font-semibold text-white flex flex-row justify-center items-center transition-transform transform hover:scale-105 shadow-sm px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="size-5 mr-1"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm288 32c0-11.5 6.1-22 16-27.6l80-45.7c10.8-6.2 24.3-3.4 31.5 6.9s3.2 23.4-7.5 29.7l-80 45.7c-2.4 1.4-5 2.2-7.8 2.2s-5.4-.8-7.8-2.2l-128-73.1c-10.8-6.2-13.6-19.7-7.5-30.5s19.7-13.6 30.5-7.5L256 226.4V64c0-17.7 14.3-32 32-32s32 14.3 32 32v240c0 17.7-14.3 32-32 32s-32-14.3-32-32v-44.5l-80 45.7c-10.8 6.2-13.6 19.7-7.5 30.5s19.7 13.6 30.5 7.5L256 280.9V448c0 17.7-14.3 32-32 32s-32-14.3-32-32V208c0-11.5-6.1-22-16-27.6L96 134.7c-10.8-6.2-24.3-3.4-31.5 6.9s-3.2 23.4 7.5 29.7l80 45.7c2.4 1.4 5 2.2 7.8 2.2s5.4-.8 7.8-2.2l128-73.1c10.8-6.2 13.6-19.7 7.5-30.5s-19.7-13.6-30.5-7.5L256 167.1V288z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="size-5 mr-1"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm288 32c0-11.5 6.1-22 16-27.6l80-45.7c10.8-6.2 24.3-3.4 31.5 6.9s3.2 23.4-7.5 29.7l-80 45.7c-2.4 1.4-5 2.2-7.8 2.2s-5.4-.8-7.8-2.2l-128-73.1c-10.8-6.2-13.6-19.7-7.5-30.5s19.7-13.6 30.5-7.5L256 226.4V64c0-17.7 14.3-32 32-32s32 14.3 32 32v240c0 17.7-14.3 32-32 32s-32-14.3-32-32v-44.5l-80 45.7c-10.8 6.2-13.6-19.7-7.5 30.5s19.7 13.6 30.5 7.5L256 280.9V448c0 17.7-14.3 32-32 32s-32-14.3-32-32V208c0-11.5-6.1-22-16-27.6L96 134.7c-10.8-6.2-24.3-3.4-31.5 6.9s-3.2 23.4 7.5 29.7l80 45.7c2.4 1.4 5 2.2 7.8 2.2s5.4-.8 7.8-2.2l128-73.1c10.8-6.2 13.6-19.7 7.5-30.5s-19.7-13.6-30.5-7.5L256 167.1V288z"/></svg>
                         BFR
                     </button>
                     <button onclick="copyToClipboardAsRaw()" class="p-1.5 rounded-md bg-gray-400 hover:bg-gray-500 text-xs font-semibold text-white flex flex-row justify-center items-center transition-transform transform hover:scale-105 shadow-sm px-6 py-2 text-white rounded-lg disabled:opacity-50 text-base font-semibold btn-gradient hover:opacity-80 transition-opacity">
@@ -2274,10 +2595,16 @@ let baseHTML = `
       function copyToClipboard(text) {
         toggleOutputWindow();
         rawConfig = text;
+        const previewElement = document.getElementById('config-preview');
+        if (previewElement) {
+            previewElement.value = rawConfig;
+        }
       }
 
       function copyToClipboardAsRaw() {
-        navigator.clipboard.writeText(rawConfig);
+        const previewElement = document.getElementById('config-preview');
+        if (!previewElement) return;
+        navigator.clipboard.writeText(previewElement.value);
 
         notification.classList.remove("opacity-0");
         setTimeout(() => {
@@ -2291,7 +2618,7 @@ let baseHTML = `
         const res = await fetch(url, {
           method: "POST",
           body: JSON.stringify({
-            url: rawConfig,
+            url: rawConfig.replaceAll('\\n', ','),
             format: target,
             template: "cf",
           }),
@@ -2429,10 +2756,7 @@ function checkProxy() {
                             const colo = jsonResp.colo || "N/A";
 
                             // MODIFIKASI: Menampilkan Active berkedip dan Delay/Colo KUNING
-                            pingElement.innerHTML = \`
-                                <span class="blink-text">Active</span><br>
-                                <span class="text-xs font-normal text-yellow-400">\${delay} (\${colo})</span>
-                            \`;
+                            pingElement.innerHTML = '<span class="blink-text">Active</span><br><span class="text-xs font-normal text-yellow-400">' + delay + ' (' + colo + ')</span>';
                             
                             // Tambahkan kelas untuk warna hijau pada elemen utama (untuk Active)
                             pingElement.classList.add("text-green-600");
@@ -2506,10 +2830,38 @@ function checkProxy() {
 
 setInterval(updateTime, 1000);
 
+      function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+      }
+
+      function checkStats() {
+        const requestsContainer = document.querySelector("#container-info-requests span");
+        const bandwidthContainer = document.querySelector("#container-info-bandwidth span");
+        if (!requestsContainer || !bandwidthContainer) return;
+
+        fetch("https://" + rootDomain + "/api/v1/stats")
+            .then(response => response.json())
+            .then(data => {
+                requestsContainer.textContent = data.requests.toLocaleString();
+                bandwidthContainer.textContent = formatBytes(data.bandwidth);
+            })
+            .catch(error => {
+                console.error('Error fetching stats:', error);
+                requestsContainer.textContent = "N/A";
+                bandwidthContainer.textContent = "N/A";
+            });
+      }
+
       window.onload = () => {
         checkGeoip();
         checkProxy();
         updateTime();
+        checkStats();
         // checkRegion();
         const observer = lozad(".lozad", {
           load: function (el) {
@@ -2582,7 +2934,7 @@ setTitle(title) {
         let tableRows = "";
         for (let i = 0; i < this.proxies.length; i++) {
             const prx = this.proxies[i];
-            const proxyConfigs = prx.list.join(',');
+            const proxyConfigs = prx.list.join('\\n');
             tableRows += `
                 <tr>
      <td class="px-3 py-3 text-base text-center">${this.startIndex + i + 1}.</td>
@@ -2595,7 +2947,7 @@ setTitle(title) {
     <td class="px-3 py-3 text-base font-mono">
     <div class="max-w-[150px] overflow-x-auto whitespace-nowrap">${prx.org}</div></td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-        <button onclick="copyToClipboard('${proxyConfigs}')" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
+        <button onclick="copyToClipboard(\`${proxyConfigs}\`)" class="text-white px-4 py-1 rounded text-sm font-semibold transition-colors duration-200 action-btn">Config</button>
     </td>
 </tr>
             `;
