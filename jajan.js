@@ -19,6 +19,792 @@ const telegramku = 'https://geoproject.biz.id/circle-flags/telegram.png'
 const whatsappku = 'https://geoproject.biz.id/circle-flags/whatsapp.png'
 const ope = 'https://geoproject.biz.id/circle-flags/options.png'
 
+const GALAXY_ANIMATION_COMPONENT = `
+     <style>
+    :root { --app-vh: 1vh; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #000; overflow: scroll; }
+    .webgl {
+      position: fixed;
+      inset: 0;
+      width: 100dvw; height: 100dvh;
+      width: 100vw;  height: calc(var(--app-vh) * 100); /* fallback */
+      outline: none;
+      opacity: 0;
+      animation: fadeIn 800ms ease-out forwards;
+      touch-action: none;
+      display: block;
+    }
+    @supports (height: 100svh) { .webgl { height: 100svh; } }
+    @supports (height: 100lvh) { .webgl { height: 100lvh; } }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .glass-card {
+      background-color: rgba(255,255,255,0.22);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 8px 32px rgba(31,38,135,0.2);
+    }
+    .info-panel {
+      position: fixed;
+      left: max(16px, env(safe-area-inset-left));
+      bottom: calc(max(16px, env(safe-area-inset-bottom)) + 2px);
+      color: #1a202c;
+      padding: 16px 18px;
+      border-radius: 14px;
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      max-width: min(90vw, 340px);
+      z-index: 100;
+      line-height: 1.5;
+    }
+    .info-panel h2 { margin: 0 0 6px; color: #4a75e2; font-size: 18px; font-weight: 700; }
+    .info-panel p { margin: 6px 0; font-size: 13.5px; }
+    .info-panel a { color: #0949f0; text-decoration: none; font-weight: 600; }
+    .info-panel a:hover { text-decoration: underline; }
+
+    /* Floating control button */
+    .control-button {
+      position: fixed;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      right: max(16px, env(safe-area-inset-right));
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 200;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.4);
+    }
+    .control-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(42, 82, 152, 0.6);
+    }
+    .control-button svg {
+      width: 28px;
+      height: 28px;
+      fill: #fff;
+    }
+
+    /* Color controls panel */
+    .color-controls {
+      position: fixed;
+      bottom: calc(max(16px, env(safe-area-inset-bottom)) + 70px);
+      right: max(16px, env(safe-area-inset-right));
+      background-color: rgba(255,255,255,0.22);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      padding: 16px;
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      color: #fff;
+      width: min(90vw, 320px);
+      z-index: 150;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .color-controls.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    .color-controls h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      color: #fff;
+    }
+    .control-group {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .control-group:last-child {
+      border-bottom: none;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .color-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-input input[type="color"] {
+      width: 40px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .color-input input[type="text"] {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 6px 8px;
+      color: #fff;
+      font-size: 13px;
+    }
+    .slider-control {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-control input[type="range"] {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.2);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .slider-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+    .slider-control span {
+      font-size: 12px;
+      min-width: 40px;
+      text-align: right;
+    }
+    .reset-btn {
+      width: 100%;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 8px;
+    }
+    .reset-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    /* Toggle switch */
+    .toggle-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255,255,255,0.2);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .toggle-slider {
+      background-color: #4a75e2;
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    /* Animation presets */
+    .preset-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .preset-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 6px;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .preset-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Control sections */
+    .control-section {
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #4a75e2;
+      display: flex;
+      align-items: center;
+    }
+    .section-title svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      fill: currentColor;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas class="webgl"></canvas>
+
+  <!-- Floating control button -->
+  <div class="control-button glass-card" id="controlButton">
+    <svg viewBox="0 0 24 24">
+      <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" />
+    </svg>
+  </div>
+
+  <!-- Color controls panel -->
+  <div class="color-controls glass-card" id="colorControls">
+    <h3>Galaxy Controls</h3>
+    
+    <div class="control-section">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M17.66,7.93L12,2.27L6.34,7.93C3.22,11.05 3.22,16.12 6.34,19.24C7.9,20.8 9.95,21.58 12,21.58C14.05,21.58 16.1,20.8 17.66,19.24C20.78,16.12 20.78,11.05 17.66,7.93M7.76,17.66C5.85,15.75 5.85,12.58 7.76,10.67L12,6.43L16.24,10.67C18.15,12.58 18.15,15.75 16.24,17.66C15.34,18.56 14.17,19.06 12.96,19.06C11.75,19.06 10.58,18.56 9.69,17.66"/>
+        </svg>
+        Colors
+      </div>
+      
+      <div class="control-group">
+        <label for="insideColor">Inside Color</label>
+        <div class="color-input">
+          <input type="color" id="insideColor" value="#ff6030">
+          <input type="text" id="insideColorText" value="#ff6030">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="outsideColor">Outside Color</label>
+        <div class="color-input">
+          <input type="color" id="outsideColor" value="#0949f0">
+          <input type="text" id="outsideColorText" value="#0949f0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+        </svg>
+        Particles
+      </div>
+      
+      <div class="control-group">
+        <label for="particleSize">Particle Size: <span id="sizeValue">0.01</span></label>
+        <div class="slider-control">
+          <input type="range" id="particleSize" min="0.001" max="0.05" step="0.001" value="0.01">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="particleCount">Particle Count: <span id="countValue">100000</span></label>
+        <div class="slider-control">
+          <input type="range" id="particleCount" min="10000" max="500000" step="10000" value="100000">
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M13,2.03V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.03M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M2.06,13C2.26,14.96 3.03,16.81 4.27,18.33L5.69,16.9C4.81,15.77 4.24,14.42 4.06,13H2.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.82 8.23,19.25 7.1,18.37M16.82,15.19L12.71,11.08C13.12,10.04 12.89,8.82 12.03,7.97C11.13,7.06 9.78,6.88 8.69,7.38L10.63,9.32L9.28,10.68L7.29,8.73C6.75,9.82 6.95,11.17 7.84,12.08C8.73,12.97 9.96,13.2 11,12.78L15.11,16.89C15.29,17.07 15.5,17.12 15.7,17.12C15.9,17.12 16.11,17.04 16.3,16.85C16.67,16.48 16.67,15.85 16.3,15.47L16.82,15.19Z"/>
+        </svg>
+        Animation
+      </div>
+      
+      <div class="control-group">
+        <label for="spinFactor">Spin Factor: <span id="spinValue">3</span></label>
+        <div class="slider-control">
+          <input type="range" id="spinFactor" min="0.1" max="10" step="0.1" value="3">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="branches">Branches: <span id="branchesValue">3</span></label>
+        <div class="slider-control">
+          <input type="range" id="branches" min="1" max="8" step="1" value="3">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="randomness">Randomness: <span id="randomnessValue">5</span></label>
+        <div class="slider-control">
+          <input type="range" id="randomness" min="0.1" max="10" step="0.1" value="5">
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C14.8,13.1 13.4,14.7 12,14.7C10.6,14.7 9.2,13.1 9.2,11.5V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,9.5V11.5C10.5,12.3 11.2,12.8 12,12.8C12.8,12.8 13.5,12.3 13.5,11.5V9.5C13.5,8.7 12.8,8.2 12,8.2Z"/>
+        </svg>
+        Controls
+      </div>
+      
+      <div class="control-group">
+        <div class="toggle-group">
+          <label for="autoRotate">Auto Rotation</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="autoRotate" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <div class="toggle-group">
+          <label for="orbitControls">Orbit Controls</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="orbitControls">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+        </svg>
+        Presets
+      </div>
+      
+      <div class="preset-buttons">
+        <button class="preset-btn" data-preset="fire">Fire Galaxy</button>
+        <button class="preset-btn" data-preset="ice">Ice Galaxy</button>
+        <button class="preset-btn" data-preset="nebula">Nebula</button>
+        <button class="preset-btn" data-preset="sunset">Sunset</button>
+        <button class="preset-btn" data-preset="ocean">Ocean</button>
+        <button class="preset-btn" data-preset="forest">Forest</button>
+      </div>
+    </div>
+    
+    <button class="reset-btn" id="resetBtn">Reset to Default</button>
+  </div>
+
+  <script type="module">
+    // Keep CSS --app-vh in sync with visual viewport
+    const setVH = () => {
+      const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) * 0.01;
+      document.documentElement.style.setProperty('--app-vh', vh + 'px');
+    };
+    setVH();
+    addEventListener('resize', setVH, { passive: true });
+    addEventListener('orientationchange', setVH, { passive: true });
+    window.visualViewport && window.visualViewport.addEventListener('resize', setVH, { passive: true });
+
+    // ===== THREE.js =====
+    import * as THREE from "https://cdn.skypack.dev/three@0.132.2";
+    import { OrbitControls } from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js";
+
+    const canvas = document.querySelector('canvas.webgl');
+    const scene  = new THREE.Scene();
+
+    // Default parameters
+    const defaultParameters = {
+      count: 100000,
+      size: 0.01,
+      radius: 2.15,
+      branches: 3,
+      spin: 3,
+      randomness: 5,
+      randomnessPower: 4,
+      insideColor: '#ff6030',
+      outsideColor: '#0949f0',
+      autoRotate: true,
+      orbitControls: false
+    };
+
+    // Load saved parameters from localStorage or use defaults
+    let parameters = JSON.parse(localStorage.getItem('galaxyParameters')) || {...defaultParameters};
+
+    let material, geometry, points;
+    function generateGalaxy() {
+      if (points) { geometry.dispose(); material.dispose(); scene.remove(points); }
+      material = new THREE.PointsMaterial({
+        size: parameters.size, sizeAttenuation: true,
+        depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true
+      });
+      geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(parameters.count * 3);
+      const colors    = new Float32Array(parameters.count * 3);
+      const colorInside = new THREE.Color(parameters.insideColor);
+      const colorOutside = new THREE.Color(parameters.outsideColor);
+
+      for (let i = 0; i < parameters.count; i++) {
+        const i3 = i * 3;
+        const radius = Math.pow(Math.random() * parameters.randomness, Math.random() * parameters.radius);
+        const spinAngle = radius * parameters.spin;
+        const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+
+        const rx = (Math.random() < 0.5 ? -1 : 1) * Math.pow(Math.random(), parameters.randomnessPower);
+        const ry = (Math.random() < 0.5 ? -1 : 1) * Math.pow(Math.random(), parameters.randomnessPower);
+        const rz = (Math.random() < 0.5 ? -1 : 1) * Math.pow(Math.random(), parameters.randomnessPower);
+
+        positions[i3]     = Math.cos(branchAngle + spinAngle) * radius + rx;
+        positions[i3 + 1] = ry;
+        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + rz;
+
+        const mixed = colorInside.clone();
+        mixed.lerp(colorOutside, Math.random() * radius / parameters.radius);
+        colors[i3]     = mixed.r;
+        colors[i3 + 1] = mixed.g;
+        colors[i3 + 2] = mixed.b;
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+      points = new THREE.Points(geometry, material);
+      scene.add(points);
+    }
+    generateGalaxy();
+
+    // Sizes / Renderer
+    const sizes = { width: 0, height: 0 };
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+    function setSize() {
+      sizes.width  = Math.round(window.visualViewport ? window.visualViewport.width  : window.innerWidth);
+      sizes.height = Math.round(window.visualViewport ? window.visualViewport.height : window.innerHeight);
+      camera.aspect = sizes.width / sizes.height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(sizes.width, sizes.height, false);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+    addEventListener('resize', setSize, { passive: true });
+    window.visualViewport && window.visualViewport.addEventListener('resize', setSize, { passive: true });
+
+    // Camera (Oblique right-top)
+    const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 100);
+    // Start: closer, slightly above-right
+    camera.position.set(0.9, 1.2, 0.45);
+    scene.add(camera);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.enabled = parameters.orbitControls; // disabled during intro
+
+    // Intro: zoom-in then zoom-out to an oblique wide view (right-top diagonal)
+    let introActive = true;
+    const introIn = 900, introOut = 1400;
+    const introStart = performance.now();
+
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+    const easeInOutQuad = (t) => (t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2);
+
+    const startPos  = new THREE.Vector3(0.9, 1.2, 0.45);
+    const zoomPos   = new THREE.Vector3(0.65, 0.9, 0.22);
+    // final: from right-top, diagonal wide (angle ~37° down to origin)
+    const settlePos = new THREE.Vector3(4.8, 4.2, 3.2);
+    const baseLook  = new THREE.Vector3(0, 0, 0);
+
+    const startFov = 82, zoomFov = 64, endFov = 68;
+    camera.fov = startFov; camera.updateProjectionMatrix();
+
+    const clock = new THREE.Clock();
+
+    function tick() {
+      const now = performance.now();
+
+      if (introActive) {
+        const e = now - introStart;
+        if (e <= introIn) {
+          const t = easeOutCubic(Math.min(1, e / introIn));
+          camera.position.lerpVectors(startPos, zoomPos, t);
+          camera.fov = startFov + (zoomFov - startFov) * t;
+          camera.updateProjectionMatrix();
+          camera.lookAt(baseLook);
+        } else if (e <= introIn + introOut) {
+          const t = easeInOutQuad(Math.min(1, (e - introIn) / introOut));
+          camera.position.lerpVectors(zoomPos, settlePos, t);
+          camera.fov = zoomFov + (endFov - zoomFov) * t;
+          camera.updateProjectionMatrix();
+          camera.lookAt(baseLook);
+        } else {
+          introActive = false;
+          controls.enabled = parameters.orbitControls;
+          clock.start();
+        }
+      } else {
+        // Auto rotation if enabled
+        if (parameters.autoRotate && !parameters.orbitControls) {
+          const et = clock.getElapsedTime();
+          const r = 6.0;
+          const tilt = 0.6; // keep Y elevated (tilt)
+          // phase shift to start near settlePos quadrant (right-top)
+          const phase = Math.atan2(settlePos.z, settlePos.x);
+          camera.position.x = Math.cos(et * 0.05 + phase) * r;
+          camera.position.z = Math.sin(et * 0.05 + phase) * r;
+          camera.position.y = tilt * 4.2 + 2.2; // maintain oblique height
+          camera.lookAt(0, 0, 0);
+        }
+        
+        if (parameters.orbitControls) {
+          controls.update();
+        }
+      }
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+
+    setSize();
+    tick();
+
+    // ===== UI Controls =====
+    const controlButton = document.getElementById('controlButton');
+    const colorControls = document.getElementById('colorControls');
+    const insideColor = document.getElementById('insideColor');
+    const insideColorText = document.getElementById('insideColorText');
+    const outsideColor = document.getElementById('outsideColor');
+    const outsideColorText = document.getElementById('outsideColorText');
+    const particleSize = document.getElementById('particleSize');
+    const sizeValue = document.getElementById('sizeValue');
+    const particleCount = document.getElementById('particleCount');
+    const countValue = document.getElementById('countValue');
+    const spinFactor = document.getElementById('spinFactor');
+    const spinValue = document.getElementById('spinValue');
+    const branches = document.getElementById('branches');
+    const branchesValue = document.getElementById('branchesValue');
+    const randomness = document.getElementById('randomness');
+    const randomnessValue = document.getElementById('randomnessValue');
+    const autoRotate = document.getElementById('autoRotate');
+    const orbitControls = document.getElementById('orbitControls');
+    const resetBtn = document.getElementById('resetBtn');
+    const presetButtons = document.querySelectorAll('.preset-btn');
+
+    // Initialize UI with current parameters
+    function updateUI() {
+      insideColor.value = parameters.insideColor;
+      insideColorText.value = parameters.insideColor;
+      outsideColor.value = parameters.outsideColor;
+      outsideColorText.value = parameters.outsideColor;
+      particleSize.value = parameters.size;
+      sizeValue.textContent = parameters.size;
+      particleCount.value = parameters.count;
+      countValue.textContent = parameters.count;
+      spinFactor.value = parameters.spin;
+      spinValue.textContent = parameters.spin;
+      branches.value = parameters.branches;
+      branchesValue.textContent = parameters.branches;
+      randomness.value = parameters.randomness;
+      randomnessValue.textContent = parameters.randomness;
+      autoRotate.checked = parameters.autoRotate;
+      orbitControls.checked = parameters.orbitControls;
+    }
+
+    updateUI();
+
+    // Toggle color controls panel
+    controlButton.addEventListener('click', () => {
+      colorControls.classList.toggle('active');
+    });
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!colorControls.contains(e.target) && !controlButton.contains(e.target)) {
+        colorControls.classList.remove('active');
+      }
+    });
+
+    // Inside color controls
+    insideColor.addEventListener('input', () => {
+      parameters.insideColor = insideColor.value;
+      insideColorText.value = insideColor.value;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    insideColorText.addEventListener('input', () => {
+      parameters.insideColor = insideColorText.value;
+      insideColor.value = insideColorText.value;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Outside color controls
+    outsideColor.addEventListener('input', () => {
+      parameters.outsideColor = outsideColor.value;
+      outsideColorText.value = outsideColor.value;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    outsideColorText.addEventListener('input', () => {
+      parameters.outsideColor = outsideColorText.value;
+      outsideColor.value = outsideColorText.value;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Particle size control
+    particleSize.addEventListener('input', () => {
+      parameters.size = parseFloat(particleSize.value);
+      sizeValue.textContent = parameters.size.toFixed(3);
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Particle count control
+    particleCount.addEventListener('input', () => {
+      parameters.count = parseInt(particleCount.value);
+      countValue.textContent = parameters.count;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Spin factor control
+    spinFactor.addEventListener('input', () => {
+      parameters.spin = parseFloat(spinFactor.value);
+      spinValue.textContent = parameters.spin.toFixed(1);
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Branches control
+    branches.addEventListener('input', () => {
+      parameters.branches = parseInt(branches.value);
+      branchesValue.textContent = parameters.branches;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Randomness control
+    randomness.addEventListener('input', () => {
+      parameters.randomness = parseFloat(randomness.value);
+      randomnessValue.textContent = parameters.randomness;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      generateGalaxy();
+    });
+
+    // Auto rotation toggle
+    autoRotate.addEventListener('change', () => {
+      parameters.autoRotate = autoRotate.checked;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+    });
+
+    // Orbit controls toggle
+    orbitControls.addEventListener('change', () => {
+      parameters.orbitControls = orbitControls.checked;
+      controls.enabled = parameters.orbitControls;
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+    });
+
+    // Preset buttons
+    const presets = {
+      fire: {
+        insideColor: '#ff3300',
+        outsideColor: '#ff9900',
+        spin: 4,
+        branches: 4
+      },
+      ice: {
+        insideColor: '#00ccff',
+        outsideColor: '#0066ff',
+        spin: 2,
+        branches: 6
+      },
+      nebula: {
+        insideColor: '#9900ff',
+        outsideColor: '#ff00cc',
+        spin: 5,
+        branches: 3
+      },
+      sunset: {
+        insideColor: '#ff6600',
+        outsideColor: '#ff0066',
+        spin: 3,
+        branches: 5
+      },
+      ocean: {
+        insideColor: '#00ffff',
+        outsideColor: '#0066cc',
+        spin: 2.5,
+        branches: 4
+      },
+      forest: {
+        insideColor: '#00ff99',
+        outsideColor: '#009933',
+        spin: 3.5,
+        branches: 3
+      }
+    };
+
+    presetButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const presetName = button.getAttribute('data-preset');
+        const preset = presets[presetName];
+        
+        if (preset) {
+          Object.assign(parameters, preset);
+          localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+          updateUI();
+          generateGalaxy();
+        }
+      });
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', () => {
+      parameters = {...defaultParameters};
+      localStorage.setItem('galaxyParameters', JSON.stringify(parameters));
+      updateUI();
+      generateGalaxy();
+    });
+  </script>
+`;
+
 // Variables
 const wildcards = [];
 
@@ -1156,12 +1942,10 @@ function mamangenerateHTML() {
   </style>
 </head>
 <body>
+  ${GALAXY_ANIMATION_COMPONENT}
   <header>
     <h1>Proxy Checker</h1>
   </header>
-
-  <!-- Matrix Background -->
-  <canvas id="matrix"></canvas>
 
   <!-- Sidebar Navigation -->
   <div class="navbar" id="navbar">
@@ -1283,35 +2067,6 @@ function mamangenerateHTML() {
         </span>
     </div>
 </div>
-
-<script>
-    // Efek Matrix di background
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const letters = "GEO@PROJECT";
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0f0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-    setInterval(drawMatrix, 35);
-  </script>
 
 <script>
     let map;
@@ -1519,17 +2274,18 @@ async function handleStatsRequest(env) {
 
     const hourlyData = result.data.viewer.zones[0].httpRequests1hGroups;
 
-    let cardsHtml = '';
+    // Generate cards HTML for all data
+    let allCardsHtml = '';
     if (hourlyData.length === 0) {
-        cardsHtml = '<p class="text-center text-gray-400">Tidak ada data penggunaan untuk 24 jam terakhir.</p>';
+        allCardsHtml = '<p class="text-center text-gray-400">Tidak ada data penggunaan untuk 24 jam terakhir.</p>';
     } else {
-        hourlyData.forEach((hour) => {
+        hourlyData.forEach((hour, index) => {
             const timestamp = new Date(hour.dimensions.datetime);
             const formattedTime = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             const totalData = (hour.sum.bytes / (1024 ** 3)).toFixed(3); // GB
             const totalRequests = hour.sum.requests.toLocaleString('id-ID');
-            cardsHtml += `
-                <div class="stats-card">
+            allCardsHtml += `
+                <div class="stats-card" data-page="${Math.floor(index / 5) + 1}">
                     <div class="date">${formattedTime}</div>
                     <div class="data-item">
                         <span class="label">Total Data:</span>
@@ -1543,7 +2299,6 @@ async function handleStatsRequest(env) {
             `;
         });
     }
-
 
     const html = `
    <!DOCTYPE html>
@@ -1564,6 +2319,13 @@ async function handleStatsRequest(env) {
                 --text-color: #c9d1d9;
                 --header-color: #00ffff;
                 --date-color: #f0a500;
+                --pagination-bg: rgba(0, 255, 255, 0.1);
+                --pagination-active: rgba(0, 255, 255, 0.3);
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
             body {
                 background-color: var(--bg-color);
@@ -1578,16 +2340,25 @@ async function handleStatsRequest(env) {
                 background-image: radial-gradient(circle at top left, rgba(0, 255, 255, 0.1) 0%, transparent 30%),
                                   radial-gradient(circle at bottom right, rgba(0, 128, 255, 0.1) 0%, transparent 30%);
             }
-            .container {
-                width: 100%;
-                max-width: 600px;
-                background-color: var(--card-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 15px;
-                padding: 25px;
-                box-shadow: 0 0 25px rgba(0,0,0,0.5), 0 0 15px var(--glow-color) inset;
-                backdrop-filter: blur(10px);
-            }
+  
+    .container {
+    margin-top: 8rem;
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5), 0 0 15px var(--glow-color) inset;
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin-top: 40vh; 
+        }
+}
+            
             h1 {
                 font-family: 'Orbitron', sans-serif;
                 color: var(--header-color);
@@ -1600,15 +2371,20 @@ async function handleStatsRequest(env) {
             .cards-container {
                 display: grid;
                 gap: 15px;
+                margin-bottom: 25px;
             }
-            .report-card {
+            .stats-card {
                 background-color: rgba(0,0,0,0.3);
                 border-left: 5px solid var(--header-color);
                 border-radius: 8px;
                 padding: 15px 20px;
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
+                display: none;
             }
-            .report-card:hover {
+            .stats-card.active {
+                display: block;
+            }
+            .stats-card:hover {
                 transform: translateY(-5px) scale(1.02);
                 box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             }
@@ -1632,34 +2408,211 @@ async function handleStatsRequest(env) {
                 font-weight: 600;
                 color: var(--text-color);
             }
-             footer {
+
+            /* Pagination Styles */
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            .pagination-btn {
+                background: var(--pagination-bg);
+                border: 1px solid var(--border-color);
+                color: var(--text-color);
+                padding: 8px 15px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: 'Rajdhani', sans-serif;
+                font-weight: 600;
+                min-width: 40px;
+                text-align: center;
+            }
+
+            .pagination-btn:hover {
+                background: var(--pagination-active);
+                border-color: var(--header-color);
+                transform: translateY(-2px);
+            }
+
+            .pagination-btn.active {
+                background: var(--pagination-active);
+                border-color: var(--header-color);
+                color: var(--header-color);
+                box-shadow: 0 0 10px var(--glow-color);
+            }
+
+            .pagination-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .pagination-info {
+                text-align: center;
+                color: #8b949e;
+                font-size: 0.9em;
+                margin-top: 10px;
+            }
+
+            .no-data {
+                text-align: center;
+                color: #8b949e;
+                font-style: italic;
+                padding: 20px;
+            }
+            
+            footer {
                 text-align: center;
                 margin-top: 25px;
                 font-size: 0.9em;
                 color: #8b949e;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-top: 20px;
             }
             footer a {
                 color: var(--header-color);
                 text-decoration: none;
+                transition: color 0.3s ease;
+            }
+            footer a:hover {
+                text-shadow: 0 0 8px var(--glow-color);
             }
             @media (max-width: 600px) {
                 body { padding: 10px; }
                 .container { padding: 15px; }
                 h1 { font-size: 1.5em; }
+                .pagination-btn {
+                    padding: 6px 12px;
+                    font-size: 0.9em;
+                }
             }
         </style>
     </head>
     <body>
-    ${SIDEBAR_COMPONENT}
+        ${GALAXY_ANIMATION_COMPONENT}
+        ${SIDEBAR_COMPONENT}
         <div class="container">
             <h1>Laporan Penggunaan</h1>
-            <div class="cards-container">
-                ${cardsHtml}
+            <div class="cards-container" id="cardsContainer">
+                ${allCardsHtml}
             </div>
+            
+            <div class="pagination-container" id="paginationContainer">
+                <!-- Pagination buttons will be generated here -->
+            </div>
+            
+            <div class="pagination-info" id="paginationInfo">
+                <!-- Page info will be shown here -->
+            </div>
+            
             <footer>
                 Powered by <a href="https://t.me/sampiiiiu" target="_blank">GEO PROJECT</a>
             </footer>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const cardsContainer = document.getElementById('cardsContainer');
+                const paginationContainer = document.getElementById('paginationContainer');
+                const paginationInfo = document.getElementById('paginationInfo');
+                const cards = cardsContainer.querySelectorAll('.stats-card');
+                const itemsPerPage = 5;
+                let currentPage = 1;
+                
+                // Calculate total pages
+                const totalPages = Math.ceil(cards.length / itemsPerPage);
+                
+                // Function to show page
+                function showPage(page) {
+                    // Hide all cards
+                    cards.forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    
+                    // Show cards for current page
+                    const startIndex = (page - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    
+                    for (let i = startIndex; i < endIndex && i < cards.length; i++) {
+                        cards[i].classList.add('active');
+                    }
+                    
+                    // Update pagination buttons
+                    updatePaginationButtons(page);
+                    
+                    // Update page info
+                    updatePageInfo(page);
+                }
+                
+                // Function to update pagination buttons
+                function updatePaginationButtons(activePage) {
+                    paginationContainer.innerHTML = '';
+                    
+                    // Previous button
+                    const prevButton = document.createElement('button');
+                    prevButton.innerHTML = '&laquo; Prev';
+                    prevButton.className = 'pagination-btn';
+                    prevButton.disabled = activePage === 1;
+                    prevButton.addEventListener('click', () => {
+                        if (activePage > 1) {
+                            showPage(activePage - 1);
+                        }
+                    });
+                    paginationContainer.appendChild(prevButton);
+                    
+                    // Page number buttons
+                    const maxVisiblePages = 5;
+                    let startPage = Math.max(1, activePage - Math.floor(maxVisiblePages / 2));
+                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                    
+                    if (endPage - startPage + 1 < maxVisiblePages) {
+                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                    }
+                    
+                    for (let i = startPage; i <= endPage; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.textContent = i;
+                        pageButton.className = 'pagination-btn' + (i === activePage ? ' active' : '');
+                        pageButton.addEventListener('click', () => {
+                            showPage(i);
+                        });
+                        paginationContainer.appendChild(pageButton);
+                    }
+                    
+                    // Next button
+                    const nextButton = document.createElement('button');
+                    nextButton.innerHTML = 'Next &raquo;';
+                    nextButton.className = 'pagination-btn';
+                    nextButton.disabled = activePage === totalPages;
+                    nextButton.addEventListener('click', () => {
+                        if (activePage < totalPages) {
+                            showPage(activePage + 1);
+                        }
+                    });
+                    paginationContainer.appendChild(nextButton);
+                }
+                
+                // Function to update page info
+                function updatePageInfo(page) {
+                    const startItem = (page - 1) * itemsPerPage + 1;
+                    const endItem = Math.min(page * itemsPerPage, cards.length);
+                    paginationInfo.textContent = 'Menampilkan ' + startItem + '-' + endItem + ' dari ' + cards.length + ' data';
+                }
+                
+                // Initialize pagination
+                if (cards.length > 0) {
+                    showPage(currentPage);
+                } else {
+                    paginationContainer.style.display = 'none';
+                    paginationInfo.textContent = 'Tidak ada data untuk ditampilkan';
+                }
+            });
+        </script>
     </body>
     </html>
     `;
@@ -1674,7 +2627,6 @@ async function handleStatsRequest(env) {
     return new Response(errorHtml, { status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 }
-
 async function handleKuotaRequest() {
     return `
         <!DOCTYPE html>
@@ -1697,7 +2649,7 @@ async function handleKuotaRequest() {
             --secondary: #8b5cf6;
             --accent: #06b6d4;
             --dark-bg: #0f172a;
-            --card-bg: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
             --text-light: #f1f5f9;
             --text-gray: #94a3b8;
             --success: #10b981;
@@ -1742,15 +2694,17 @@ async function handleKuotaRequest() {
         }
 
         .header-card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(30, 41, 59, 0.9) 100%);
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 1.5rem;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                0 5px 10px rgba(0, 0, 0, 0.2),
+                0 10px 25px rgba(0, 0, 0, 0.2),
+                0 5px 10px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             position: relative;
             overflow: hidden;
         }
@@ -1778,8 +2732,9 @@ async function handleKuotaRequest() {
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary);
+            border: 3px solid rgba(59, 130, 246, 0.7);
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            backdrop-filter: blur(5px);
         }
 
         .title {
@@ -1792,7 +2747,9 @@ async function handleKuotaRequest() {
         }
 
         .info-box {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 1rem;
             padding: 1.25rem;
             margin-bottom: 1.5rem;
@@ -1800,7 +2757,6 @@ async function handleKuotaRequest() {
             box-shadow: 
                 0 5px 15px rgba(0, 0, 0, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
         }
 
         .info-box i {
@@ -1809,19 +2765,22 @@ async function handleKuotaRequest() {
         }
 
         .form-container {
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(30, 41, 59, 0.9) 100%);
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 1.5rem;
             padding: 2rem;
             box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                0 5px 10px rgba(0, 0, 0, 0.2),
+                0 10px 25px rgba(0, 0, 0, 0.2),
+                0 5px 10px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             margin-bottom: 1.5rem;
         }
 
         .input-field {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(59, 130, 246, 0.3);
             border-radius: 0.75rem;
             padding: 1rem 1.25rem;
@@ -1835,7 +2794,7 @@ async function handleKuotaRequest() {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.7);
         }
 
         .input-field::placeholder {
@@ -1843,8 +2802,9 @@ async function handleKuotaRequest() {
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border: none;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 0.75rem;
             padding: 1rem 1.5rem;
             color: white;
@@ -1863,6 +2823,7 @@ async function handleKuotaRequest() {
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%);
         }
 
         .btn-primary:active {
@@ -1874,7 +2835,8 @@ async function handleKuotaRequest() {
         }
 
         .result-success {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            background: rgba(16, 185, 129, 0.15);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 1rem;
             padding: 1.5rem;
@@ -1883,7 +2845,8 @@ async function handleKuotaRequest() {
         }
 
         .result-error {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            background: rgba(239, 68, 68, 0.15);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 1rem;
             padding: 1.5rem;
@@ -1892,7 +2855,8 @@ async function handleKuotaRequest() {
         }
 
         footer {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(15px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             margin-top: auto;
@@ -1964,7 +2928,8 @@ async function handleKuotaRequest() {
         }
 
         .notification {
-            background: var(--card-bg);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 0.75rem;
             padding: 1rem 1.5rem;
             margin-bottom: 0.5rem;
@@ -2039,8 +3004,8 @@ async function handleKuotaRequest() {
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-    ${SIDEBAR_COMPONENT}
-    
+${GALAXY_ANIMATION_COMPONENT}
+   ${SIDEBAR_COMPONENT}
     <div id="cover-spin">
         <div class="loader"></div>
     </div>
@@ -2090,7 +3055,6 @@ async function handleKuotaRequest() {
     </footer>
 
     <script>
-        
         function cekKuota() {
             const msisdn = document.getElementById('msisdn').value;
             if (!msisdn) {
@@ -2134,8 +3098,7 @@ async function handleKuotaRequest() {
                 if (e.which === 13) cekKuota();
             });
         });
-        
-      </script>
+    </script>
 </body>
 </html>
     `;
@@ -2212,7 +3175,6 @@ async function handleSubRequest(hostnem) {
 
     body {
         display: flex;
-        background: url('https://raw.githubusercontent.com/bitzblack/ip/refs/heads/main/shubham-dhage-5LQ_h5cXB6U-unsplash.jpg') no-repeat center center fixed;
         background-size: cover;
         justify-content: center;
         align-items: flex-start; /* Align items to the top */
@@ -2392,6 +3354,7 @@ async function handleSubRequest(hostnem) {
 </style>
 </head>
 <body>
+${GALAXY_ANIMATION_COMPONENT}
 ${SIDEBAR_COMPONENT}
     <div class="container">
         <div class="card">
@@ -3153,26 +4116,7 @@ body {
 .dark body { 
     background-color: var(--dark-bg);
     color: var(--light);
-    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
     background-size: cover;
-}
-
-.quantum-container {
-    max-width: 350px;
-    margin: 20px auto;
-    background-image: url('https://www.transparenttextures.com/patterns/inspiration-geometry.png');
-    padding: 20px;
-    background-color: var(--container-light-bg);
-    border: 1px solid var(--glass-border-light);
-    border-radius: 15px;
-    backdrop-filter: blur(8px);
-    min-height: calc(100vh - 40px);
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.dark .quantum-container {
-    background-color: rgba(3, 6, 23, 0.85); 
-    border-color: var(--glass-border-dark);
 }
 
 .popup-overlay {
@@ -3342,6 +4286,65 @@ select:focus {
     border-color: var(--neon-magenta);
 }
 
+.quantum-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.quantum-pagination a {
+    padding: 0.8rem 1.5rem;
+    background: #10b981; /* Hijau */
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    border: 1px solid #059669; /* Hijau lebih tua untuk border */
+    transition: all 0.3s ease;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 800; /* Lebih tebal */
+    min-width: 45px;
+    text-align: center;
+    font-weight: bold; /* Tambahan untuk ketebalan ekstra */
+}
+
+.quantum-pagination a:hover {
+    background: #059669; /* Hijau lebih tua saat hover */
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-weight: 900; /* Lebih tebal saat hover */
+}
+
+.quantum-pagination a.active {
+    background: #f59e0b; /* Kuning emas */
+    color: white !important;
+    border-color: #d97706; /* Kuning emas lebih tua */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    font-weight: 900; /* Paling tebal untuk active */
+}
+
+.quantum-pagination {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.quantum-pagination a {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.7rem;
+    min-width: 30px;
+}
+
+/* Jika Anda masih menggunakan class pagination-number */
+.pagination-number.active {
+    background: #f59e0b; /* Kuning emas */
+    color: white !important;
+    border-color: #d97706; /* Kuning emas lebih tua */
+    font-weight: 900; /* Juga tebal untuk class active */
+}
+
 .neon-active {
     color: #00FF00;
     text-shadow: 
@@ -3457,34 +4460,6 @@ select:focus {
     margin-bottom: 0.8rem;
 }
 
-@media (min-width: 640px) {
-    .quantum-container {
-        max-width: 900px;
-    }
-    .quantum-container .table-wrapper {
-        width: calc(100% + 40px);
-        margin-left: -20px;
-        margin-right: -20px;
-        padding-left: 10px;
-        padding-right: 10px;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-    }
-}
-
-@media (max-width: 768px) {
-    .quantum-title {
-        font-size: 2.5rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .quantum-title {
-        font-size: 3rem;
-        margin-bottom: 0.8rem;
-    }
-}
 
 .quantum-toast {
     position: fixed;
@@ -3833,9 +4808,88 @@ select:focus {
         padding: 30px 20px;
     }
 }
+
+.quantum-container {
+    max-width: 350px;
+    margin: 20px auto;
+    padding: 20px;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.25) 0%, 
+        rgba(255, 255, 255, 0.15) 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    min-height: calc(100vh - 40px);
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 8px 32px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek glass overlay */
+.quantum-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+    border-radius: 15px;
+}
+
+.dark .quantum-container {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.08) 50%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+@media (min-width: 640px) {
+    .quantum-container {
+        max-width: 900px;
+    }
+    .quantum-container .table-wrapper {
+        width: calc(100% + 40px);
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .quantum-title {
+        font-size: 2.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .quantum-title {
+        font-size: 3rem;
+        margin-bottom: 0.8rem;
+    }
+}
+
 </style>
     </head>
    <body>
+    ${GALAXY_ANIMATION_COMPONENT}
    ${SIDEBAR_COMPONENT}
     <div class="quantum-container">
     <div class="mt-10"></div>
