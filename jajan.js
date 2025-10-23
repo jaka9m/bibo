@@ -1,14 +1,3 @@
-// Untuk kemudahan Anda, berikut adalah daftar lengkap variabel lingkungan yang perlu Anda atur di dasbor Cloudflare Worker Anda:
-
-// ROOT_DOMAIN
-// SERVICE_NAME
-// API_KEY
-// API_EMAIL
-// ACCOUNT_ID
-// ZONE_ID
-// OWNER_PASSWORD
-// CLOUDFLARE_API_TOKEN
-
 import { connect } from "cloudflare:sockets";
 
 const proxyListURL = 'https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt';
@@ -18,6 +7,17 @@ const channelku = 'https://t.me/testikuy_mang'
 const telegramku = 'https://geoproject.biz.id/circle-flags/telegram.png'
 const whatsappku = 'https://geoproject.biz.id/circle-flags/whatsapp.png'
 const ope = 'https://geoproject.biz.id/circle-flags/options.png'
+
+// Variables
+const rootDomain = "gpj2.dpdns.org"; // Ganti dengan domain utama kalian
+const serviceName = "jaka"; // Ganti dengan nama workers kalian
+const apiKey = "0c3e77d35303c039932ad7bd99f37df00cba3"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
+const apiEmail = "pihajamal@gmail.com"; // Ganti dengan email yang kalian gunakan
+const accountID = "78bb1d06237c6d40b7b6385533601188"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+const zoneID = "19ec6129cdb108dad61d3dae1411673e"; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+const ownerPassword = "7";
+
+const wildcards = [];
 
 const GALAXY_ANIMATION_COMPONENT = `
      <style>
