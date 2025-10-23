@@ -805,94 +805,81 @@ const GALAXY_ANIMATION_COMPONENT = `
   </script>
 `;
 
-// Variables
-const wildcards = [];
 
 // CloudflareApi Class
 class CloudflareApi {
-  constructor(env) {
-    this.env = env;
-    this.bearer = `Bearer ${this.env.API_KEY}`;
-    
+  constructor() {
+    this.bearer = `Bearer ${apiKey}`;
+    this.accountID = accountID;
+    this.zoneID = zoneID;
+    this.apiEmail = apiEmail;
+    this.apiKey = apiKey;
+
     this.headers = {
       Authorization: this.bearer,
-      "X-Auth-Email": this.env.API_EMAIL,
-      "X-Auth-Key": this.env.API_KEY,
+      "X-Auth-Email": this.apiEmail,
+      "X-Auth-Key": this.apiKey,
       "Content-Type": "application/json",
     };
   }
 
   async getDomainList() {
-    try {
-      const url = `https://api.cloudflare.com/client/v4/accounts/${this.env.ACCOUNT_ID}/workers/domains`;
-      const res = await fetch(url, {
-        headers: this.headers,
-      });
+    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
+    const res = await fetch(url, {
+      headers: this.headers,
+    });
 
-      if (res.status == 200) {
-        const respJson = await res.json();
-        return respJson.result.filter((data) => data.service == this.env.SERVICE_NAME);
-      }
-      return [];
-    } catch (e) {
-      console.error('Error getting domain list:', e);
-      return [];
+    if (res.status == 200) {
+      const respJson = await res.json();
+      return respJson.result.filter((data) => data.service == serviceName);
     }
+    return [];
   }
 
   async registerDomain(domain) {
-    try {
-      domain = domain.toLowerCase();
-      const suffix = `.${this.env.SERVICE_NAME}.${this.env.ROOT_DOMAIN}`;
-      let fullDomain = domain;
+    domain = domain.toLowerCase();
+    const suffix = `.${serviceName}.${rootDomain}`;
+    let fullDomain = domain;
 
-      // If the user-provided domain doesn't already end with the suffix, append it.
-      if (!domain.endsWith(suffix)) {
-        fullDomain = domain + suffix;
-      }
-
-      const registeredDomains = await this.getDomainList();
-
-      if (registeredDomains.some(d => d.hostname === fullDomain)) {
-        return 409; // Conflict
-      }
-
-      const url = `https://api.cloudflare.com/client/v4/accounts/${this.env.ACCOUNT_ID}/workers/domains`;
-      const res = await fetch(url, {
-        method: "PUT",
-        body: JSON.stringify({
-          environment: "production",
-          hostname: fullDomain,
-          service: this.env.SERVICE_NAME,
-          zone_id: this.env.ZONE_ID,
-        }),
-        headers: this.headers,
-      });
-
-      return res.status;
-    } catch (e) {
-      console.error('Error registering domain:', e);
-      return 500;
+    // If the user-provided domain doesn't already end with the suffix, append it.
+    if (!domain.endsWith(suffix)) {
+      fullDomain = domain + suffix;
     }
+
+    const registeredDomains = await this.getDomainList();
+
+    if (registeredDomains.some(d => d.hostname === fullDomain)) {
+      return 409; // Conflict
+    }
+
+    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains`;
+    const res = await fetch(url, {
+      method: "PUT",
+      body: JSON.stringify({
+        environment: "production",
+        hostname: fullDomain,
+        service: serviceName,
+        zone_id: this.zoneID,
+      }),
+      headers: this.headers,
+    });
+
+    return res.status;
   }
 
   async deleteDomain(domainId) {
-    try {
-      const url = `https://api.cloudflare.com/client/v4/accounts/${this.env.ACCOUNT_ID}/workers/domains/${domainId}`;
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: this.headers,
-      });
-      return res.status;
-    } catch (e) {
-      console.error('Error deleting domain:', e);
-      return 500;
-    }
+    const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountID}/workers/domains/${domainId}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: this.headers,
+    });
+    return res.status;
   }
 }
 
 // Global Variables
 let cachedProxyList = [];
+let proxyIP = "";
 let pathinfo = "/Free-VPN-CF-Geo-Project/";
 
 // Constants
@@ -1297,7 +1284,7 @@ export default {
 
       // API for wildcard management
       if (url.pathname.startsWith('/api/v1/domains')) {
-        const cfApi = new CloudflareApi(env);
+        const cfApi = new CloudflareApi();
 
         if (request.method === 'GET') {
           const domains = await cfApi.getDomainList();
@@ -1325,7 +1312,7 @@ export default {
             if (!id) {
               return new Response('Domain ID is required', { status: 400 });
             }
-            if (password !== env.OWNER_PASSWORD) {
+            if (password !== ownerPassword) {
                 return new Response('Invalid password', { status: 401 });
             }
             const status = await cfApi.deleteDomain(id);
