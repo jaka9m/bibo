@@ -19,7 +19,6 @@ const telegramku = 'https://geoproject.biz.id/circle-flags/telegram.png'
 const whatsappku = 'https://geoproject.biz.id/circle-flags/whatsapp.png'
 const ope = 'https://geoproject.biz.id/circle-flags/options.png'
 
-
 const GALAXY_ANIMATION_COMPONENT = `
      <style>
     :root { --app-vh: 1vh; }
@@ -805,7 +804,6 @@ const GALAXY_ANIMATION_COMPONENT = `
     });
   </script>
 `;
-
 
 // Variables
 const wildcards = [];
