@@ -20,11 +20,14 @@ async function handleRequest(request) {
 
   // Homepage dengan file upload
   if (path === '/' && request.method === 'GET') {
-    const htmlContent = `<!DOCTYPE html>
+    const htmlContent = `
+<!DOCTYPE html>
 <html>
 <head>
     <title>Cloudflare Worker File Uploader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -50,6 +53,10 @@ async function handleRequest(request) {
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
         .header p {
             opacity: 0.9;
@@ -76,7 +83,9 @@ async function handleRequest(request) {
             margin-bottom: 20px;
         }
         label {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 8px;
             font-weight: 600;
             color: #2c3e50;
@@ -109,22 +118,29 @@ async function handleRequest(request) {
             left: -9999px;
         }
         .file-input-label {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             padding: 12px;
             background: #3498db;
             color: white;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         .file-input-label:hover {
             background: #2980b9;
+            transform: translateY(-2px);
         }
         .file-name {
             margin-top: 8px;
             font-size: 14px;
             color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .btn-group {
             display: flex;
@@ -142,6 +158,10 @@ async function handleRequest(request) {
             transition: all 0.3s;
             flex: 1;
             min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .btn-primary {
             background: #3498db;
@@ -218,10 +238,14 @@ async function handleRequest(request) {
             border-radius: 5px;
             margin-bottom: 10px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .file-item:hover {
             background: #e9ecef;
+            transform: translateX(5px);
         }
         .file-item.active {
             background: #3498db;
@@ -233,6 +257,10 @@ async function handleRequest(request) {
             color: #7f8c8d;
             font-size: 0.9em;
             border-top: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .tab-container {
             margin-bottom: 20px;
@@ -246,6 +274,13 @@ async function handleRequest(request) {
             cursor: pointer;
             border-bottom: 2px solid transparent;
             margin-bottom: -2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .tab:hover {
+            background: #f8f9fa;
         }
         .tab.active {
             border-bottom: 2px solid #3498db;
@@ -258,12 +293,24 @@ async function handleRequest(request) {
         .tab-content.active {
             display: block;
         }
+        .icon-large {
+            font-size: 1.2em;
+        }
+        .status-icon {
+            margin-right: 8px;
+        }
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📁 Cloudflare Worker File Uploader</h1>
+            <h1><i class="fas fa-cloud-upload-alt"></i> Cloudflare Worker File Uploader</h1>
             <p>Upload script Worker dari file JavaScript</p>
         </div>
         
@@ -271,39 +318,49 @@ async function handleRequest(request) {
             <div class="form-section">
                 <div class="tab-container">
                     <div class="tabs">
-                        <div class="tab active" onclick="switchTab('upload')">📤 Upload File</div>
-                        <div class="tab" onclick="switchTab('manual')">✏️ Manual Input</div>
+                        <div class="tab active" onclick="switchTab('upload')"><i class="fas fa-file-upload"></i> Upload File
+                        </div>
+                        <div class="tab" onclick="switchTab('manual')"><i class="fas fa-keyboard"></i> Manual Input
+                        </div>
                     </div>
                 </div>
 
                 <!-- Upload File Tab -->
                 <div id="upload-tab" class="tab-content active">
                     <div class="form-group">
-                        <label>📧 Email Cloudflare:</label>
+                        <label><i class="fas fa-envelope"></i> Email Cloudflare:</label>
                         <input type="email" id="email" placeholder="your-email@example.com">
                     </div>
                     
                     <div class="form-group">
-                        <label>🔑 Global API Key:</label>
+                        <label><i class="fas fa-key"></i> Global API Key:</label>
                         <input type="password" id="apiKey" placeholder="Dapatkan dari Cloudflare Dashboard">
                     </div>
                     
                     <div class="form-group">
-                        <label>🆔 Account ID:</label>
+                        <label><i class="fas fa-id-card"></i> Account ID:</label>
                         <input type="text" id="accountId" placeholder="Account ID Anda">
                     </div>
                     
                     <div class="form-group">
-                        <label>📝 Nama Worker:</label>
+                        <label><i class="fas fa-file-code"></i> Nama Worker:</label>
                         <input type="text" id="workerName" placeholder="nama-worker-anda">
                     </div>
 
                     <div class="form-group">
-                        <label>📁 Pilih File JavaScript:</label>
+                        <label><i class="fas fa-cog"></i> Format Worker:</label>
+                        <div style="display: flex; gap: 15px;">
+                            <label for="format-sw-upload" style="display: flex; align-items: center; cursor: pointer;"><input type="radio" id="format-sw-upload" name="workerFormatUpload" value="service-worker" checked style="width: auto; margin-right: 5px;"> Service Worker</label>
+                            <label for="format-es-upload" style="display: flex; align-items: center; cursor: pointer;"><input type="radio" id="format-es-upload" name="workerFormatUpload" value="es-module" style="width: auto; margin-right: 5px;"> ES Module</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-folder-open"></i> Pilih File JavaScript:</label>
                         <div class="file-input-container">
                             <input type="file" id="fileInput" class="file-input" accept=".js,.javascript" onchange="handleFileSelect(this.files)">
                             <label for="fileInput" class="file-input-label">
-                                📤 Pilih File .js
+                                <i class="fas fa-upload"></i> Pilih File .js
                             </label>
                         </div>
                         <div class="file-name" id="fileName">Belum ada file dipilih</div>
@@ -317,23 +374,31 @@ async function handleRequest(request) {
                 <!-- Manual Input Tab -->
                 <div id="manual-tab" class="tab-content">
                     <div class="form-group">
-                        <label>📧 Email Cloudflare:</label>
+                        <label><i class="fas fa-envelope"></i> Email Cloudflare:</label>
                         <input type="email" id="emailManual" placeholder="your-email@example.com">
                     </div>
                     
                     <div class="form-group">
-                        <label>🔑 Global API Key:</label>
+                        <label><i class="fas fa-key"></i> Global API Key:</label>
                         <input type="password" id="apiKeyManual" placeholder="Dapatkan dari Cloudflare Dashboard">
                     </div>
                     
                     <div class="form-group">
-                        <label>🆔 Account ID:</label>
+                        <label><i class="fas fa-id-card"></i> Account ID:</label>
                         <input type="text" id="accountIdManual" placeholder="Account ID Anda">
                     </div>
                     
                     <div class="form-group">
-                        <label>📝 Nama Worker:</label>
+                        <label><i class="fas fa-file-code"></i> Nama Worker:</label>
                         <input type="text" id="workerNameManual" placeholder="nama-worker-anda">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-cog"></i> Format Worker:</label>
+                        <div style="display: flex; gap: 15px;">
+                            <label for="format-sw-manual" style="display: flex; align-items: center; cursor: pointer;"><input type="radio" id="format-sw-manual" name="workerFormatManual" value="service-worker" checked style="width: auto; margin-right: 5px;"> Service Worker</label>
+                            <label for="format-es-manual" style="display: flex; align-items: center; cursor: pointer;"><input type="radio" id="format-es-manual" name="workerFormatManual" value="es-module" style="width: auto; margin-right: 5px;"> ES Module</label>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -356,16 +421,16 @@ async function handleRequest(request) {
                 
                 <div class="btn-group">
                     <button class="btn-success" onclick="deployWorker()">
-                        🚀 Deploy Worker
+                        <i class="fas fa-rocket"></i> Deploy Worker
                     </button>
                     <button class="btn-primary" onclick="listWorkers()">
-                        📋 List Workers
+                        <i class="fas fa-list"></i> List Workers
                     </button>
                     <button class="btn-danger" onclick="deleteWorker()">
-                        🗑️ Delete Worker
+                        <i class="fas fa-trash"></i> Delete Worker
                     </button>
                     <button class="btn-secondary" onclick="clearForm()">
-                        🧹 Clear
+                        <i class="fas fa-broom"></i> Clear
                     </button>
                 </div>
                 
@@ -373,15 +438,20 @@ async function handleRequest(request) {
             </div>
             
             <div class="preview-section">
-                <h3>👀 Preview Script</h3>
+                <div class="preview-header">
+                    <i class="fas fa-eye"></i>
+                    <h3>Preview Script</h3>
+                </div>
                 <div class="worker-preview" id="workerPreview">// Pilih file atau ketik script untuk preview</div>
-                <div style="margin-top: 15px; font-size: 12px; color: #666;">
-                    <strong>Format yang didukung:</strong> File JavaScript (.js) dengan Service Worker syntax
+                <div style="margin-top: 15px; font-size: 12px; color: #666; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Format yang didukung:</strong> Service Worker & ES Module
                 </div>
             </div>
         </div>
         
         <div class="credits">
+            <i class="fas fa-cloud"></i>
             Cloudflare Worker File Uploader • Upload script dari file lokal
         </div>
     </div>
@@ -417,11 +487,11 @@ async function handleRequest(request) {
             reader.onload = function(e) {
                 currentFileContent = e.target.result;
                 document.getElementById('workerPreview').textContent = currentFileContent;
-                showResult('✅ File berhasil dibaca: ' + file.name + ' (' + file.size + ' bytes)', true);
+                showResult('<i class="fas fa-check-circle status-icon"></i> File berhasil dibaca: ' + file.name + ' (' + formatFileSize(file.size) + ')', true);
             };
             
             reader.onerror = function() {
-                showResult('❌ Gagal membaca file', false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Gagal membaca file', false);
             };
             
             reader.readAsText(file);
@@ -457,7 +527,7 @@ async function handleRequest(request) {
                     document.getElementById('workerPreview').textContent = file.content;
                     document.getElementById('fileName').textContent = file.name;
                     document.getElementById('workerName').value = file.name.replace('.js', '');
-                    showResult('✅ Loaded: ' + file.name, true);
+                    showResult('<i class="fas fa-check-circle status-icon"></i> Loaded: ' + file.name, true);
                     
                     // Remove active class from all items
                     document.querySelectorAll('.file-item').forEach(item => {
@@ -478,7 +548,8 @@ async function handleRequest(request) {
                     apiKey: document.getElementById('apiKey').value,
                     accountId: document.getElementById('accountId').value,
                     workerName: document.getElementById('workerName').value,
-                    workerScript: currentFileContent
+                    workerScript: currentFileContent,
+                    workerFormat: document.querySelector('input[name="workerFormatUpload"]:checked').value
                 };
             } else {
                 return {
@@ -486,26 +557,27 @@ async function handleRequest(request) {
                     apiKey: document.getElementById('apiKeyManual').value,
                     accountId: document.getElementById('accountIdManual').value,
                     workerName: document.getElementById('workerNameManual').value,
-                    workerScript: document.getElementById('workerScriptManual').value
+                    workerScript: document.getElementById('workerScriptManual').value,
+                    workerFormat: document.querySelector('input[name="workerFormatManual"]:checked').value
                 };
             }
         }
 
         async function deployWorker() {
             const credentials = getCurrentCredentials();
-            const { email, apiKey, accountId, workerName, workerScript } = credentials;
+            const { email, apiKey, accountId, workerName, workerScript, workerFormat } = credentials;
 
             if (!email || !apiKey || !accountId || !workerName || !workerScript) {
-                showResult('❌ Semua field harus diisi!', false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Semua field harus diisi!', false);
                 return;
             }
 
             if (workerScript.trim().length === 0) {
-                showResult('❌ Script Worker tidak boleh kosong!', false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Script Worker tidak boleh kosong!', false);
                 return;
             }
 
-            showResult('🔄 Deploying worker...', true);
+            showResult('<i class="fas fa-sync-alt fa-spin status-icon"></i> Deploying worker...', true);
 
             try {
                 const response = await fetch('/deploy', {
@@ -518,7 +590,8 @@ async function handleRequest(request) {
                     body: JSON.stringify({
                         accountId: accountId,
                         workerName: workerName,
-                        workerScript: workerScript
+                        workerScript: workerScript,
+                        workerFormat: workerFormat
                     })
                 });
 
@@ -530,7 +603,7 @@ async function handleRequest(request) {
                     resultDiv.innerHTML += '\\\\n\\\\n🔗 <a href=\"' + result.workerUrl + '\" target=\"_blank\" style=\"color: #155724;\">Test Worker: ' + result.workerUrl + '</a>';
                 }
             } catch (error) {
-                showResult('❌ Error: ' + error.message, false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Error: ' + error.message, false)
             }
         }
 
@@ -539,11 +612,11 @@ async function handleRequest(request) {
             const { email, apiKey, accountId } = credentials;
 
             if (!email || !apiKey || !accountId) {
-                showResult('❌ Email, API Key, dan Account ID harus diisi!', false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Email, API Key, dan Account ID harus diisi!', false);
                 return;
             }
 
-            showResult('🔄 Loading workers list...', true);
+            showResult('<i class="fas fa-sync-alt fa-spin status-icon"></i> Loading workers list...', true);
 
             try {
                 const response = await fetch('/workers?accountId=' + encodeURIComponent(accountId), {
@@ -556,7 +629,7 @@ async function handleRequest(request) {
                 const result = await response.json();
                 showResult(JSON.stringify(result, null, 2), response.ok);
             } catch (error) {
-                showResult('❌ Error: ' + error.message, false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Error: ' + error.message, false);
             }
         }
 
@@ -565,7 +638,7 @@ async function handleRequest(request) {
             const { email, apiKey, accountId, workerName } = credentials;
 
             if (!email || !apiKey || !accountId || !workerName) {
-                showResult('❌ Semua field harus diisi!', false);
+                showResult('<i class="fas fa-exclamation-circle status-icon"></i> Semua field harus diisi!', false);
                 return;
             }
 
@@ -573,7 +646,7 @@ async function handleRequest(request) {
                 return;
             }
 
-            showResult('🔄 Deleting worker...', true);
+            showResult('<i class="fas fa-sync-alt fa-spin status-icon"></i> Deleting worker...', true);
 
             try {
                 const response = await fetch('/delete/' + encodeURIComponent(workerName) + '?accountId=' + encodeURIComponent(accountId), {
@@ -657,11 +730,11 @@ async function handleRequest(request) {
 
 async function handleDeploy(request) {
   try {
-    const { accountId, workerName, workerScript } = await request.json()
+    const { accountId, workerName, workerScript, workerFormat } = await request.json()
     const email = request.headers.get('X-Auth-Email')
     const apiKey = request.headers.get('X-Auth-Key')
 
-    if (!email || !apiKey || !accountId || !workerName || !workerScript) {
+    if (!email || !apiKey || !accountId || !workerName || !workerScript || !workerFormat) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Missing required fields or headers'
@@ -671,19 +744,41 @@ async function handleDeploy(request) {
       })
     }
 
-    // Upload ke Cloudflare API
-    const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`,
-      {
-        method: 'PUT',
-        headers: {
-          'X-Auth-Email': email,
-          'X-Auth-Key': apiKey,
-          'Content-Type': 'application/javascript',
-        },
-        body: workerScript
-      }
-    )
+    let response;
+    if (workerFormat === 'es-module') {
+      const formData = new FormData();
+      const metadata = {
+        main_module: 'index.js'
+      };
+      formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      formData.append('index.js', new Blob([workerScript], { type: 'application/javascript+module' }));
+      
+      response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`,
+        {
+          method: 'PUT',
+          headers: {
+            'X-Auth-Email': email,
+            'X-Auth-Key': apiKey
+          },
+          body: formData
+        }
+      );
+    } else {
+      // Logika untuk 'service-worker'
+      response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`,
+        {
+          method: 'PUT',
+          headers: {
+            'X-Auth-Email': email,
+            'X-Auth-Key': apiKey,
+            'Content-Type': 'application/javascript',
+          },
+          body: workerScript
+        }
+      );
+    }
 
     const result = await response.json()
 
