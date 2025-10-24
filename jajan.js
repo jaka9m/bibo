@@ -1486,15 +1486,15 @@ __name(buildCountryButtons, "buildCountryButtons");
 function generateCountryIPsMessage(ipList, countryCode) {
   const filteredIPs = ipList.filter((line) => line.split(",")[2] === countryCode);
   if (filteredIPs.length === 0) return null;
-  let msg = ` *Proxy IP untuk negara ${countryCode} ${getFlagEmoji(countryCode)}:*
+  let msg = ` 🌍 *Proxy IP untuk negara ${countryCode} ${getFlagEmoji(countryCode)}:*
 
 `;
   filteredIPs.slice(0, 20).forEach((line) => {
     const [ip, port, _code, isp] = line.split(",");
     msg += `
- *IP:PORT* : \`${ip}:${port}\` 
- *Country* : ${_code} ${getFlagEmoji(_code)}
- *ISP* : ${isp}
+📍 *IP:PORT* : \`${ip}:${port}\` 
+🌍 *Country* : ${_code} ${getFlagEmoji(_code)}
+💻 *ISP* : ${isp}
 `;
   });
   return msg;
@@ -1582,26 +1582,30 @@ var TelegramBotku = class {
 
                   
 
+───────────────────
+≡         𝐆𝐄𝐎𝐁𝐎𝐓𝐒𝐄𝐑𝐕𝐄𝐑         ≡
+───────────────────
 Pilih command sesuai kebutuhan!
+───────────────────
 
-� /start         mulai bot!
-� /proxyip       Config random sesuai tombol Flag CC
-� /stats       Daftar pemakaian akun Cloudflare!
-� /findproxy     Cara Cari Proxy!
-� /converter     Converter Akun V2ray!
-� /randomconfig  Config random mix protocol!
-� /proxy         Generate Proxy IPs!!
-� /config        Generate config auto-rotate!
-� /list          Lihat daftar wildcard yang terdaftar
-� /user          List Pengguna Bot
-� /add + bug     Tambah domain wildcard
-� /broadcast + Text    Info ke Pengguna
+• /start         mulai bot!
+• /proxyip       Config random sesuai tombol Flag CC
+• /stats       Daftar pemakaian akun Cloudflare!
+• /findproxy     Cara Cari Proxy!
+• /converter     Converter Akun V2ray!
+• /randomconfig  Config random mix protocol!
+• /proxy         Generate Proxy IPs!!
+• /config        Generate config auto-rotate!
+• /list          Lihat daftar wildcard yang terdaftar
+• /user          List Pengguna Bot
+• /add + bug     Tambah domain wildcard
+• /broadcast + Text    Info ke Pengguna
 
-* Perintah Domain :*
-� /del + bug     Hapus domain wildcard (admin only)
+⚙️* Perintah Domain :*
+• /del + bug     Hapus domain wildcard (admin only)
 
 *SUPPORT*
-� /donate        Bantu admin !
+• /donate        Bantu admin 😘!
 
 `;
   await this.sendMessage(chatId, menuText, { parse_mode: "Markdown" });
@@ -1848,15 +1852,15 @@ _Error:_ ${error.message}`,
 KETIK /menu UNTUK MELIHAT COMMAND
 
  *Format IP yang Diterima:*
-� \`176.97.78.80\`
-� \`176.97.78.80:2053\`
+• \`176.97.78.80\`
+• \`176.97.78.80:2053\`
 
- *Catatan:*
+ ⚠️*Catatan:*
 - Jika status *DEAD*, Akun *VLESS*, *SS*, dan *TROJAN* tidak akan dibuat.
 
- [WEB VPN TUNNEL](https://joss.gpj2.dpdns.org)
- [CHANNEL VPS & Script VPS](https://t.me/testikuy_mang)
- [Phreaker GROUP](https://t.me/+Q1ARd8ZsAuM2xB6-)
+ 🌐[WEB VPN TUNNEL](https://joss.gpj2.dpdns.org)
+ 📺[CHANNEL VPS & Script VPS](https://t.me/testikuy_mang)
+ 👥[Phreaker GROUP](https://t.me/+Q1ARd8ZsAuM2xB6-)
 
 `.trim(),
         parse_mode: "Markdown",
@@ -2225,7 +2229,7 @@ Pilih protokol:`;
       const parts = data.split("|");
       if (parts[0] === "PROTOCOL") {
         const [_, protocol, ip, port] = parts;
-        await this.editMessage(chatId, messageId, ` Opsi wildcard untuk ${protocol}`, {
+        await this.editMessage(chatId, messageId, ` ⚙️Opsi wildcard untuk ${protocol}`, {
           reply_markup: createInitialWildcardInlineKeyboard(ip, port, protocol)
         });
         return new Response("OK", { status: 200 });
