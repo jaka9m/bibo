@@ -1,5 +1,5 @@
-var __defProp = Object.defineProperty;
-var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+const __defProp = Object.defineProperty;
+const __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
 // src/converter/linkParser.js
 function decodeBase64(str) {
@@ -1078,7 +1078,7 @@ __name(generateSingboxConfig, "generateSingboxConfig");
 
 // src/converter/converter.js
 // src/converter/converter.js
-var Converterbot = class {
+const Converterbot = class {
   static {
     __name(this, "Converterbot");
   }
@@ -1450,162 +1450,217 @@ ss://${toBase642(`none:${generateUUID4()}`)}@${HOSTKU2}:80?encryption=none&type=
 __name(rotateconfig, "rotateconfig");
 
 // src/randomip/randomip.js
-var globalIpList = [];
-var globalCountryCodes = [];
+
+let globalIpList = [];
+let globalCountryCodes = [];
+
 async function fetchProxyList(url) {
-  const response = await fetch(url);
-  const ipText = await response.text();
-  const ipList = ipText.split("\n").map((line) => line.trim()).filter((line) => line !== "");
-  return ipList;
+    const response = await fetch(url);
+    const ipText = await response.text();
+    const ipList = ipText.split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "");
+    return ipList;
 }
 __name(fetchProxyList, "fetchProxyList");
+
 function getFlagEmoji(code) {
-  const OFFSET = 127397;
-  return [...code.toUpperCase()].map((c) => String.fromCodePoint(c.charCodeAt(0) + OFFSET)).join("");
+    const OFFSET = 127397;
+    return [...code.toUpperCase()]
+        .map((c) => String.fromCodePoint(c.charCodeAt(0) + OFFSET))
+        .join("");
 }
 __name(getFlagEmoji, "getFlagEmoji");
+
 function buildCountryButtons(page = 0, pageSize = 15) {
-  const start = page * pageSize;
-  const end = start + pageSize;
-  const pageItems = globalCountryCodes.slice(start, end);
-  const buttons = pageItems.map((code) => ({
-    text: `${getFlagEmoji(code)} ${code}`,
-    callback_data: `cc_${code}`
-  }));
-  const inline_keyboard = [];
-  for (let i = 0; i < buttons.length; i += 3) {
-    inline_keyboard.push(buttons.slice(i, i + 3));
-  }
-  const navButtons = [];
-  if (page > 0) navButtons.push({ text: " Prev", callback_data: `randomip_page_${page - 1}` });
-  if (end < globalCountryCodes.length) navButtons.push({ text: "Next ", callback_data: `randomip_page_${page + 1}` });
-  if (navButtons.length) inline_keyboard.push(navButtons);
-  return { inline_keyboard };
+    const start = page * pageSize;
+    const end = start + pageSize;
+    const pageItems = globalCountryCodes.slice(start, end);
+    
+    const buttons = pageItems.map((code) => ({
+        text: `${getFlagEmoji(code)} ${code}`,
+        callback_data: `cc_${code}`
+    }));
+    
+    const inline_keyboard = [];
+    for (let i = 0; i < buttons.length; i += 3) {
+        inline_keyboard.push(buttons.slice(i, i + 3));
+    }
+    
+    const navButtons = [];
+    if (page > 0) {
+        navButtons.push({ 
+            text: "◀️ Prev", 
+            callback_data: `randomip_page_${page - 1}` 
+        });
+    }
+    
+    if (end < globalCountryCodes.length) {
+        navButtons.push({ 
+            text: "Next ▶️", 
+            callback_data: `randomip_page_${page + 1}` 
+        });
+    }
+    
+    if (navButtons.length) {
+        inline_keyboard.push(navButtons);
+    }
+    
+    return { inline_keyboard };
 }
 __name(buildCountryButtons, "buildCountryButtons");
-function generateCountryIPsMessage(ipList, countryCode) {
-  const filteredIPs = ipList.filter((line) => line.split(",")[2] === countryCode);
-  if (filteredIPs.length === 0) return null;
-  let msg = ` 🌍 *Proxy IP untuk negara ${countryCode} ${getFlagEmoji(countryCode)}:*
 
-`;
-  filteredIPs.slice(0, 20).forEach((line) => {
-    const [ip, port, _code, isp] = line.split(",");
-    msg += `
-📍 *IP:PORT* : \`${ip}:${port}\` 
-🌍 *Country* : ${_code} ${getFlagEmoji(_code)}
-💻 *ISP* : ${isp}
-`;
-  });
-  return msg;
+function generateCountryIPsMessage(ipList, countryCode) {
+    const filteredIPs = ipList.filter((line) => line.split(",")[2] === countryCode);
+    if (filteredIPs.length === 0) return null;
+    
+    let msg = `🌍 *Proxy IP untuk negara ${countryCode} ${getFlagEmoji(countryCode)}:*\n\n`;
+    
+    filteredIPs.slice(0, 20).forEach((line) => {
+        const [ip, port, _code, isp] = line.split(",");
+        msg += `📍 *IP:PORT* : \`${ip}:${port}\`\n`;
+        msg += `🌍 *Country* : ${_code} ${getFlagEmoji(_code)}\n`;
+        msg += `💻 *ISP* : ${isp}\n\n`;
+    });
+    
+    return msg;
 }
 __name(generateCountryIPsMessage, "generateCountryIPsMessage");
+
 async function handleRandomIpCommand(bot, chatId) {
-  try {
-    globalIpList = await fetchProxyList("https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt");
-    if (globalIpList.length === 0) {
-      await bot.sendMessage(chatId, ` *Daftar IP kosong atau tidak ditemukan. Coba lagi nanti.*`, { parse_mode: "Markdown" });
-      return;
+    try {
+        globalIpList = await fetchProxyList("https://raw.githubusercontent.com/jaka2m/botak/refs/heads/main/cek/proxyList.txt");
+        
+        if (globalIpList.length === 0) {
+            await bot.sendMessage(chatId, 
+                "❌ *Daftar IP kosong atau tidak ditemukan. Coba lagi nanti.*", 
+                { parse_mode: "Markdown" }
+            );
+            return;
+        }
+        
+        globalCountryCodes = [...new Set(globalIpList.map((line) => line.split(",")[2]))].sort();
+        
+        const text = "Silakan pilih negara untuk mendapatkan IP random:";
+        const reply_markup = buildCountryButtons(0);
+        
+        await bot.sendMessage(chatId, text, {
+            parse_mode: "Markdown",
+            reply_markup
+        });
+        
+    } catch (error) {
+        await bot.sendMessage(chatId, 
+            `⚠️ Gagal mengambil data IP: ${error.message}`
+        );
     }
-    globalCountryCodes = [...new Set(globalIpList.map((line) => line.split(",")[2]))].sort();
-    const text = "Silakan pilih negara untuk mendapatkan IP random:";
-    const reply_markup = buildCountryButtons(0);
-    await bot.sendMessage(chatId, text, {
-      parse_mode: "Markdown",
-      reply_markup
-    });
-  } catch (error) {
-    await bot.sendMessage(chatId, ` Gagal mengambil data IP: ${error.message}`);
-  }
 }
 __name(handleRandomIpCommand, "handleRandomIpCommand");
+
 async function handleCallbackQuery(bot, callbackQuery) {
-  const chatId = callbackQuery.message.chat.id;
-  const messageId = callbackQuery.message.message_id;
-  const data = callbackQuery.data;
-  if (data.startsWith("randomip_page_")) {
-    const page = parseInt(data.split("_")[2], 10);
-    const keyboard = buildCountryButtons(page);
-    await bot.editMessageReplyMarkup({
-      chat_id: chatId,
-      message_id: messageId,
-      reply_markup: keyboard
-    });
-    await bot.answerCallbackQuery(callbackQuery.id);
-    return;
-  }
-  if (data.startsWith("cc_")) {
-    const code = data.split("_")[1];
-    const msg = generateCountryIPsMessage(globalIpList, code);
-    if (!msg) {
-      await bot.sendMessage(chatId, ` Tidak ditemukan IP untuk negara: ${code}`, { parse_mode: "Markdown" });
-    } else {
-      await bot.sendMessage(chatId, msg, { parse_mode: "Markdown" });
+    const chatId = callbackQuery.message.chat.id;
+    const messageId = callbackQuery.message.message_id;
+    const data = callbackQuery.data;
+    
+    if (data.startsWith("randomip_page_")) {
+        const page = parseInt(data.split("_")[2], 10);
+        const keyboard = buildCountryButtons(page);
+        
+        await bot.editMessageReplyMarkup({
+            chat_id: chatId,
+            message_id: messageId,
+            reply_markup: keyboard
+        });
+        
+        await bot.answerCallbackQuery(callbackQuery.id);
+        return;
     }
-    await bot.answerCallbackQuery(callbackQuery.id);
-    return;
-  }
+    
+    if (data.startsWith("cc_")) {
+        const code = data.split("_")[1];
+        const msg = generateCountryIPsMessage(globalIpList, code);
+        
+        if (!msg) {
+            await bot.sendMessage(chatId, 
+                `❌ Tidak ditemukan IP untuk negara: ${code}`, 
+                { parse_mode: "Markdown" }
+            );
+        } else {
+            await bot.sendMessage(chatId, msg, { parse_mode: "Markdown" });
+        }
+        
+        await bot.answerCallbackQuery(callbackQuery.id);
+        return;
+    }
 }
 __name(handleCallbackQuery, "handleCallbackQuery");
 
 // src/randomip/bot2.js
-var TelegramBotku = class {
-  static {
-    __name(this, "TelegramBotku");
-  }
-  constructor(token, apiUrl = "https://api.telegram.org", ownerId, env) {
-    this.token = token;
-    this.apiUrl = apiUrl;
-    this.ownerId = ownerId;
-    this.env = env;
-  }
-  async handleUpdate(update) {
-    if (update.callback_query) {
-      const data = update.callback_query.data;
-      if (data.startsWith("user_page_")) {
-        await this.handleUserCallback(update.callback_query);
-      } else {
-        await handleCallbackQuery(this, update.callback_query);
-      }
-      return new Response("OK", { status: 200 });
+
+const TelegramBotku = class {
+    static {
+        __name(this, "TelegramBotku");
     }
-    if (!update.message) return new Response("OK", { status: 200 });
-    const chatId = update.message.chat.id;
-    const text = update.message.text || "";
-    const messageId = update.message.message_id;
-    if (text === "/proxy") {
-      await handleRandomIpCommand(this, chatId);
-      return new Response("OK", { status: 200 });
+
+    constructor(token, apiUrl = "https://api.telegram.org", ownerId, env) {
+        this.token = token;
+        this.apiUrl = apiUrl;
+        this.ownerId = ownerId;
+        this.env = env;
     }
-    if (text === "/menu") {
-  const menuText = `
-
-                  
-
-───────────────────
-≡         𝐆𝐄𝐎𝐁𝐎𝐓𝐒𝐄𝐑𝐕𝐄𝐑         ≡
-───────────────────
-Pilih command sesuai kebutuhan!
-───────────────────
-
-• /start         mulai bot!
-• /proxyip       Config random sesuai tombol Flag CC
-• /stats       Daftar pemakaian akun Cloudflare!
-• /findproxy     Cara Cari Proxy!
-• /converter     Converter Akun V2ray!
-• /randomconfig  Config random mix protocol!
-• /proxy         Generate Proxy IPs!!
-• /config        Generate config auto-rotate!
-• /list          Lihat daftar wildcard yang terdaftar
-• /user          List Pengguna Bot
-• /add + bug     Tambah domain wildcard
-• /broadcast + Text    Info ke Pengguna
-
-⚙️* Perintah Domain :*
-• /del + bug     Hapus domain wildcard (admin only)
-
-*SUPPORT*
-• /donate        Bantu admin 😘!
+
+    async handleUpdate(update) {
+        if (update.callback_query) {
+            const data = update.callback_query.data;
+            
+            if (data.startsWith("user_page_")) {
+                await this.handleUserCallback(update.callback_query);
+            } else {
+                await handleCallbackQuery(this, update.callback_query);
+            }
+            return new Response("OK", { status: 200 });
+        }
+        
+        if (!update.message) return new Response("OK", { status: 200 });
+        
+        const chatId = update.message.chat.id;
+        const text = update.message.text || "";
+        const messageId = update.message.message_id;
+
+        if (text === "/proxy") {
+            await handleRandomIpCommand(this, chatId);
+            return new Response("OK", { status: 200 });
+        }
+
+        if (text === "/menu") {
+            const menuText = `
+  
+╭─── • 𝗚𝗘𝗢 𝗕𝗢𝗧 𝗦𝗘𝗥𝗩𝗘𝗥 • ───╮
+│
+├─ 🌟 *Fitur Utama*
+│  ├─ /proxyip ─ Config acak by Flag
+│  ├─ /randomconfig ─ Config acak mix
+│  ├─ /converter ─ Convert Akun V2ray
+│  └─ /config ─ Config auto-rotate
+│
+├─ 🛠️ *Tools & Info*
+│  ├─ /proxy ─ Generate Proxy IPs
+│  ├─ /stats ─ Statistik Penggunaan
+│  ├─ /findproxy ─ Tutorial Cari Proxy
+│  └─ /user ─ Daftar Pengguna Bot
+│
+├─ 👤 *Manajemen Wildcard*
+│  ├─ /add \\\`[bug]\\\` ─ Tambah Wildcard
+│  ├─ /del \\\`[bug]\\\` ─ Hapus Wildcard (Admin)
+│  └─ /list ─ Daftar Wildcard
+│
+├─ 📣 *Admin*
+│  └─ /broadcast \\\`[teks]\\\` ─ Kirim Pesan
+│
+├─ ❤️ *Dukungan*
+│  └─ /donate ─ Bantu Kopi Admin
+│
+╰─── •「 @sampiiiiu 」• ───╯
 
 `;
   await this.sendMessage(chatId, menuText, { parse_mode: "Markdown" });
@@ -1700,37 +1755,73 @@ not autonomous_system.name: "CLOUDFLARE*" and services: (software.product: "Clou
 }
 
 if (text === "/donate") {
-  const imageUrl = "https://github.com/jaka1m/project/raw/main/BAYAR.jpg";
-  try {
-    await fetch(`${this.apiUrl}/bot${this.token}/sendPhoto`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        photo: imageUrl,
-        caption: `
- *Dukung Pengembangan Bot!* 
+    const imageUrl = "https://github.com/jaka1m/project/raw/main/BAYAR.jpg";
+    
+    try {
+        await fetch(`${this.apiUrl}/bot${this.token}/sendPhoto`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                photo: imageUrl,
+                caption: `
+💝 *Dukung Pengembangan Bot!* 💝
 
 Bantu kami terus berkembang dengan scan QRIS di atas!
 
-Terima kasih atas dukungannya! 
+✨ *Fitur yang akan datang:*
+• Server yang lebih cepat
+• Lebih banyak negara proxy
+• Fitur premium eksklusif
+• Update rutin dan perbaikan bug
 
+Terima kasih atas dukungannya! 🙏
+
+_— Tim GEO BOT SERVER_
 `.trim(),
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: " GEO PROJECT", url: "https://t.me/sampiiiiu" }]
-          ]
-        }
-      })
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  return new Response("OK", { status: 200 });
+                parse_mode: "Markdown",
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { 
+                                text: "🌐 GEO PROJECT", 
+                                url: "https://t.me/sampiiiiu" 
+                            },
+                            { 
+                                text: "⭐ Beri Rating", 
+                                url: "https://t.me/sampiiiiu" 
+                            }
+                        ],
+                        [
+                            { 
+                                text: "💬 Channel Update", 
+                                url: "https://t.me/sampiiiiu" 
+                            }
+                        ]
+                    ]
+                }
+            })
+        });
+        
+    } catch (error) {
+        console.error("❌ Error sending donation photo:", error);
+        // Fallback to text message if image fails
+        await this.sendMessage(chatId, 
+            `💝 *Dukung Pengembangan Bot!*\n\n` +
+            `Bantu kami terus berkembang dengan donasi melalui QRIS.\n\n` +
+            `Terima kasih atas dukungannya! 🙏\n\n` +
+            `🌐 [GEO PROJECT](https://t.me/sampiiiiu)`,
+            { parse_mode: "Markdown" }
+        );
+    }
+    
+    return new Response("OK", { status: 200 });
 }
+
     if (text.startsWith("/user")) {
-      try {
+    try {
         const userChats = await this.env.GEO_DB.get("broadcast_users", { type: "json" }) || [];
         const page = parseInt(text.split(" ")[1]) || 1;
         const usersPerPage = 10;
@@ -1739,98 +1830,211 @@ Terima kasih atas dukungannya! 
         const start = (page - 1) * usersPerPage;
         const end = start + usersPerPage;
         const usersToShow = userChats.slice(start, end);
-        let responseText = `*Daftar Pengguna*\n\n`;
-        responseText += `Total: ${totalUsers} pengguna\n`;
-        responseText += `Halaman: ${page}/${totalPages}\n\n`;
-        usersToShow.forEach((userId, index) => {
-          responseText += `${start + index + 1}. User ID: \`${userId}\`\n`;
-        });
-        responseText += `\n`;
+
+        // Validate page number
+        if (page < 1 || page > totalPages) {
+            await this.sendMessage(chatId, 
+                `❌ Halaman tidak valid. Total halaman: ${totalPages}`,
+                { parse_mode: "Markdown" }
+            );
+            return new Response("OK", { status: 200 });
+        }
+
+        let responseText = `👥 *DAFTAR PENGGUNA BOT*\n\n`;
+        responseText += `📊 **Total Pengguna:** ${totalUsers.toLocaleString()}\n`;
+        responseText += `📄 **Halaman:** ${page}/${totalPages}\n`;
+        responseText += `📋 **Menampilkan:** ${start + 1}-${Math.min(end, totalUsers)} dari ${totalUsers.toLocaleString()}\n\n`;
+        
+        responseText += "┌── 📋 *Daftar User ID* ──┐\n";
+        
+        if (usersToShow.length === 0) {
+            responseText += "│   Tidak ada pengguna   │\n";
+        } else {
+            usersToShow.forEach((userId, index) => {
+                const number = start + index + 1;
+                responseText += `│ ${number.toString().padStart(2, ' ')}. \`${userId}\`\n`;
+            });
+        }
+        
+        responseText += "└────────────────────────┘\n";
+
+        // Build pagination keyboard
         const keyboard = { inline_keyboard: [] };
-        const row = [];
+        const navButtons = [];
+
+        // Previous button
         if (page > 1) {
-          row.push({ text: " Prev", callback_data: `user_page_${page - 1}` });
+            navButtons.push({ 
+                text: "◀️ Prev", 
+                callback_data: `user_page_${page - 1}` 
+            });
         }
-        if (end < totalUsers) {
-          row.push({ text: "Next ", callback_data: `user_page_${page + 1}` });
+
+        // Page indicator (if multiple pages)
+        if (totalPages > 1) {
+            navButtons.push({ 
+                text: `${page}/${totalPages}`, 
+                callback_data: `user_page_info` 
+            });
         }
-        if (row.length > 0) {
-          keyboard.inline_keyboard.push(row);
+
+        // Next button
+        if (page < totalPages) {
+            navButtons.push({ 
+                text: "Next ▶️", 
+                callback_data: `user_page_${page + 1}` 
+            });
         }
-        await this.sendMessage(chatId, responseText, {
-          parse_mode: "Markdown",
-          reply_markup: keyboard.inline_keyboard.length > 0 ? keyboard : null
+
+        if (navButtons.length > 0) {
+            keyboard.inline_keyboard.push(navButtons);
+        }
+
+        // Add refresh button
+         await this.sendMessage(chatId, responseText, {
+            parse_mode: "Markdown",
+            reply_markup: keyboard.inline_keyboard.length > 0 ? keyboard : null
         });
-      } catch (error) {
-        await this.sendMessage(chatId, ` Gagal mengambil data pengguna. Error: ${error.message}`, { parse_mode: "Markdown" });
-      }
-      return new Response("OK", { status: 200 });
-    }
-    if (text === "/stats") {
-  const CLOUDFLARE_API_TOKEN = "RaVO8PdTsasiaApNyLJd1cseJQ_76SdpuyjvQnMi";
-  const CLOUDFLARE_ZONE_ID = "b17a795202e9bbc768204782ae038681";
-  const getTenDaysAgoDate = /* @__PURE__ */ __name(() => {
-    const d = /* @__PURE__ */ new Date();
-    d.setDate(d.getDate() - 10);
-    return d.toISOString().split("T")[0];
-  }, "getTenDaysAgoDate");
-  const tenDaysAgo = getTenDaysAgoDate();
-  try {
-    const response = await fetch("https://api.cloudflare.com/client/v4/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        query: `query {
-          viewer {
-            zones(filter: { zoneTag: "${CLOUDFLARE_ZONE_ID}" }) {
-              httpRequests1dGroups(
-                limit: 10,
-                orderBy: [date_DESC],
-                filter: { date_geq: "${tenDaysAgo}" }
-              ) {
-                sum {
-                  bytes
-                  requests
-                }
-                dimensions {
-                  date
-                }
-              }
-            }
-          }
-        }`
-      })
-    });
-    const result = await response.json();
-    if (!result.data || !result.data.viewer || !result.data.viewer.zones.length) {
-      throw new Error("Gagal mengambil data pemakaian.");
-    }
-    let usageText = "* Data Pemakaian 10 Hari Terakhir:*\n\n";
-    result.data.viewer.zones[0].httpRequests1dGroups.forEach((day) => {
-      const tanggal = day.dimensions.date;
-      const totalData = (day.sum.bytes / 1024 ** 3).toFixed(2);
-      const totalRequests = day.sum.requests.toLocaleString();
-      usageText += ` *Tanggal:* ${tanggal}
-     � Daily Requests ${totalRequests} 
-     � Daily Bandwidth ${totalData} GB
 
-`;
-    });
-    await this.sendMessage(chatId, usageText, { parse_mode: "Markdown" });
-  } catch (error) {
-    await this.sendMessage(
-      chatId,
-      ` Gagal mengambil data pemakaian.
-
-_Error:_ ${error.message}`,
-      { parse_mode: "Markdown" }
-    );
-  }
-  return new Response("OK", { status: 200 });
+    } catch (error) {
+        console.error("❌ Error fetching user data:", error);
+        await this.sendMessage(chatId, 
+            `❌ Gagal mengambil data pengguna.\n\n` +
+            `_Error: ${error.message}_`, 
+            { parse_mode: "Markdown" }
+        );
+    }
+    return new Response("OK", { status: 200 });
 }
+
+    if (text === "/stats") {
+    const CLOUDFLARE_API_TOKEN = "RaVO8PdTsasiaApNyLJd1cseJQ_76SdpuyjvQnMi";
+    const CLOUDFLARE_ZONE_ID = "b17a795202e9bbc768204782ae038681";
+    
+    const getTenDaysAgoDate = /* @__PURE__ */ __name(() => {
+        const d = /* @__PURE__ */ new Date();
+        d.setDate(d.getDate() - 10);
+        return d.toISOString().split("T")[0];
+    }, "getTenDaysAgoDate");
+
+    const tenDaysAgo = getTenDaysAgoDate();
+
+    try {
+        // Show loading message
+        const loadingMsg = await this.sendMessage(chatId, 
+            "📊 *Mengambil data statistik...*", 
+            { parse_mode: "Markdown" }
+        );
+
+        const response = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                query: `query {
+                    viewer {
+                        zones(filter: { zoneTag: "${CLOUDFLARE_ZONE_ID}" }) {
+                            httpRequests1dGroups(
+                                limit: 10,
+                                orderBy: [date_DESC],
+                                filter: { date_geq: "${tenDaysAgo}" }
+                            ) {
+                                sum {
+                                    bytes
+                                    requests
+                                }
+                                dimensions {
+                                    date
+                                }
+                            }
+                        }
+                    }
+                }`
+            })
+        });
+
+        const result = await response.json();
+        
+        if (!result.data || !result.data.viewer || !result.data.viewer.zones.length) {
+            throw new Error("Gagal mengambil data pemakaian dari Cloudflare.");
+        }
+
+        const dailyData = result.data.viewer.zones[0].httpRequests1dGroups;
+        
+        if (dailyData.length === 0) {
+            await this.editMessageText(chatId, loadingMsg.message_id,
+                "📊 *Tidak ada data pemakaian untuk 10 hari terakhir.*",
+                { parse_mode: "Markdown" }
+            );
+            return new Response("OK", { status: 200 });
+        }
+
+        // Calculate totals
+        let totalBandwidth = 0;
+        let totalRequests = 0;
+        
+        dailyData.forEach((day) => {
+            totalBandwidth += day.sum.bytes;
+            totalRequests += day.sum.requests;
+        });
+
+        // Format main stats message
+        let usageText = `📊 *STATISTIK PENGGUNAAN SERVER*\n\n`;
+        usageText += `⏰ **Periode:** 10 Hari Terakhir\n`;
+        usageText += `📅 **Dari:** ${tenDaysAgo} hingga ${new Date().toISOString().split('T')[0]}\n\n`;
+        
+        usageText += `📈 **TOTAL KESELURUHAN:**\n`;
+        usageText += `   ┣ 📊 Total Requests: ${totalRequests.toLocaleString()}\n`;
+        usageText += `   ┗ 💾 Total Bandwidth: ${(totalBandwidth / 1024 ** 3).toFixed(2)} GB\n\n`;
+        
+        usageText += `📋 **RINCIAN HARIAN:**\n`;
+        usageText += "┌─────────────────────────────────┐\n";
+
+        dailyData.forEach((day, index) => {
+            const tanggal = new Date(day.dimensions.date).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            
+            const totalData = (day.sum.bytes / 1024 ** 3).toFixed(2);
+            const totalRequests = day.sum.requests.toLocaleString();
+            
+            usageText += `│ 📅 ${tanggal}\n`;
+            usageText += `│ ├─ 📨 Requests: ${totalRequests}\n`;
+            usageText += `│ └─ 💾 Bandwidth: ${totalData} GB\n`;
+            
+            if (index < dailyData.length - 1) {
+                usageText += "│ ───────────────────────────────\n";
+            }
+        });
+        
+        usageText += "└─────────────────────────────────┘\n\n";
+        
+        usageText += `💡 *Info:* Data diperbarui secara real-time dari Cloudflare Analytics`;
+
+        // Delete loading message and send final stats
+        await this.deleteMessage(chatId, loadingMsg.message_id);
+        await this.sendMessage(chatId, usageText, { 
+            parse_mode: "Markdown"
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching stats:", error);
+        await this.sendMessage(
+            chatId,
+            `❌ *Gagal mengambil data statistik*\n\n` +
+            `_Error:_ \`${error.message}\`\n\n` +
+            `Pastikan API token dan Zone ID masih valid.`,
+            { parse_mode: "Markdown" }
+        );
+    }
+    
+    return new Response("OK", { status: 200 });
+}
+    
     if (text === "/start") {
   const imageUrl = "https://github.com/jaka8m/BOT-CONVERTER/raw/main/start.png";
   try {
@@ -1844,23 +2048,27 @@ _Error:_ ${error.message}`,
 
                  
 
- *Cara Penggunaan:*
-1. Masukkan alamat IP dan port yang ingin Anda cek.
-2. Jika tidak memasukkan port, maka default adalah *443*.
-3. Tunggu beberapa detik untuk hasilnya
+ 👋 *Selamat Datang di Geo Bot Server!*
 
-KETIK /menu UNTUK MELIHAT COMMAND
+Bot ini dapat membantu Anda memeriksa status proxy dan membuat konfigurasi V2Ray.
 
- *Format IP yang Diterima:*
+*Cara Penggunaan:*
+1. Kirim alamat IP dan port (opsional, default 443).
+2. Tunggu beberapa detik untuk hasilnya.
+
+*Format yang Diterima:*
 • \`176.97.78.80\`
 • \`176.97.78.80:2053\`
 
- ⚠️*Catatan:*
-- Jika status *DEAD*, Akun *VLESS*, *SS*, dan *TROJAN* tidak akan dibuat.
+Ketik /menu untuk melihat semua perintah yang tersedia.
 
- 🌐[WEB VPN TUNNEL](https://joss.gpj2.dpdns.org)
- 📺[CHANNEL VPS & Script VPS](https://t.me/testikuy_mang)
- 👥[Phreaker GROUP](https://t.me/+Q1ARd8ZsAuM2xB6-)
+⚠️ *Catatan:*
+- Jika status proxy *DEAD*, konfigurasi tidak akan dibuat.
+
+🔗 *Tautan Penting:*
+🌐 [WEB VPN TUNNEL](https://joss.gpj2.dpdns.org)
+📺 [CHANNEL VPS & Script](https://t.me/testikuy_mang)
+👥 [GRUP PHREAKER](https://t.me/+Q1ARd8ZsAuM2xB6-)
 
 `.trim(),
         parse_mode: "Markdown",
@@ -2004,7 +2212,7 @@ return new Response("OK", { status: 200 });
 };
 
 // src/checkip/cek.js
-var WILDCARD_MAP = {
+const WILDCARD_MAP = {
   ava: "ava.game.naver.com",
   api: "api.midtrans.com",
   blibli: "business.blibli.com",
@@ -2020,11 +2228,11 @@ var WILDCARD_MAP = {
   fb: "investor.fb.com",
   bakrie: "bakrie.ac.id"
 };
-var WILDCARD_OPTIONS = Object.entries(WILDCARD_MAP).map(
+const WILDCARD_OPTIONS = Object.entries(WILDCARD_MAP).map(
   ([value, text]) => ({ text, value })
 );
-var DEFAULT_HOST = "joss.gpj2.dpdns.org";
-var API_URL = "https://geovpn.vercel.app/check?ip=";
+const DEFAULT_HOST = "joss.gpj2.dpdns.org";
+const API_URL = "https://geovpn.vercel.app/check?ip=";
 async function fetchIPData(ip, port) {
   try {
     const response = await fetch(`${API_URL}${encodeURIComponent(ip)}:${encodeURIComponent(port)}`);
@@ -2152,7 +2360,7 @@ return " Unknown protocol!";
 __name(generateConfig, "generateConfig");
 
 // src/checkip/botCek.js
-var TelegramProxyCekBot = class {
+const TelegramProxyCekBot = class {
   static {
     __name(this, "TelegramProxyCekBot");
   }
@@ -2333,10 +2541,10 @@ Pilih protokol:`;
 };
 
 // src/proxyip/proxyip.js
-var APIKU = "https://geovpn.vercel.app/check?ip=";
-var DEFAULT_HOST2 = "joss.gpj2.dpdns.org";
-var sentMessages = /* @__PURE__ */ new Map();
-var paginationState = /* @__PURE__ */ new Map();
+const APIKU = "https://geovpn.vercel.app/check?ip=";
+const DEFAULT_HOST2 = "joss.gpj2.dpdns.org";
+const sentMessages = /* @__PURE__ */ new Map();
+const paginationState = /* @__PURE__ */ new Map();
 function generateUUID3() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0, v = c === "x" ? r : r & 3 | 8;
@@ -2543,7 +2751,7 @@ ss://${toBase642(`none:${uuid}`)}@${DEFAULT_HOST2}:80?encryption=none&type=ws&ho
 __name(handleCallbackQuery2, "handleCallbackQuery");
 
 // src/proxyip/bot3.js
-var TelegramProxyBot = class {
+const TelegramProxyBot = class {
   static {
     __name(this, "TelegramProxyBot");
   }
@@ -2600,7 +2808,7 @@ var TelegramProxyBot = class {
 };
 
 // src/wildcard/botwild.js
-var KonstantaGlobalbot = class {
+const KonstantaGlobalbot = class {
   static {
     __name(this, "KonstantaGlobalbot");
   }
@@ -2688,7 +2896,7 @@ var KonstantaGlobalbot = class {
     return globalThis.subdomainRequests.slice();
   }
 };
-var TelegramWildcardBot = class {
+const TelegramWildcardBot = class {
   static {
     __name(this, "TelegramWildcardBot");
   }
@@ -2945,8 +3153,8 @@ ${lines}`;
 };
 
 // src/bot.js
-var HOSTKU = "joss.gpj2.dpdns.org";
-var TelegramBot = class {
+const HOSTKU = "joss.gpj2.dpdns.org";
+const TelegramBot = class {
   static {
     __name(this, "TelegramBot");
   }
@@ -3081,7 +3289,7 @@ if (text.startsWith("/listwildcard")) {
 };
 
 // src/kuota.js
-var CekkuotaBotku = class _CekkuotaBotku {
+const CekkuotaBotku = class _CekkuotaBotku {
   static {
     __name(this, "CekkuotaBotku");
   }
@@ -3345,7 +3553,7 @@ Kirim nomor HP XL untuk cek kuota
 };
 
 // src/worker.js
-var worker_default = {
+const worker_default = {
   async fetch(request, env) {
     if (request.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405 });
